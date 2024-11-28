@@ -11,7 +11,7 @@
       "dropdown_options": [],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -29,7 +29,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -47,7 +47,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -65,7 +65,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -83,7 +83,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -101,7 +101,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -119,7 +119,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -132,7 +132,7 @@
       "dropdown_options": [],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     },
     {
@@ -153,7 +153,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Not Mandatory",
+      "mandatory": false,
       "placeholder": ""
     },
     {
@@ -166,7 +166,7 @@
       "dropdown_options": [],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Not Mandatory",
+      "mandatory": false,
       "placeholder": ""
     },
     {
@@ -183,7 +183,7 @@
       ],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Not Mandatory",
+      "mandatory": false,
       "placeholder": ""
     },
     {
@@ -196,7 +196,7 @@
       "dropdown_options": [],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Not Mandatory",
+      "mandatory": false,
       "placeholder": ""
     },
     {
@@ -209,7 +209,7 @@
       "dropdown_options": [],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Not Mandatory",
+      "mandatory": false,
       "placeholder": ""
     },
     {
@@ -222,7 +222,7 @@
       "dropdown_options": [],
       "follow_up_questions": [],
       "section": "",
-      "mandatory": "Mandatory",
+      "mandatory": true,
       "placeholder": ""
     }
   ],
@@ -287,8 +287,8 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
-          "placeholder": ""
+          "mandatory": true,
+          "placeholder": "Select an Option"
         },
         {
           "question_id": 23,
@@ -300,8 +300,8 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
-          "placeholder": "Enter Component Count"
+          "mandatory": true,
+          "placeholder": ""
         },
         {
           "question_id": 24,
@@ -313,8 +313,8 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
-          "placeholder": "Enter text"
+          "mandatory": true,
+          "placeholder": ""
         },
         {
           "question_id": 25,
@@ -329,6 +329,7 @@
             "Metal",
             "Glass",
             "Foam",
+            "Multilayer",
             "Other"
           ],
           "follow_up_questions": [
@@ -339,7 +340,7 @@
             }
           ],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -352,7 +353,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -363,250 +364,247 @@
           "dependent_answer": "based on material type (generic), material type (specific) list will load",
           "field_dependency": "*Dependent On Value Selection*",
           "dropdown_options": {
-            "Material (Generic)2": [
-              "Material (Specific)"
-            ],
             "Paper": [
-              "Self- adhesive, non-removable Sticker",
-              "CIS",
-              "Wood free paper",
-              "SBS, TMP",
-              "Coffee Filter Paper",
-              "CRB",
-              "Coated Art Paper (C1S)",
-              "350g CCNB+350g CCNB",
-              "White Board",
-              "GD2",
-              "3.1 mil White Semi-Gloss Web",
-              "CS1",
-              "Blister Board",
-              "Cardboard",
-              "Coated 1-Side Label Paper",
-              "Copper sheet",
-              "Newspaper",
-              "Molded Paper Pulp",
-              "Cold Seal Paper",
-              "CCWB",
-              "offset paper",
-              "Removable adhesive",
-              "CCN",
-              "Paper Label",
-              "Whiteboard",
-              "70# Gloss Text",
-              "Semi-gloss label",
-              "15 pts SBS C1S (Coated one side)",
-              "CIS Paper",
-              "C1S art paper",
-              "Label",
-              "None Adhesive sticker",
-              "Duplex Board",
+              "Uncoated Composite Paper",
               "BKP - Bleached Kraft Pulp",
-              "F Flute",
+              "Molded Fiber",
+              "Removable adhesive",
+              "Whiteboard",
+              "paper based-Lable",
+              "SUS",
+              "Cardboard",
+              "Reycled Paper Pulp",
+              "Cold Seal Paper",
+              "Label",
+              "350g CCNB+350g CCNB",
+              "Self- adhesive, non-removable Sticker",
+              "self-adhesive label",
+              "Siliconized Paper",
+              "Kraft",
+              "Blister Board",
+              "Pressure Sensitive Label",
+              "Corrugated",
+              "Coated 1-Side Label Paper",
+              "75# Reply Index",
+              "Leaflet",
+              "Coated Art Paper (C1S)",
               "CCNB, SBS",
               "Paper Board",
-              "CNK",
-              "Pressure Sensitive Label (PE)",
-              "Tape",
-              "Glassine paper",
-              "70# Gloss C2S Text",
-              "CDB",
-              "Leaflet",
-              "Paper pulp",
-              "C1S",
-              "CUK",
-              "Pressure Sensitive Label with Adhesive",
-              "Paper",
-              "Coated Duplex Board",
-              "Parchment Paper",
-              "CCRB",
-              "Siliconized Paper",
-              "Spot glued or wraparound label",
-              "SBS Paperboard",
-              "SBS",
-              "Corrugated",
-              "paper based-Lable",
-              "Molded Fiber",
-              "coated paper",
-              "C1S Label Paper",
-              "C2S",
-              "Paper Sticker",
-              "Ivory Paper",
-              "CCNB",
-              "Couche Paper",
-              "whitecard",
-              "Pressure Sensitive Label",
-              "80# Semigloss book",
-              "UBK",
-              "FBB",
-              "Release paper",
-              "self-adhesive label",
-              "Coated Paper & Corrugated",
-              "Light coated paper",
-              "Kraft",
-              "Chipboard",
-              "Reycled Paper Pulp",
-              "Wax Coated Paper",
+              "Semi-gloss label",
               "Semigloss Supreme",
-              "Uncoated Composite Paper",
-              "75# Reply Index",
-              "SUS"
+              "CUK",
+              "Duplex Board",
+              "Coated Duplex Board",
+              "C1S",
+              "Paper Sticker",
+              "Coffee Filter Paper",
+              "Chipboard",
+              "Parchment Paper",
+              "Ivory Paper",
+              "SBS Paperboard",
+              "Release paper",
+              "CS1",
+              "White Board",
+              "Couche Paper",
+              "Pressure Sensitive Label (PE)",
+              "whitecard",
+              "80# Semigloss book",
+              "Paper",
+              "coated paper",
+              "SBS, TMP",
+              "CCN",
+              "70# Gloss Text",
+              "Pressure Sensitive Label with Adhesive",
+              "3.1 mil White Semi-Gloss Web",
+              "CCNB",
+              "Tape",
+              "F Flute",
+              "Glassine paper",
+              "Paper pulp",
+              "Paper Label",
+              "CCWB",
+              "GD2",
+              "C1S Label Paper",
+              "Coated Paper & Corrugated",
+              "70# Gloss C2S Text",
+              "Light coated paper",
+              "Molded Paper Pulp",
+              "None Adhesive sticker",
+              "Copper sheet",
+              "Wax Coated Paper",
+              "Wood free paper",
+              "Spot glued or wraparound label",
+              "C2S",
+              "CNK",
+              "Newspaper",
+              "SBS",
+              "C1S art paper",
+              "FBB",
+              "CIS Paper",
+              "CIS",
+              "15 pts SBS C1S (Coated one side)",
+              "CCRB",
+              "offset paper",
+              "CDB",
+              "UBK",
+              "CRB"
             ],
             "Glass": [
+              "Borosilicate",
               "Soda lime",
-              "Glass",
-              "Borosilicate"
+              "Glass"
             ],
             "Metal": [
-              "Tin",
-              "Aluminum",
-              "EPT",
-              "Aluminium, Epoxyphenolic Lacquer, Acrylic Latex",
-              "Metal",
-              "Tinplate",
-              "Foil Suppository",
-              "Tin plated steel",
-              "Aluminium Alloy",
               "Stainless steel",
+              "Aluminium Alloy",
+              "Metal",
+              "Tin plated steel",
+              "Foil Suppository",
               "Aluminum barrier laminate",
+              "Tinplate",
+              "EPT",
+              "Aluminum",
               "Aluminum foil",
-              "Foil"
+              "Foil",
+              "Tin",
+              "Aluminium, Epoxyphenolic Lacquer, Acrylic Latex"
             ],
             "Plastic": [
-              "PPE",
-              "purple",
-              "PVC",
-              "OPP",
-              "CPE",
-              "Zipper",
-              "Plastic Closure",
-              "MDPE",
-              "POF",
-              "LLDPE",
-              "PETG (Glycol-modified polyethylene terephthalate)",
-              "PBAT, PLA",
-              "PETG",
-              "PP, LDPE, HDPE",
-              "PET",
-              "HDPE",
-              "PS",
-              "PVDC",
-              "PE",
-              "Flat",
-              "PET, LDPE",
-              "Polyester",
-              "PET (Polyethylene terephthalate)",
-              "Other (please specify)",
-              "Clear Label Film",
-              "Polymer",
-              "PS (Polystyrene)",
-              "White",
-              "Other PE (MDPE, LLDPE, PE plastomers, etc)",
-              "Aluminum alloy",
-              "Mono-Layer Film",
-              "Polyester Twist 23 microns",
-              "HPGS",
-              "Nylon",
-              "EVA",
-              "Laminated Pressure Sensitive Label",
-              "Tube",
-              "PMMA",
-              "Sprayer",
-              "RPET",
-              "PP",
-              "POF (Polyolefin)",
-              "MDO",
-              "SBS-B",
-              "PVC (Polyvinyl chloride)",
-              "LDPE, PE",
-              "PE and PP",
-              "PETE",
-              "Other PE (MDPE, LDPE, PE plastomers, etc)",
-              "PES",
-              "PET, EVOH, LLDPE",
-              "LDPE (Low density polyethylene)",
-              "Phenolic/Urea",
-              "LDPE",
-              "BOPP",
-              "Neckband",
-              "CPP",
-              "Acrylic",
               "PP (Polypropylene)",
-              "Flexible Packaging",
+              "POF (Polyolefin)",
+              "PS (Polystyrene)",
+              "Phenolic/Urea",
+              "RPETG",
+              "PE and PP",
+              "LDPE, PE",
+              "PP, LDPE, HDPE",
+              "Nylon",
+              "LLDPE",
+              "PUR",
+              "Plastic Closure",
+              "Mono-Layer Film",
+              "PES",
+              "PET (Polyethylene terephthalate)",
+              "HPGS",
+              "Aluminum alloy",
+              "Laminated Pressure Sensitive Label",
+              "PVC (Polyvinyl chloride)",
               "HDPE (High density polyethylene)",
               "EPE",
-              "PUR",
-              "PO",
+              "Other PE (MDPE, LDPE, PE plastomers, etc)",
               "Film",
               "PE, PET",
-              "RPETG",
+              "PET",
+              "PETG (Glycol-modified polyethylene terephthalate)",
+              "EVA",
+              "HDPE",
+              "Tube",
               "Spot glue or wraparound label",
+              "PP",
+              "SBS-B",
+              "PBAT, PLA",
+              "Other (please specify)",
+              "PET, EVOH, LLDPE",
+              "Flexible Packaging",
+              "PMMA",
+              "PO",
+              "PETG",
+              "CPP",
+              "PVDC",
+              "LDPE (Low density polyethylene)",
               "PAP",
-              "PVC, PE"
+              "MDO",
+              "Polyester Twist 23 microns",
+              "PS",
+              "Sprayer",
+              "Polyester",
+              "OPP",
+              "CPE",
+              "MDPE",
+              "RPET",
+              "Neckband",
+              "Acrylic",
+              "PET, LDPE",
+              "Clear Label Film",
+              "PE",
+              "PVC, PE",
+              "LDPE",
+              "purple",
+              "Other PE (MDPE, LLDPE, PE plastomers, etc)",
+              "PPE",
+              "Flat",
+              "Polymer",
+              "BOPP",
+              "PVC",
+              "PETE",
+              "White",
+              "Zipper",
+              "POF"
             ],
             "Multilayer": [
-              "Multilayer",
-              "Heat Seal Foam Liner",
-              "Stand-up Resealable Pouch",
-              "Material #1",
-              "Steel",
-              "Foil/Foam",
-              "Aluminum, PVC, PVDC",
-              "Pressure Sensitive Paper/BOPP",
-              "Pressure-Sensitive Metalized Label",
-              "TMP",
-              "Platic",
-              "Biopolymer",
-              "Zippered Stand up Pouch",
+              "Polystyrene Foam, Paper, Aluminum Foil, Heat Seal Coating",
+              "Laminate Tube",
               "Tube TE Seal",
+              "Plastic",
+              "Stand-up Resealable Pouch",
+              "Steel",
+              "Multilayer",
+              "Biopolymer",
               "Paperboard",
               "PET/PE",
-              "Polystyrene Foam, Paper, Aluminum Foil, Heat Seal Coating",
-              "Plastic",
+              "TMP",
+              "Heat Seal Foam Liner",
+              "Platic",
+              "Pressure Sensitive Paper/BOPP",
+              "Material #1",
               "Multilayer Tube",
-              "Laminate Tube"
+              "Zippered Stand up Pouch",
+              "Pressure-Sensitive Metalized Label",
+              "Foil/Foam",
+              "Aluminum, PVC, PVDC"
             ],
             "Other": [
-              "Mylar",
-              "Rubber",
+              "COTTON",
+              "Cotton ball insert",
               "Desiccant",
               "Silica gel in sachet - generic printed",
+              "Other",
+              "Oxygen Scavenger",
               "Silica",
-              "silica gel sachet",
+              "Cellophane",
+              "Nitrocellulose",
               "Latex/Rubber",
               "polyester fabric",
-              "Cellophane",
-              "Cotton ball insert",
-              "COTTON",
-              "Oxygen Scavenger",
-              "Nitrocellulose",
-              "Other"
+              "Rubber",
+              "silica gel sachet",
+              "Mylar"
             ],
             "Metal, Paper, Plastic": [
               "Foil, Paper, Polyester, HSL, OPA, PVC",
               "Aluminium Foil, Paperboard, PET"
             ],
             "Plastic, Metal": [
-              "PVC, Aluminum Foil",
+              "LDPE, Aluminum",
               "PE, PP, Stainless Steel",
-              "LDPE, Aluminum"
+              "PVC, Aluminum Foil"
             ],
             "Paper, Metal, Plastic, Other": [
               "Paper, Foil, PVC"
             ],
             "Paper, Other": [
-              "Paper, Adhesive, Kraft",
               "Pulp, Adhesive",
               "Corrugated, Duplex board",
-              "Paper, Adhesive"
+              "Paper, Adhesive",
+              "Paper, Adhesive, Kraft"
             ],
             "Plastic, Metal, Ceramic": [
               "PP, Steel, Ceramic"
             ],
             "Paper, Plastic": [
-              "SBS, BOPP",
-              "Pulp, Adhesive, Urethane",
               "SBS, PET",
-              "Paper, PET"
+              "Paper, PET",
+              "SBS, BOPP",
+              "Pulp, Adhesive, Urethane"
             ],
             "Fabric": [
               "Rayon"
@@ -622,9 +620,9 @@
               "PET, Adhesive, PE"
             ],
             "Plastic, Metal, Glass": [
+              "PP, Glass, Stainless Steel, PE, HDPE, LDPE",
               "PP, POM, LDPE, PVC, PE, Stainless Steel, Glass",
               "PP, POM, LDPE, PE, Stainless Steel, Glass",
-              "PP, Glass, Stainless Steel, PE, HDPE, LDPE",
               "PP, LDPE, PE, Stainless Steel, Glass"
             ],
             "Paper, Plastic, Metal": [
@@ -652,7 +650,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -670,7 +668,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -688,7 +686,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -706,7 +704,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -724,7 +722,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -742,7 +740,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -760,7 +758,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -773,7 +771,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In inch square"
         },
         {
@@ -786,7 +784,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In inches"
         },
         {
@@ -799,7 +797,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In inches"
         },
         {
@@ -812,7 +810,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In inches"
         },
         {
@@ -825,7 +823,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In inches"
         },
         {
@@ -838,7 +836,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In inches"
         },
         {
@@ -856,7 +854,7 @@
           ],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -869,7 +867,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Dimensions",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "Plastic (SPI): Eg 24-410\nGlass (GPI): Eg. 38-400"
         },
         {
@@ -882,7 +880,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -899,7 +897,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -922,7 +920,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -935,7 +933,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -952,7 +950,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -969,7 +967,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -982,7 +980,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -995,7 +993,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1012,7 +1010,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1043,7 +1041,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1056,7 +1054,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1077,7 +1075,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1090,7 +1088,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1103,7 +1101,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "On the container's surface not including top or bottom of the container"
         },
         {
@@ -1120,7 +1118,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1137,7 +1135,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1150,7 +1148,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1167,7 +1165,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1184,7 +1182,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "Including coating, waxes, fluoropolymers, denesting agends, or other processing aids"
         },
         {
@@ -1197,7 +1195,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1214,7 +1212,7 @@
           ],
           "follow_up_questions": [],
           "section": "Component Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1231,7 +1229,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1244,7 +1242,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1261,7 +1259,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1278,7 +1276,7 @@
           ],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1291,7 +1289,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1304,7 +1302,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Print, Recycle & Certification Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1317,7 +1315,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "Please provide a description of the material and layer breakdown.\n•        E.g. (flexible film): PET/Ink/LDPE/MDPE/EVOH/mPE)\n•        E.g. (blow molded bottle): HDPE-HDPE Regrind-Tie-EVOH-Tie-HDPE)\n"
         },
         {
@@ -1330,7 +1328,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1347,7 +1345,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1360,7 +1358,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1391,7 +1389,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1422,7 +1420,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1453,7 +1451,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1484,7 +1482,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1515,7 +1513,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1528,7 +1526,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1546,7 +1544,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1559,7 +1557,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1572,7 +1570,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1585,7 +1583,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1598,7 +1596,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1611,7 +1609,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1628,7 +1626,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1641,7 +1639,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1671,7 +1669,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1701,7 +1699,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1731,7 +1729,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1761,7 +1759,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1791,7 +1789,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1804,7 +1802,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1817,7 +1815,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1830,7 +1828,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1843,7 +1841,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1856,7 +1854,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1869,7 +1867,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In mils"
         },
         {
@@ -1882,7 +1880,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1895,7 +1893,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In (g/100in 2 /24hr)"
         },
         {
@@ -1908,7 +1906,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In (cc/100in 2 /24hr)"
         },
         {
@@ -1928,7 +1926,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1941,7 +1939,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1958,7 +1956,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -1975,7 +1973,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -1997,7 +1995,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2010,7 +2008,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2023,7 +2021,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2036,7 +2034,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2056,7 +2054,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2069,7 +2067,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2086,7 +2084,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2103,7 +2101,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2116,7 +2114,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2141,7 +2139,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2154,7 +2152,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2167,7 +2165,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2180,7 +2178,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In lbs"
         },
         {
@@ -2193,7 +2191,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "lb/1,000 ft 2"
         },
         {
@@ -2206,7 +2204,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "lb/1,000 ft 2"
         },
         {
@@ -2219,7 +2217,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "lb/1,000 ft 2"
         },
         {
@@ -2232,7 +2230,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "lb/1,000 ft 2"
         },
         {
@@ -2245,7 +2243,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In mils"
         },
         {
@@ -2258,7 +2256,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In b/1,000 ft 2"
         },
         {
@@ -2271,7 +2269,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In mils"
         },
         {
@@ -2284,7 +2282,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": "In lb/3,000 ft 2"
         },
         {
@@ -2297,7 +2295,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2324,7 +2322,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2351,7 +2349,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2378,7 +2376,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2391,7 +2389,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2404,7 +2402,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2421,7 +2419,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2438,7 +2436,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2455,7 +2453,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2468,7 +2466,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In %"
         },
         {
@@ -2481,7 +2479,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2494,7 +2492,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": "In %"
         },
         {
@@ -2511,7 +2509,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2524,7 +2522,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2541,7 +2539,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2554,7 +2552,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2571,7 +2569,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2589,7 +2587,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2602,7 +2600,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2615,7 +2613,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2628,7 +2626,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2641,7 +2639,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2665,7 +2663,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2689,7 +2687,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2713,7 +2711,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2737,7 +2735,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2761,7 +2759,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2774,7 +2772,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2791,7 +2789,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2804,7 +2802,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2817,7 +2815,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2830,7 +2828,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2850,7 +2848,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2870,7 +2868,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2890,7 +2888,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2903,7 +2901,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2920,7 +2918,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2937,7 +2935,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2950,7 +2948,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2967,7 +2965,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -2980,7 +2978,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -2997,7 +2995,7 @@
           ],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Mandatory",
+          "mandatory": true,
           "placeholder": ""
         },
         {
@@ -3010,7 +3008,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         },
         {
@@ -3023,7 +3021,7 @@
           "dropdown_options": [],
           "follow_up_questions": [],
           "section": "Material Information",
-          "mandatory": "Not Mandatory",
+          "mandatory": false,
           "placeholder": ""
         }
       ]

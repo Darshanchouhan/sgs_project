@@ -3,10 +3,13 @@ import Navbar from "./Navbar";
 import BreadcrumbHeader from "./Breadcrumb";
 import "./style.css";
 import questionnaireData from "./questionnarire_repsonse_latest.json";
+import { ReactComponent as CircleLoader } from './assets/images/circle-load.svg';
 
 const PkgDataForm = () => {
     const [sections, setSections] = useState({});
     const [answers, setAnswers] = useState({});
+    const [mandatoryAnsweredCount, setMandatoryAnsweredCount] = useState(0); // Track answered mandatory questions
+    const [totalMandatoryCount, setTotalMandatoryCount] = useState(0); // Track total mandatory questions
     const sectionRefs = useRef({}); // Store refs for each section
 
     useEffect(() => {
@@ -14,9 +17,20 @@ const PkgDataForm = () => {
             const questions = questionnaireData.components[0].component_questions;
             const questionMap = new Map();
 
+            let totalMandatory = 0;
+            let answeredMandatory = 0;
+
             // Build question map with children
             questions.forEach((q) => {
                 questionMap.set(q.question_id, { ...q, children: [] });
+
+                // Count mandatory questions
+                if (q.mandatory) {
+                    totalMandatory += 1;
+                    if (answers[q.question_id] !== undefined) {
+                        answeredMandatory += 1; // If the question is answered
+                    }
+                }
             });
 
             // Assign children to their respective parents
@@ -37,10 +51,12 @@ const PkgDataForm = () => {
             });
 
             setSections(groupedSections);
+            setTotalMandatoryCount(totalMandatory); // Set the total count of mandatory questions
+            setMandatoryAnsweredCount(answeredMandatory); // Set the initial count of answered mandatory questions
         };
 
         processQuestions();
-    }, []);
+    }, [answers]); // Re-run whenever answers change
 
     // Helper function to normalize text for case-insensitive comparison
     const normalizeText = (text) => {
@@ -58,17 +74,17 @@ const PkgDataForm = () => {
 
     // Handle input change for answers
     const handleInputChange = (questionId, value) => {
-        setAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            [questionId]: value,
-        }));
+        setAnswers((prevAnswers) => {
+            const newAnswers = { ...prevAnswers, [questionId]: value };
+            return newAnswers;
+        });
     };
 
     const renderField = (question) => {
         const handleChange = (e) => handleInputChange(question.question_id, e.target.value);
-    
+
         const placeholderText = question.placeholder || "Enter value"; // Default if placeholder is not provided
-    
+
         switch (question.question_type) {
             case "Varchar":
                 return (
@@ -96,12 +112,12 @@ const PkgDataForm = () => {
                 return (
                     <div className="input-group">
                         <input
-                            className="h-44  text-secondary w-130"
+                            className="h-44 text-secondary w-130"
                             type={question.question_type === "Float + Dropdown" ? "number" : "text"}
                             placeholder={placeholderText} // Use placeholder from question
                             onChange={handleChange}
                         />
-                        <select onChange={handleChange} className="bg-color-light-shade form-list w-70 ">
+                        <select onChange={handleChange} className="bg-color-light-shade form-list w-70">
                             {question.dropdown_options.map((option, index) => (
                                 <option key={index} value={option}>
                                     {option}
@@ -112,8 +128,8 @@ const PkgDataForm = () => {
                 );
             case "Dropdown":
                 return (
-                    <select className="w-320 form-list "onChange={handleChange}>
-                        <option value="" disabled>{placeholderText }</option> {/* Use placeholder as the first option */}
+                    <select className="w-320 " onChange={handleChange}>
+                        <option value="">{placeholderText}</option> {/* Use placeholder as the first option */}
                         {question.dropdown_options.map((option, index) => (
                             <option key={index} value={option}>
                                 {option}
@@ -132,8 +148,6 @@ const PkgDataForm = () => {
                 );
         }
     };
-    
-
 
     // Render questions dynamically based on answers and section grouping
     const renderQuestions = (questions) => {
@@ -145,9 +159,12 @@ const PkgDataForm = () => {
                 return null;
             }
 
+            // Check if the question is mandatory and append '*' if true
+            const questionLabel = question.mandatory ? `${question.question_text} *` : question.question_text;
+
             return (
                 <div className="form-group mt-4" key={question.question_id}>
-                    <label>{question.question_text}</label>
+                    <label>{questionLabel}</label>
                     {renderField(question)}
                 </div>
             );
@@ -180,6 +197,9 @@ const PkgDataForm = () => {
         });
     };
 
+    // Calculate progress percentage
+    const progressPercentage = totalMandatoryCount === 0 ? 0 : (mandatoryAnsweredCount / totalMandatoryCount) * 100;
+    const strokeDashoffset = (1 - progressPercentage / 100) * 219.91; // 219.91 is the circle's circumference
     return (
         <div>
             <Navbar />
@@ -200,8 +220,23 @@ const PkgDataForm = () => {
                                     {section}
                                 </p>
                             ))}
+
+                            {/* Circular Loader placed inside section container */}
+                            <div className="circle-loader-container mt-4">
+                            <CircleLoader
+                className="circle-loader"
+                width="24"
+                height="24"
+                style={{
+                    transform: 'rotate(-90deg)', 
+                }}
+            />
+                                <span className="percentage-text ml-3">{Math.round(progressPercentage)}% Completed</span>
+                 
+                            </div>
                         </div>
                     </div>
+
                     <div className="col-12 col-md-9">{renderSections()}</div>
                 </div>
             </div>

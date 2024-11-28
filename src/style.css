@@ -20125,3 +20125,35 @@ input[type="number"]::-webkit-outer-spin-button,
  input[type="radio"]{
           accent-color:#D43014;
         }
+        /* Styling for the circle loader container */
+.circle-loader-container {
+  margin-top: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -35px;
+}
+
+/* Styling for the SVG circle loader */
+.circle-loader {
+  transform: rotate(-90deg); 
+}
+
+/* Background circle style */
+.circle-background {
+  fill: none;
+}
+
+/* Progress circle style */
+.circle-progress {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* Text next to the circle */
+.percentage-text {
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  color: #D42D1F;
+  margin-left: 10px;
+}
