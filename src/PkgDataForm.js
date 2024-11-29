@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import Navbar from "./Navbar";
 import BreadcrumbHeader from "./Breadcrumb";
 import "./style.css";
 import questionnaireData from "./questionnarire_repsonse_latest.json";
-import { ReactComponent as CircleLoader } from "./assets/images/circle-load.svg";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa"; // Importing arrow icons
+import { ReactComponent as CircleLoader } from './assets/images/circle-load.svg';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';  // Importing arrow icons
 
 const PkgDataForm = () => {
   const [sections, setSections] = useState({});
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState({}); // Store answers for all questions
   const [mandatoryAnsweredCount, setMandatoryAnsweredCount] = useState(0); // Track answered mandatory questions
   const [totalMandatoryCount, setTotalMandatoryCount] = useState(0); // Track total mandatory questions
   const sectionRefs = useRef({}); // Store refs for each section
@@ -26,7 +26,6 @@ const PkgDataForm = () => {
       questions.forEach((q) => {
         questionMap.set(q.question_id, { ...q, children: [] });
 
-        // Count mandatory questions
         if (q.mandatory) {
           totalMandatory += 1;
           if (answers[q.question_id] !== undefined) {
@@ -42,7 +41,6 @@ const PkgDataForm = () => {
         }
       });
 
-      // Organize questions into sections
       const groupedSections = {};
       Array.from(questionMap.values()).forEach((question) => {
         const section = question.section || "Uncategorized";
@@ -65,7 +63,9 @@ const PkgDataForm = () => {
     const sectionKeys = Object.keys(sections);
     const currentIndex = sectionKeys.indexOf(activeSection);
     if (currentIndex > 0) {
-      setActiveSection(sectionKeys[currentIndex - 1]);
+      const newActiveSection = sectionKeys[currentIndex - 1];
+      setActiveSection(newActiveSection);
+      scrollToSection(newActiveSection);  // Scroll to the previous section
     }
   };
 
@@ -74,7 +74,26 @@ const PkgDataForm = () => {
     const sectionKeys = Object.keys(sections);
     const currentIndex = sectionKeys.indexOf(activeSection);
     if (currentIndex < sectionKeys.length - 1) {
-      setActiveSection(sectionKeys[currentIndex + 1]);
+      const newActiveSection = sectionKeys[currentIndex + 1];
+      setActiveSection(newActiveSection);
+      scrollToSection(newActiveSection);  // Scroll to the next section
+    }
+  };
+
+  // Handle Section click to navigate
+  const handleSectionClick = (section) => {
+    setActiveSection(section);
+    scrollToSection(section);  // Scroll to the clicked section
+  };
+
+  // Scroll to the active section
+  const scrollToSection = (section) => {
+    // Ensure the section ref exists before scrolling
+    if (sectionRefs.current[section] && sectionRefs.current[section].current) {
+      sectionRefs.current[section].current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -96,10 +115,10 @@ const PkgDataForm = () => {
 
   // Handle input change for answers
   const handleInputChange = (questionId, value) => {
-    setAnswers((prevAnswers) => {
-      const newAnswers = { ...prevAnswers, [questionId]: value };
-      return newAnswers;
-    });
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionId]: value, // Persist answers
+    }));
   };
 
   const renderField = (question) => {
@@ -115,7 +134,8 @@ const PkgDataForm = () => {
             maxLength="100"
             className="w-320"
             rows="6"
-            placeholder={placeholderText} // Use placeholder from question
+            value={answers[question.question_id] || ""}
+            placeholder={placeholderText}
             onChange={handleChange}
           />
         );
@@ -123,10 +143,22 @@ const PkgDataForm = () => {
         return (
           <div onChange={handleChange}>
             <label className="me-3">
-              <input type="radio" name={question.question_id} value="Yes" /> Yes
+              <input
+                type="radio"
+                name={question.question_id}
+                value="Yes"
+                checked={answers[question.question_id] === "Yes"}
+              />
+              Yes
             </label>
             <label>
-              <input type="radio" name={question.question_id} value="No" /> No
+              <input
+                type="radio"
+                name={question.question_id}
+                value="No"
+                checked={answers[question.question_id] === "No"}
+              />
+              No
             </label>
           </div>
         );
@@ -136,17 +168,15 @@ const PkgDataForm = () => {
           <div className="input-group">
             <input
               className="h-44 text-secondary w-130"
-              type={
-                question.question_type === "Float + Dropdown"
-                  ? "number"
-                  : "text"
-              }
-              placeholder={placeholderText} // Use placeholder from question
+              type={question.question_type === "Float + Dropdown" ? "number" : "text"}
+              value={answers[question.question_id] || ""}
+              placeholder={placeholderText}
               onChange={handleChange}
             />
             <select
               onChange={handleChange}
               className="bg-color-light-shade form-list w-70"
+              value={answers[question.question_id] || ""}
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -158,7 +188,11 @@ const PkgDataForm = () => {
         );
       case "Dropdown":
         return (
-          <select className="w-320 " onChange={handleChange}>
+          <select
+            className="w-320"
+            value={answers[question.question_id] || ""}
+            onChange={handleChange}
+          >
             <option value="">{placeholderText}</option>{" "}
             {/* Use placeholder as the first option */}
             {question.dropdown_options.map((option, index) => (
@@ -173,7 +207,8 @@ const PkgDataForm = () => {
           <input
             type="text"
             className="w-320"
-            placeholder={placeholderText} // Use placeholder from question
+            value={answers[question.question_id] || ""}
+            placeholder={placeholderText}
             onChange={handleChange}
           />
         );
@@ -251,15 +286,13 @@ const PkgDataForm = () => {
               </span>
               {Object.keys(sections).map((section) => (
                 <p
-                  className={`fs-14 fw-600 cursor-pointer ${
-                    section === activeSection ? "text-danger" : ""
-                  }`}
+                  className={`fs-14 fw-600 cursor-pointer ${section === activeSection ? "text-danger" : ""}`}
                   key={section}
+                  onClick={() => handleSectionClick(section)} // Section click handler
                 >
                   <div
                     style={{
-                      borderLeft:
-                        section === activeSection ? "4px solid red" : "none",
+                      borderLeft: section === activeSection ? "4px solid red" : "none",
                       paddingLeft: "10px",
                     }}
                   >
@@ -292,11 +325,7 @@ const PkgDataForm = () => {
         {/* Previous Button */}
         <button
           onClick={handlePreviousSection}
-          className={`footer-button prev-button px-30 rounded-2 py-10 fs-14 bg-white border border-secondary text-secondary ${
-            Object.keys(sections).indexOf(activeSection) === 0
-              ? "invisible"
-              : ""
-          }`}
+          className={`footer-button prev-button px-30 rounded-2 py-10 fs-14 bg-white border border-secondary text-secondary ${Object.keys(sections).indexOf(activeSection) === 0 ? "invisible" : ""}`}
         >
           <FaArrowLeft />
           Previous
@@ -305,12 +334,7 @@ const PkgDataForm = () => {
         {/* Next Button */}
         <button
           onClick={handleNextSection}
-          className={`footer-button next-button px-30 rounded-2 py-10 fs-14 bg-primary text-white ${
-            Object.keys(sections).indexOf(activeSection) ===
-            Object.keys(sections).length - 1
-              ? "invisible"
-              : ""
-          }`}
+          className={`footer-button next-button px-30 rounded-2 py-10 fs-14 bg-primary text-white ${Object.keys(sections).indexOf(activeSection) === Object.keys(sections).length - 1 ? "invisible" : ""}`}
         >
           Next
           <FaArrowRight />
