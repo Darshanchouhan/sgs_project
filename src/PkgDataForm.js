@@ -168,10 +168,17 @@ const PkgDataForm = () => {
           <div className="input-group">
             <input
               className="h-44 text-secondary w-130"
-              type={question.question_type === "Float + Dropdown" ? "number" : "text"}
-              value={answers[question.question_id] || ""}
+              type="number"
+              // value={answers[question.question_id] || ""}
               placeholder={placeholderText}
-              onChange={handleChange}
+              // onChange={handleChange}
+              step="1"  // Restrict to integers only
+              min="0"  // Optional: ensures non-negative input
+              onInput={(e) => {
+                if (e.target.value.includes(".")) {
+                  e.target.value = e.target.value.replace(/\..*/, ''); // Remove decimals
+                }
+              }}
             />
             <select
               onChange={handleChange}
