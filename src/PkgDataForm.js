@@ -3,8 +3,8 @@ import Navbar from "./Navbar";
 import BreadcrumbHeader from "./Breadcrumb";
 import "./style.css";
 import questionnaireData from "./questionnarire_repsonse_latest.json";
-import { ReactComponent as CircleLoader } from './assets/images/circle-load.svg';
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';  // Importing arrow icons
+import { ReactComponent as CircleLoader } from "./assets/images/circle-load.svg";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa"; // Importing arrow icons
 
 const PkgDataForm = () => {
   const [sections, setSections] = useState({});
@@ -65,7 +65,7 @@ const PkgDataForm = () => {
     if (currentIndex > 0) {
       const newActiveSection = sectionKeys[currentIndex - 1];
       setActiveSection(newActiveSection);
-      scrollToSection(newActiveSection);  // Scroll to the previous section
+      scrollToSection(newActiveSection); // Scroll to the previous section
     }
   };
 
@@ -76,14 +76,14 @@ const PkgDataForm = () => {
     if (currentIndex < sectionKeys.length - 1) {
       const newActiveSection = sectionKeys[currentIndex + 1];
       setActiveSection(newActiveSection);
-      scrollToSection(newActiveSection);  // Scroll to the next section
+      scrollToSection(newActiveSection); // Scroll to the next section
     }
   };
 
   // Handle Section click to navigate
   const handleSectionClick = (section) => {
     setActiveSection(section);
-    scrollToSection(section);  // Scroll to the clicked section
+    scrollToSection(section); // Scroll to the clicked section
   };
 
   // Scroll to the active section
@@ -130,10 +130,11 @@ const PkgDataForm = () => {
     switch (question.question_type) {
       case "Varchar":
         return (
-          <textarea
+          <input
             maxLength="100"
-            className="w-320"
+            className="h-44 text-secondary w-320"
             rows="6"
+            type="text"
             value={answers[question.question_id] || ""}
             placeholder={placeholderText}
             onChange={handleChange}
@@ -163,27 +164,31 @@ const PkgDataForm = () => {
           </div>
         );
       case "Float + Dropdown":
-      case "Integer + Dropdown":
         return (
           <div className="input-group">
             <input
               className="h-44 text-secondary w-130"
-              type="number"
-              // value={answers[question.question_id] || ""}
+              type="text"
+              value={answers[question.question_id] || ""}
               placeholder={placeholderText}
-              // onChange={handleChange}
-              step="1"  // Restrict to integers only
-              min="0"  // Optional: ensures non-negative input
+              onChange={handleChange}
+              step="1" // Restrict to integers only
+              min="0" // Optional: ensures non-negative input
               onInput={(e) => {
-                if (e.target.value.includes(".")) {
-                  e.target.value = e.target.value.replace(/\..*/, ''); // Remove decimals
+                const value = e.target.value;
+                let validValue = value;
+                validValue = value.replace(/[^0-9.]/g, "");
+                // Allow only one decimal point
+                if ((validValue.match(/\./g) || []).length > 1) {
+                  validValue = validValue.replace(/\.(?=.*\.)/, ""); // Remove extra decimals
                 }
+                e.target.value = validValue;
               }}
             />
             <select
-              onChange={handleChange}
+              // onChange={handleChange}
               className="bg-color-light-shade form-list w-70"
-              value={answers[question.question_id] || ""}
+              // value={answers[question.question_id] || ""}
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -193,6 +198,73 @@ const PkgDataForm = () => {
             </select>
           </div>
         );
+
+      case "Integer + Dropdown":
+        return (
+          <div className="input-group">
+            <input
+              className="h-44 text-secondary w-130"
+              type="text"
+              value={answers[question.question_id] || ""}
+              placeholder={placeholderText}
+              onChange={handleChange}
+              onInput={(e) => {
+                const value = e.target.value;
+
+                e.target.value = value.replace(/[^0-9]/g, ""); // Remove decimals for integer input
+              }}
+            />
+            <select
+              // onChange={handleChange}
+              className="bg-color-light-shade form-list w-70"
+              // value={answers[question.question_id] || ""}
+            >
+              {question.dropdown_options.map((option, index) => (
+                <option key={index} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      // For other fields with question_type only Integer
+      case "Integer":
+        return (
+          <input
+            className="h-44 text-secondary w-130"
+            type="text"
+            value={answers[question.question_id] || ""}
+            placeholder={placeholderText}
+            onChange={handleChange}
+            onInput={(e) => {
+              const value = e.target.value;
+
+              e.target.value = value.replace(/[^0-9]/g, ""); // Remove decimals for integer input
+            }}
+          />
+        );
+      // For other fields with question_type only Float
+      case "Float":
+        return (
+          <input
+            className="h-44 text-secondary w-130"
+            type="text"
+            value={answers[question.question_id] || ""}
+            placeholder={placeholderText}
+            onChange={handleChange}
+            onInput={(e) => {
+              const value = e.target.value;
+              let validValue = value;
+              validValue = value.replace(/[^0-9.]/g, "");
+              // Allow only one decimal point
+              if ((validValue.match(/\./g) || []).length > 1) {
+                validValue = validValue.replace(/\.(?=.*\.)/, ""); // Remove extra decimals
+              }
+              e.target.value = validValue;
+            }}
+          />
+        );
+
       case "Dropdown":
         return (
           <select
@@ -293,13 +365,16 @@ const PkgDataForm = () => {
               </span>
               {Object.keys(sections).map((section) => (
                 <p
-                  className={`fs-14 fw-600 cursor-pointer ${section === activeSection ? "text-danger" : ""}`}
+                  className={`fs-14 fw-600 cursor-pointer ${
+                    section === activeSection ? "text-danger" : ""
+                  }`}
                   key={section}
                   onClick={() => handleSectionClick(section)} // Section click handler
                 >
                   <div
                     style={{
-                      borderLeft: section === activeSection ? "4px solid red" : "none",
+                      borderLeft:
+                        section === activeSection ? "4px solid red" : "none",
                       paddingLeft: "10px",
                     }}
                   >
@@ -332,7 +407,11 @@ const PkgDataForm = () => {
         {/* Previous Button */}
         <button
           onClick={handlePreviousSection}
-          className={`footer-button prev-button px-30 rounded-2 py-10 fs-14 bg-white border border-secondary text-secondary ${Object.keys(sections).indexOf(activeSection) === 0 ? "invisible" : ""}`}
+          className={`footer-button prev-button px-30 rounded-2 py-10 fs-14 bg-white border border-secondary text-secondary ${
+            Object.keys(sections).indexOf(activeSection) === 0
+              ? "invisible"
+              : ""
+          }`}
         >
           <FaArrowLeft />
           Previous
@@ -341,7 +420,12 @@ const PkgDataForm = () => {
         {/* Next Button */}
         <button
           onClick={handleNextSection}
-          className={`footer-button next-button px-30 rounded-2 py-10 fs-14 bg-primary text-white ${Object.keys(sections).indexOf(activeSection) === Object.keys(sections).length - 1 ? "invisible" : ""}`}
+          className={`footer-button next-button px-30 rounded-2 py-10 fs-14 bg-primary text-white ${
+            Object.keys(sections).indexOf(activeSection) ===
+            Object.keys(sections).length - 1
+              ? "invisible"
+              : ""
+          }`}
         >
           Next
           <FaArrowRight />
