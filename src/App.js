@@ -13,7 +13,7 @@ const App = () => {
       <div>
         <Routes>
           {/* Default Route */}
-          <Route path="/" element={<PkgDataForm />} />
+          <Route path="/" element={<Sku_Page />} />
 
           {/* PkgDataForm Route */}
           <Route path="/pkgdataform" element={<PkgDataForm />} />
