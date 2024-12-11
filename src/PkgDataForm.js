@@ -1,46 +1,70 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import Navbar from "./Navbar";
-import BreadcrumbHeader from "./Breadcrumb";
+import Breadcrumb from "./Breadcrumb";
 import "./style.css";
-import questionnaireData from "./questionnarire_repsonse_latest.json";
 import { ReactComponent as CircleLoader } from "./assets/images/circle-load.svg";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa"; // Importing arrow icons
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import { PkgDataContext } from "./Pkg_DataContext"; // Import Context
+import Autosave from "./AutoSave";
 
 const PkgDataForm = () => {
-  const [sections, setSections] = useState({});
-  const [answers, setAnswers] = useState({}); // Store answers for all questions
-  const [mandatoryAnsweredCount, setMandatoryAnsweredCount] = useState(0); // Track answered mandatory questions
-  const [totalMandatoryCount, setTotalMandatoryCount] = useState(0); // Track total mandatory questions
+  const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { componentName } = location.state || {}; // Retrieve the component name
+
   const sectionRefs = useRef({}); // Store refs for each section
-  const [activeSection, setActiveSection] = useState("Component Information"); // Active section tracking
+
+  const savePkgData = async () => {
+    // Save the package data to the backend
+    console.log("Autosaving Package Data:", pkgData.answers);
+    await fetch("https://demo.gramener.com/api/package/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pkgData.answers),
+    });
+  };
+
 
   useEffect(() => {
-    const processQuestions = () => {
-      const questions = questionnaireData.components[0].component_questions;
+    const fetchData = async () => {
+      try {
+        const response = await fetch("https://demo.gramener.com/api/questionnaire/");
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+
+        processQuestions(data); // Process the fetched data
+      } catch (error) {
+        console.error("Error fetching questionnaire data:", error);
+      }
+    };
+
+    const processQuestions = (data) => {
+      const questions = data.components[0].component_questions;
       const questionMap = new Map();
 
       let totalMandatory = 0;
       let answeredMandatory = 0;
 
-      // Build question map with children
       questions.forEach((q) => {
         questionMap.set(q.question_id, { ...q, children: [] });
-
         if (q.mandatory) {
           totalMandatory += 1;
-          if (answers[q.question_id] !== undefined) {
-            answeredMandatory += 1; // If the question is answered
+          if (pkgData.answers[q.question_id] !== undefined) {
+            answeredMandatory += 1;
           }
         }
       });
 
-      // Assign children to their respective parents
       questions.forEach((q) => {
         if (q.dependent_question) {
           questionMap.get(q.dependent_question).children.push(q);
         }
       });
-
       const groupedSections = {};
       Array.from(questionMap.values()).forEach((question) => {
         const section = question.section || "Uncategorized";
@@ -50,82 +74,41 @@ const PkgDataForm = () => {
         groupedSections[section].push(question);
       });
 
-      setSections(groupedSections);
-      setTotalMandatoryCount(totalMandatory); // Set the total count of mandatory questions
-      setMandatoryAnsweredCount(answeredMandatory); // Set the initial count of answered mandatory questions
+      setPkgData((prev) => ({
+        ...prev,
+        sections: groupedSections,
+        totalMandatoryCount: totalMandatory,
+        mandatoryAnsweredCount: answeredMandatory,
+      }));
     };
 
-    processQuestions();
-  }, [answers]); // Re-run whenever answers change
+    fetchData();
+  }, [pkgData.answers, setPkgData]);
 
-  // Handle Previous section
-  const handlePreviousSection = () => {
-    const sectionKeys = Object.keys(sections);
-    const currentIndex = sectionKeys.indexOf(activeSection);
-    if (currentIndex > 0) {
-      const newActiveSection = sectionKeys[currentIndex - 1];
-      setActiveSection(newActiveSection);
-      scrollToSection(newActiveSection); // Scroll to the previous section
-    }
-  };
+  const handleBackClick = () => navigate("/sku_page");
 
-  // Handle Next section
-  const handleNextSection = () => {
-    const sectionKeys = Object.keys(sections);
-    const currentIndex = sectionKeys.indexOf(activeSection);
-    if (currentIndex < sectionKeys.length - 1) {
-      const newActiveSection = sectionKeys[currentIndex + 1];
-      setActiveSection(newActiveSection);
-      scrollToSection(newActiveSection); // Scroll to the next section
-    }
-  };
-
-  // Handle Section click to navigate
-  const handleSectionClick = (section) => {
-    setActiveSection(section);
-    scrollToSection(section); // Scroll to the clicked section
-  };
-
-  // Scroll to the active section
-  const scrollToSection = (section) => {
-    // Ensure the section ref exists before scrolling
-    if (sectionRefs.current[section] && sectionRefs.current[section].current) {
-      sectionRefs.current[section].current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
-
-  // Helper function to normalize text for case-insensitive comparison
-  const normalizeText = (text) => {
-    return text ? text.trim().toLowerCase() : "";
-  };
-
-  // Check if the parent's answer matches the field_dependency
-  const isAnswerMatch = (fieldDependency, parentAnswer) => {
-    if (!fieldDependency) return true; // No dependency, always visible
-
-    const normalizedParentAnswer = normalizeText(parentAnswer);
-    const conditions = fieldDependency
-      .split(/OR/i)
-      .map((dep) => normalizeText(dep.trim()));
-    return conditions.includes(normalizedParentAnswer);
-  };
-
-  // Handle input change for answers
   const handleInputChange = (questionId, value) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [questionId]: value, // Persist answers
+    setPkgData((prev) => ({
+      ...prev,
+      answers: { ...prev.answers, [questionId]: value },
     }));
   };
 
-  const renderField = (question) => {
-    const handleChange = (e) =>
-      handleInputChange(question.question_id, e.target.value);
+  const isAnswerMatch = (fieldDependency, parentAnswer) => {
+    if (!fieldDependency) return true; // No dependency, always visible
 
-    const placeholderText = question.placeholder || "Enter value"; // Default if placeholder is not provided
+    const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
+    const conditions = fieldDependency
+      .split(/OR/i)
+      .map((dep) => dep.trim().toLowerCase());
+
+    return conditions.includes(normalizedParentAnswer);
+  };
+
+  const renderField = (question) => {
+    const handleChange = (e) => handleInputChange(question.question_id, e.target.value);
+
+    const placeholderText = question.placeholder || "Enter value";
 
     switch (question.question_type) {
       case "Varchar":
@@ -133,147 +116,37 @@ const PkgDataForm = () => {
           <input
             maxLength="100"
             className="h-44 text-secondary w-320"
-            rows="6"
             type="text"
-            value={answers[question.question_id] || ""}
+            value={pkgData.answers[question.question_id] || ""}
             placeholder={placeholderText}
             onChange={handleChange}
           />
         );
       case "Single Select Radio Button":
         return (
-          <div onChange={handleChange}>
-            <label className="me-3">
-              <input
-                type="radio"
-                name={question.question_id}
-                value="Yes"
-                checked={answers[question.question_id] === "Yes"}
-              />
-              Yes
-            </label>
-            <label>
-              <input
-                type="radio"
-                name={question.question_id}
-                value="No"
-                checked={answers[question.question_id] === "No"}
-              />
-              No
-            </label>
+          <div>
+            {["Yes", "No"].map((option) => (
+              <label key={option} className="me-3">
+                <input
+                  type="radio"
+                  name={question.question_id}
+                  value={option}
+                  checked={pkgData.answers[question.question_id] === option}
+                  onChange={handleChange}
+                />
+                {option}
+              </label>
+            ))}
           </div>
         );
-      case "Float + Dropdown":
-        return (
-          <div className="input-group">
-            <input
-              className="h-44 text-secondary w-130"
-              type="text"
-              value={answers[question.question_id] || ""}
-              placeholder={placeholderText}
-              onChange={handleChange}
-              step="1" // Restrict to integers only
-              min="0" // Optional: ensures non-negative input
-              onInput={(e) => {
-                const value = e.target.value;
-                let validValue = value;
-                validValue = value.replace(/[^0-9.]/g, "");
-                // Allow only one decimal point
-                if ((validValue.match(/\./g) || []).length > 1) {
-                  validValue = validValue.replace(/\.(?=.*\.)/, ""); // Remove extra decimals
-                }
-                e.target.value = validValue;
-              }}
-            />
-            <select
-              // onChange={handleChange}
-              className="bg-color-light-shade form-list w-70"
-              // value={answers[question.question_id] || ""}
-            >
-              {question.dropdown_options.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
-
-      case "Integer + Dropdown":
-        return (
-          <div className="input-group">
-            <input
-              className="h-44 text-secondary w-130"
-              type="text"
-              value={answers[question.question_id] || ""}
-              placeholder={placeholderText}
-              onChange={handleChange}
-              onInput={(e) => {
-                const value = e.target.value;
-
-                e.target.value = value.replace(/[^0-9]/g, ""); // Remove decimals for integer input
-              }}
-            />
-            <select
-              // onChange={handleChange}
-              className="bg-color-light-shade form-list w-70"
-              // value={answers[question.question_id] || ""}
-            >
-              {question.dropdown_options.map((option, index) => (
-                <option key={index} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
-      // For other fields with question_type only Integer
-      case "Integer":
-        return (
-          <input
-            className="h-44 text-secondary w-130"
-            type="text"
-            value={answers[question.question_id] || ""}
-            placeholder={placeholderText}
-            onChange={handleChange}
-            onInput={(e) => {
-              const value = e.target.value;
-
-              e.target.value = value.replace(/[^0-9]/g, ""); // Remove decimals for integer input
-            }}
-          />
-        );
-      // For other fields with question_type only Float
-      case "Float":
-        return (
-          <input
-            className="h-44 text-secondary w-130"
-            type="text"
-            value={answers[question.question_id] || ""}
-            placeholder={placeholderText}
-            onChange={handleChange}
-            onInput={(e) => {
-              const value = e.target.value;
-              let validValue = value;
-              validValue = value.replace(/[^0-9.]/g, "");
-              // Allow only one decimal point
-              if ((validValue.match(/\./g) || []).length > 1) {
-                validValue = validValue.replace(/\.(?=.*\.)/, ""); // Remove extra decimals
-              }
-              e.target.value = validValue;
-            }}
-          />
-        );
-
       case "Dropdown":
         return (
           <select
             className="w-320"
-            value={answers[question.question_id] || ""}
+            value={pkgData.answers[question.question_id] || ""}
             onChange={handleChange}
           >
-            <option value="">{placeholderText}</option>{" "}
-            {/* Use placeholder as the first option */}
+            <option value="">{placeholderText}</option>
             {question.dropdown_options.map((option, index) => (
               <option key={index} value={option}>
                 {option}
@@ -281,55 +154,114 @@ const PkgDataForm = () => {
             ))}
           </select>
         );
-      default:
+     
+         case "Float + Dropdown":
         return (
-          <input
-            type="text"
-            className="w-320"
-            value={answers[question.question_id] || ""}
-            placeholder={placeholderText}
-            onChange={handleChange}
-          />
+          <div className="input-group">
+            <input
+              className="h-44 text-secondary w-130"
+              type="number"
+              step="1"
+              value={pkgData.answers[question.question_id] || ""}
+              placeholder={placeholderText}
+              onChange={handleChange}
+            />
+            <select
+              className="form-list border-0 bg-color-light-shade w-70"
+              value={pkgData.answers[`${question.question_id}_unit`] || ""}
+              onChange={(e) =>
+                handleInputChange(`${question.question_id}_unit`, e.target.value)
+              }
+            >
+              {question.dropdown_options.map((option, index) => (
+                <option key={index} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
         );
+        case "Integer + Dropdown":
+          return (
+            <div className="input-group">
+              <input
+                className="h-44 text-secondary w-130"
+                type="number"
+                step="1"
+                value={pkgData.answers[question.question_id] || ""}
+                placeholder={placeholderText}
+                onChange={handleChange}
+              />
+              <select
+                className="bg-color-light-shade form-list w-70"
+                value={pkgData.answers[`${question.question_id}_unit`] || ""}
+                onChange={(e) =>
+                  handleInputChange(`${question.question_id}_unit`, e.target.value)
+                }
+              >
+                {question.dropdown_options.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        case "Integer":
+          return (
+            <input
+              className="h-44 text-secondary w-130"
+              type="number"
+              step="1"
+              value={pkgData.answers[question.question_id] || ""}
+              placeholder={placeholderText}
+              onChange={handleChange}
+            />
+          );
+      // default:
+      //   return (
+      //     <input
+      //       type="text"
+      //       className="h-44 text-secondary w-320"
+      //       value={pkgData.answers[question.question_id] || ""}
+      //       placeholder={placeholderText}
+      //       onChange={handleChange}
+      //     />
+      //   );
     }
   };
 
-  // Render questions dynamically based on answers and section grouping
   const renderQuestions = (questions) => {
     return questions.map((question) => {
-      const parentAnswer = answers[question.dependent_question];
+      const parentAnswer = pkgData.answers[question.dependent_question];
       const isDependentVisible = isAnswerMatch(
         question.field_dependency,
-        parentAnswer
+        parentAnswer,
       );
 
       if (question.dependent_question && !isDependentVisible) {
         return null;
       }
 
-      // Check if the question is mandatory and append '*' if true
-      const questionLabel = question.mandatory
-        ? `${question.question_text} *`
-        : question.question_text;
-
       return (
         <div className="form-group mt-4" key={question.question_id}>
-          <label>{questionLabel}</label>
+          <label>
+            {question.mandatory ? `${question.question_text} *` : question.question_text}
+          </label>
           {renderField(question)}
         </div>
       );
     });
   };
 
-  // Render sections and their corresponding questions
   const renderSections = () => {
-    return Object.entries(sections).map(([section, questions]) => {
+    return Object.entries(pkgData.sections).map(([section, questions]) => {
       if (!sectionRefs.current[section]) {
         sectionRefs.current[section] = React.createRef();
       }
 
       return (
-        section === activeSection && (
+        section === pkgData.activeSection && (
           <div
             className="form-section mt-5"
             key={section}
@@ -344,95 +276,163 @@ const PkgDataForm = () => {
       );
     });
   };
+  const handleSave = async () => {
+    try {
+      
+      // Convert the sections object to an array of questions
+      const answeredQuestions = Object.values(pkgData.sections).flatMap((section) =>
+        section.map((question) => {
+          // Check if the question has an answer (ignoring unanswered questions)
+          const answer = pkgData.answers[question.question_id];
+          if (answer === undefined || answer === "") return null;
+          
+       // Return the question formatted correctly if it has an answer
+          return {
+            question_id: question.question_id,
+            question_text: question.question_text,
+            question_type: question.question_type,
+            response: answer,
+            unit: question.unit || null,
+          };
+        }).filter((q) => q !== null) // Filter out null (unanswered questions)
+      );
+//if no questions are answered, notify the user and return
+      if (answeredQuestions.length === 0) {
+        alert("No questions have been answered.");
+        return;
+      }
 
-  // Calculate progress percentage
+      const requestBody = { questions: answeredQuestions };
+      console.log("formatted question is):", answeredQuestions);
+
+      console.log(
+        "Request Body (Data to be sent to the server):",
+        JSON.stringify(requestBody, null, 2)
+      );
+//make the post request to save the answers
+      const response = await fetch(
+        "https://demo.gramener.com/api/component/2/questionnaire/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (response.ok) {
+        alert("Data saved successfully!");
+      } else {
+        alert("Failed to save data.");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("An error occurred while saving.");
+    }
+  };
   const progressPercentage =
-    totalMandatoryCount === 0
+    pkgData.totalMandatoryCount === 0
       ? 0
-      : (mandatoryAnsweredCount / totalMandatoryCount) * 100;
-  const strokeDashoffset = (1 - progressPercentage / 100) * 219.91; // 219.91 is the circle's circumference
+      : (pkgData.mandatoryAnsweredCount / pkgData.totalMandatoryCount) * 100;
 
-  return (
-    <div>
-      <Navbar />
-      <BreadcrumbHeader />
-      <div className="container-fluid px-5 py-58">
-        <div className="row">
-          <div className="col-12 col-md-3">
-            <div className="p-4 bg-color-light-gray position-sticky top-0">
-              <span className="fs-12 fw-600 text-color-typo-secondary">
-                Complete all sections for this component
-              </span>
-              {Object.keys(sections).map((section) => (
-                <p
-                  className={`fs-14 fw-600 cursor-pointer ${
-                    section === activeSection ? "text-danger" : ""
-                  }`}
-                  key={section}
-                  onClick={() => handleSectionClick(section)} // Section click handler
-                >
-                  <div
-                    style={{
-                      borderLeft:
-                        section === activeSection ? "4px solid red" : "none",
-                      paddingLeft: "10px",
-                    }}
-                  >
-                    {section}
+      return (
+        <div>
+          <Navbar />
+          <Breadcrumb
+            onBackClick={handleBackClick}
+            onSaveClick={handleSave}
+            componentName={componentName || "Default Component"}
+          />
+          <Autosave saveFunction={savePkgData} dependencies={[pkgData.answers]} />
+          <div className="container-fluid px-5 py-58">
+            <div className="row">
+              <div className="col-12 col-md-3">
+                <div className="p-4 bg-color-light-gray position-sticky top-0">
+                  <span className="fs-12 fw-600 text-color-typo-secondary">
+                    Complete all sections for this component
+                  </span>
+                  {Object.keys(pkgData.sections).map((section) => (
+                    <p
+                      key={section}
+                      className={`fs-14 fw-600 cursor-pointer ${
+                        section === pkgData.activeSection ? "text-danger" : ""
+                      }`}
+                      onClick={() =>
+                        setPkgData((prev) => ({ ...prev, activeSection: section }))
+                      }
+                    >
+                      {section}
+                    </p>
+                  ))}
+                  <div className="circle-loader-container mt-4">
+                    <CircleLoader
+                      className="circle-loader"
+                      width="24"
+                      height="24"
+                      style={{ transform: "rotate(-90deg)" }}
+                    />
+                    <span className="percentage-text ml-3">
+                      {Math.round(progressPercentage)}% Completed
+                    </span>
                   </div>
-                </p>
-              ))}
-
-              {/* Circular Loader placed inside section container */}
-              <div className="circle-loader-container mt-4">
-                <CircleLoader
-                  className="circle-loader"
-                  width="24"
-                  height="24"
-                  style={{ transform: "rotate(-90deg)" }}
-                />
-                <span className="percentage-text ml-3">
-                  {Math.round(progressPercentage)}% Completed
-                </span>
+                </div>
               </div>
+              <div className="col-12 col-md-9">{renderSections()}</div>
             </div>
           </div>
-
-          <div className="col-12 col-md-9">{renderSections()}</div>
+    
+          {/* Footer with Previous and Next buttons */}
+          <div className="footer d-flex justify-content-between mt-4">
+            {/* Previous Button */}
+            <button
+              onClick={() => {
+                const sectionKeys = Object.keys(pkgData.sections);
+                const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+                if (currentIndex > 0) {
+                  const previousSection = sectionKeys[currentIndex - 1];
+                  setPkgData((prev) => ({ ...prev, activeSection: previousSection }));
+                  sectionRefs.current[previousSection]?.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }}
+              className={`btn btn-outline-secondary ${
+                Object.keys(pkgData.sections).indexOf(pkgData.activeSection) === 0
+                  ? "invisible"
+                  : ""
+              }`}
+            >
+              <FaArrowLeft /> Previous
+            </button>
+    
+            {/* Next Button */}
+            <button
+              onClick={() => {
+                const sectionKeys = Object.keys(pkgData.sections);
+                const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+                if (currentIndex < sectionKeys.length - 1) {
+                  const nextSection = sectionKeys[currentIndex + 1];
+                  setPkgData((prev) => ({ ...prev, activeSection: nextSection }));
+                  sectionRefs.current[nextSection]?.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }}
+              className={`btn btn-primary ${
+                Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
+                Object.keys(pkgData.sections).length - 1
+                  ? "invisible"
+                  : ""
+              }`}
+            >
+              Next <FaArrowRight />
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Footer with Previous and Next buttons */}
-      <div className="footer d-flex justify-content-between">
-        {/* Previous Button */}
-        <button
-          onClick={handlePreviousSection}
-          className={`footer-button prev-button px-30 rounded-2 py-10 fs-14 bg-white border border-secondary text-secondary ${
-            Object.keys(sections).indexOf(activeSection) === 0
-              ? "invisible"
-              : ""
-          }`}
-        >
-          <FaArrowLeft />
-          Previous
-        </button>
-
-        {/* Next Button */}
-        <button
-          onClick={handleNextSection}
-          className={`footer-button next-button px-30 rounded-2 py-10 fs-14 bg-primary text-white ${
-            Object.keys(sections).indexOf(activeSection) ===
-            Object.keys(sections).length - 1
-              ? "invisible"
-              : ""
-          }`}
-        >
-          Next
-          <FaArrowRight />
-        </button>
-      </div>
-    </div>
-  );
+      );
+    
+    
 };
 
 export default PkgDataForm;
