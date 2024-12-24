@@ -7,6 +7,10 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PkgDataContext } from "./Pkg_DataContext"; // Import Context
 import Autosave from "./AutoSave";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ProgressLoader from "./ProgressLoader"; // Import ProgressLoader
+
+
 
 const PkgDataForm = () => {
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
@@ -108,23 +112,37 @@ const PkgDataForm = () => {
   const renderField = (question) => {
     const handleChange = (e) => handleInputChange(question.question_id, e.target.value);
 
-    const placeholderText = question.placeholder || "Enter value";
+  // Render Info Icon only if `instructions` is provided
 
+
+    // Info Icon with Instructions
+    const infoIcon = question.instructions ? (
+      <InfoOutlinedIcon
+        className="info-icon"
+        titleAccess={question.instructions} // Display on hover
+      />
+    ) : null;
+
+    // eslint-disable-next-line default-case
     switch (question.question_type) {
       case "Varchar":
         return (
-          <input
-            maxLength="100"
-            className="h-44 text-secondary w-320"
-            type="text"
-            value={pkgData.answers[question.question_id] || ""}
-            placeholder={placeholderText}
-            onChange={handleChange}
-          />
+          <div className="input-group align-items-center">
+            <input
+              maxLength="100"
+              className="h-42 text-secondary w-320 "
+              type="text"
+              value={pkgData.answers[question.question_id] || ""}
+              placeholder={question.placeholder || "Enter value"}              
+              onChange={handleChange}
+            />
+            {infoIcon}
+          </div>
         );
+    
       case "Single Select Radio Button":
         return (
-          <div>
+          <div align-items-center me-2>
             {["Yes", "No"].map((option) => (
               <label key={option} className="me-3">
                 <input
@@ -137,37 +155,58 @@ const PkgDataForm = () => {
                 {option}
               </label>
             ))}
+            {infoIcon}
+            
           </div>
         );
+    
       case "Dropdown":
         return (
-          <select
-            className="w-320"
-            value={pkgData.answers[question.question_id] || ""}
-            onChange={handleChange}
-          >
-            <option value="">{placeholderText}</option>
-            {question.dropdown_options.map((option, index) => (
-              <option key={index} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <div className="input-group align-items-center">
+            <select
+              className="w-320 me-2"
+              value={pkgData.answers[question.question_id] || ""}
+              onChange={handleChange}
+            >
+              <option value="">Select an option</option>
+              {question.dropdown_options
+                .filter((option) => option !== "Component")
+                .map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
+            </select>
+            {infoIcon}
+
+          </div>
         );
-     
-         case "Float + Dropdown":
+    
+      case "Float + Dropdown":
         return (
-          <div className="input-group">
+          <div className="input-group align-items-center">
             <input
-              className="h-44 text-secondary w-130"
+              className="h-42 text-secondary w-130 "
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
-              placeholder={placeholderText}
+              placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
+              onKeyDown={(e) => {
+                if (
+                  !/^\d$/.test(e.key) &&
+                  e.key !== "Backspace" &&
+                  e.key !== "Delete" &&
+                  e.key !== "ArrowLeft" &&
+                  e.key !== "ArrowRight"
+                ) {
+                  e.preventDefault();
+                }
+              }}
             />
             <select
-              className="form-list border-0 bg-color-light-shade w-70"
+            
+              className="bg-color-light-shade form-list w-70"
               value={pkgData.answers[`${question.question_id}_unit`] || ""}
               onChange={(e) =>
                 handleInputChange(`${question.question_id}_unit`, e.target.value)
@@ -179,57 +218,108 @@ const PkgDataForm = () => {
                 </option>
               ))}
             </select>
+            {infoIcon}
+
           </div>
         );
-        case "Integer + Dropdown":
-          return (
-            <div className="input-group">
-              <input
-                className="h-44 text-secondary w-130"
-                type="number"
-                step="1"
-                value={pkgData.answers[question.question_id] || ""}
-                placeholder={placeholderText}
-                onChange={handleChange}
-              />
-              <select
-                className="bg-color-light-shade form-list w-70"
-                value={pkgData.answers[`${question.question_id}_unit`] || ""}
-                onChange={(e) =>
-                  handleInputChange(`${question.question_id}_unit`, e.target.value)
-                }
-              >
-                {question.dropdown_options.map((option, index) => (
-                  <option key={index} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-          );
-        case "Integer":
-          return (
+    
+      case "Integer + Dropdown":
+        return (
+          <div className="input-group align-items-center">
             <input
-              className="h-44 text-secondary w-130"
+              className="h-42 text-secondary w-130 "
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
-              placeholder={placeholderText}
+              placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
+              onKeyDown={(e) => {
+                if (
+                  !/^\d$/.test(e.key) &&
+                  e.key !== "Backspace" &&
+                  e.key !== "Delete" &&
+                  e.key !== "ArrowLeft" &&
+                  e.key !== "ArrowRight"
+                ) {
+                  e.preventDefault();
+                }
+              }}
             />
-          );
-      // default:
-      //   return (
-      //     <input
-      //       type="text"
-      //       className="h-44 text-secondary w-320"
-      //       value={pkgData.answers[question.question_id] || ""}
-      //       placeholder={placeholderText}
-      //       onChange={handleChange}
-      //     />
-      //   );
+            <select
+              className="bg-color-light-shade form-list w-70"
+              value={pkgData.answers[`${question.question_id}_unit`] || ""}
+              onChange={(e) =>
+                handleInputChange(`${question.question_id}_unit`, e.target.value)
+              }
+            >
+              {question.dropdown_options.map((option, index) => (
+                <option key={index} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {infoIcon}
+
+          </div>
+        );
+    
+      case "Integer":
+        return (
+          <div className="input-group align-items-center">
+            <input
+              className="h-42 text-secondary w-130 "
+              type="number"
+              step="1"
+              value={pkgData.answers[question.question_id] || ""}
+              placeholder={question.placeholder || "Enter value"}          
+                  onChange={handleChange}
+              onKeyDown={(e) => {
+                if (
+                  !/^\d$/.test(e.key) &&
+                  e.key !== "Backspace" &&
+                  e.key !== "Delete" &&
+                  e.key !== "ArrowLeft" &&
+                  e.key !== "ArrowRight"
+                ) {
+                  e.preventDefault();
+                }
+              }}
+            />
+                       {infoIcon}
+
+          </div>
+        );
+    
+      case "Float":
+        return (
+          <div className="input-group align-items-center">
+            <input
+              className="h-42 text-secondary w-130 "
+              type="number"
+              step="1"
+              value={pkgData.answers[question.question_id] || ""}
+              placeholder={question.placeholder || "Enter value"}
+              onChange={handleChange}
+              onKeyDown={(e) => {
+                if (
+                  !/^\d$/.test(e.key) &&
+                  e.key !== "Backspace" &&
+                  e.key !== "Delete" &&
+                  e.key !== "ArrowLeft" &&
+                  e.key !== "ArrowRight"
+                ) {
+                  e.preventDefault();
+                }
+              }}
+            />
+                       {infoIcon}
+
+          </div>
+        );
+        default:
+          return null;
     }
-  };
+  };  
 
   const renderQuestions = (questions) => {
     return questions.map((question) => {
@@ -363,7 +453,8 @@ const PkgDataForm = () => {
                       {section}
                     </p>
                   ))}
-                  <div className="circle-loader-container mt-4">
+
+                  {/* <div className="circle-loader-container mt-4">
                     <CircleLoader
                       className="circle-loader"
                       width="24"
@@ -373,7 +464,16 @@ const PkgDataForm = () => {
                     <span className="percentage-text ml-3">
                       {Math.round(progressPercentage)}% Completed
                     </span>
-                  </div>
+                  </div> */}
+   <div className="progress-loader-container pkgdataform-loader mt-4 d-flex align-items-center">
+  <ProgressLoader percentage={Math.round(progressPercentage)} size={24} />
+  <span className="progress-percentage-text ms-2">
+    {Math.round(progressPercentage)}% completed
+  </span>
+</div>
+
+
+
                 </div>
               </div>
               <div className="col-12 col-md-9">{renderSections()}</div>

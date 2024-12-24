@@ -23,7 +23,7 @@ const Autosave = ({ saveFunction, dependencies }) => {
     // Start autosave interval
     saveTimer.current = setInterval(() => {
       handleAutosave();
-    }, 5000); // 5-second interval
+    }, 500000000); // 5-second interval
 
     return () => {
       if (saveTimer.current) clearInterval(saveTimer.current); // Cleanup on unmount

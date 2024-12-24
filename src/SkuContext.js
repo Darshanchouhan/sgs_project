@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState,} from "react";
 
 // Create Context
 export const SkuContext = createContext();
@@ -25,9 +25,21 @@ export const SkuProvider = ({ children }) => {
     hasAddedFirstComponent: false,
     isCancelDisabled: true,
   });
+   // Add state for SKU Details and PKO Data
+   const [skuDetails, setSkuDetails] = useState(null);
+   const [pkoData, setPkoData] = useState(null);
+  
 
   return (
-    <SkuContext.Provider value={{ skuData, setSkuData }}>
+    <SkuContext.Provider value={{ 
+      skuData,
+     setSkuData,
+     skuDetails,
+     setSkuDetails,
+     pkoData,
+     setPkoData,
+
+      }}>
       {children}
     </SkuContext.Provider>
   );

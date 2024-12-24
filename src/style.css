@@ -8272,7 +8272,7 @@ fieldset:disabled .btn {
 .offcanvas-md,
 .offcanvas-sm {
   --bs-offcanvas-zindex: 1045;
-  --bs-offcanvas-width: 400px;
+  --bs-offcanvas-width: 900px;
   --bs-offcanvas-height: 30vh;
   --bs-offcanvas-padding-x: 1rem;
   --bs-offcanvas-padding-y: 1rem;
@@ -22308,6 +22308,9 @@ textarea {
 .w-130 {
   width: 130px;
 }
+.w-395{
+  width:395px;
+}
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -22404,14 +22407,175 @@ input[type="radio"] {
   font-style: italic;
 }
 
-
-/* .footer {
-  position: sticky;
-  bottom: 0;
-  background: #f9f9f9;
-  padding: 10px 20px;
-  border-top: 1px solid #ddd;
+.info-icon {
+  margin-left: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #888;
 }
-.btn {
-  min-width: 100px;
-} */
+
+.info-icon:hover {
+  color: #555;
+}
+
+.sku-status{
+  width:120px !important; 
+}
+.background-position{
+  background-position: 38px;
+}
+/*...........*/
+.sku-details-box {
+  display: flex;
+  flex-wrap: wrap; /* Allows the content to wrap to the next line */
+  gap: 20px; /* Adds spacing between items */
+}
+.sku-details-item {
+
+  flex: 1 1 calc(25% - 20px); /* Ensures 4 items per row */
+  min-width: 150px; /* Minimum width to avoid items shrinking too small */
+  word-wrap: break-word; /* Ensures long text breaks into the next line */
+}
+/* Default styling for all fields */
+.sku-details-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000; /* Bold and black text for values */
+  white-space: nowrap; /* Prevents text wrapping by default */
+  overflow: hidden; /* Hides overflow if the text is too long */
+  text-overflow: ellipsis; /* Adds ellipsis (...) for long text */
+}
+
+/* Specific styling for long descriptions */
+.sku-details-value.long-description {
+  white-space: normal; /* Allows text wrapping for long descriptions */
+  word-wrap: break-word; /* Breaks long words into the next line */
+  line-height: 1.4; /* Adjusts line spacing for readability */
+}
+
+.view-all{
+  color: #257CFF;
+}
+
+/* Donut Chart Styling */
+.donut-chart-container {
+  width: 180px;
+  height: 180px;
+  margin-top: -120px !important; /* Move chart slightly upward */
+  margin-left: -190px; /* Move chart slightly left */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Specific Colors for Status Dots */
+.status-dot.not-started {
+  background-color: #ABABAB; /* Gray */
+}
+
+.status-dot.draft {
+  background-color:#257CFF; /* blue */
+}
+
+.status-dot.completed {
+  background-color: #30AB30; /* Green */
+}
+
+/* Vendor Page Loader */
+.overall-progress-container .progress-loader-wrapper {
+  width: 130px !important;
+  height: 130px !important;
+}
+
+/* PkgDataForm Loader */
+.pkgdataform-loader {
+  display: flex;
+  align-items: center;
+}
+
+.pkgdataform-loader .progress-percentage-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #D42D1F;
+}
+
+.pkgdataform-loader .progress-loader-wrapper {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.offcanvas-end.width-80 {
+  width: 70%;
+}
+
+/* Thumbnail Style */
+.img-thumbnail {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.img-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+/* View All Button */
+.btn-outline-primary.btn-sm {
+  font-size: 12px;
+  padding: 4px 8px;
+  margin-left: 8px;
+}
+
+/* Disabled Add Button */
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* Thumbnail Container */
+.image-thumbnail-container {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+
+
+.text-color-black {
+  color: #000;
+}
+
+.text-secondary {
+  color: #6c757d;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+.w-60{
+  width: 60%;
+}
+.w-40 {
+  width: 40%;
+}
+
+
+
+
+
