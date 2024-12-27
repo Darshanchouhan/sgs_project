@@ -15,6 +15,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Autosave from "./AutoSave";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Offcanvas } from "bootstrap";
+import { VendorContext } from "./VendorContext";
+
 
 const Sku_Page = () => {
   const {
@@ -25,9 +27,13 @@ const Sku_Page = () => {
     pkoData,
     setPkoData,
   } = useContext(SkuContext); // Use Context
+  const { updateSkuStatus} = useContext(VendorContext)
+
   const navigate = useNavigate();
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
+  const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
+  const skuId = location.state?.skuId; // Retrieve SKU ID from navigation
 
   // Retrieve pkoData and skuDetails from location.state or fallback to context
   useEffect(() => {
@@ -40,6 +46,31 @@ const Sku_Page = () => {
       }
     }
   }, [location.state, setSkuDetails, setPkoData]);
+
+  //fetch SKU Details
+  useEffect(() => {
+    const fetchSkuDetails = async () => {
+      if (!skuId) {
+      console.warn("SKU ID is missing. Skipping fetch.");
+      return;
+    }
+      try {
+        const response = await fetch(`https://demo.gramener.com/api/skus/${skuId}/`);
+        if (!response.ok) throw new Error("Failed to fetch SKU details");
+        const data = await response.json();
+        setSkuDetails(data);
+        setSkuData({
+          dimensionsAndWeights: data.primary_packaging_details || {},
+          components: data.components || [],
+        });
+      } catch (error) {
+        console.error("Error fetching SKU details:", error);
+      }
+    };
+  
+    fetchSkuDetails();
+  }, [skuId,setSkuData, setSkuDetails]);
+  
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -58,15 +89,62 @@ const Sku_Page = () => {
     fetchQuestions();
   }, []);
 
-  const saveSkuData = async () => {
-    // Save the SKU data to the backend
-    console.log("Autosaving SKU Data:", skuData);
-    await fetch("https://demo.gramener.com/api/sku/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(skuData),
-    });
+   // 📦 Save SKU Data
+   const saveSkuData = async () => {
+    if (!skuId) {
+      console.error("SKU ID is missing");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        sku_id: skuId,
+        description: skuDetails?.description || "",
+        primary_packaging_details: {
+          ...skuData.dimensionsAndWeights,
+
+        },
+        components: skuData.components.map((comp) => ({
+          id: comp.id || null,
+          sku: skuId,
+          name: comp.name,
+          form_status: comp.formStatus,
+          responses: comp.responses || {},
+        })),
+      };
+
+      console.log("submitting Payload:", payload);
+
+      const response = await fetch(`https://demo.gramener.com/api/skus/${skuId}/`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Failed to save SKU data");
+      updateSkuStatus(skuId, "Completed");
+      alert("SKU data saved successfully!");
+      
+      navigate("/");
+    } catch (error) {
+      console.error("Error during Save:", error);
+      alert("Failed to submit SKU data. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  // 📦 Handle Input Change (Primary Packaging Details)
+  const handleInputChange = (field, value) => {
+    setSkuData((prev) => ({
+      ...prev,
+      dimensionsAndWeights: {
+        ...prev.dimensionsAndWeights,
+        [field]: value,
+      },
+    }));
+  };
+
 
   // Define the back action
   const handleBackClick = () => {
@@ -82,16 +160,6 @@ const Sku_Page = () => {
     }
   };
 
-  // Handle input change for dimensions and weights
-  const handleInputChange = (field, value) => {
-    setSkuData((prev) => ({
-      ...prev,
-      dimensionsAndWeights: {
-        ...prev.dimensionsAndWeights,
-        [field]: value,
-      },
-    }));
-  };
 
   // Handle adding a component
   const handleAddComponent = () => {
@@ -128,6 +196,15 @@ const Sku_Page = () => {
       });
     }
   };
+    // ✅ Render Dynamic Fields for Primary Packaging
+  const primaryPackagingFields = [
+    { key: "depth", label: "Depth" },
+    { key: "width", label: "Width" },
+    { key: "height", label: "Height" },
+    { key: "netWeight", label: "Net Weight" },
+    { key: "tareWeight", label: "Tare Weight" },
+    { key: "grossWeight", label: "Gross Weight" },
+  ];
   const dynamicFields = [
     { label: "Description", value: skuDetails?.description || "N/A" },
     { label: "Subcategory", value: pkoData?.subcategory || "N/A" },
@@ -154,7 +231,7 @@ const Sku_Page = () => {
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question.placeholder || "Enter Value"}
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
-              onChange={handleChange}
+              onChange={(e) => handleInputChange(question.question_id, e.target.value)}
             />
             {question.instructions && (
               <InfoOutlinedIcon
@@ -176,7 +253,7 @@ const Sku_Page = () => {
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
                 value={skuData.dimensionsAndWeights[question.question_id] || ""}
-                onChange={handleChange}
+                onChange={(e) => handleInputChange(question.question_id, e.target.value)}
               />
               <select
                 className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-2"
@@ -259,7 +336,15 @@ const Sku_Page = () => {
   return (
     <>
       <Navbar />
-      <Breadcrumb onBackClick={handleBackClick} />
+      {/* <Breadcrumb onBackClick={handleBackClick} /> */}
+      <Breadcrumb
+  onBackClick={handleBackClick}
+  onSaveClick={saveSkuData}
+  componentName="SKU Page"
+  pageType="sku"
+  isSubmitting={isSubmitting}
+
+/>
       <Autosave saveFunction={saveSkuData} dependencies={[skuData]} />
       <div className="container-fluid px-5 d-flex flex-column container-height">
         {/* Header Section */}
@@ -279,21 +364,7 @@ const Sku_Page = () => {
           </p>
         </div>
 
-        {/* SKU Details
-         <div className="px-28 py-20 border border-color-disabled-lite bg-color-light-gray">
-          <div className="row">
-            <div className="col-12 col-md-10">
-              <div className="d-flex align-items-start gap-70">
-              {dynamicFields.map((field, index) => (
-                  <div key={index} className="d-flex flex-column mb-30">
-                    <p className="text-color-labels fs-14 mb-1">{field.label}</p>
-                    <h6 className="fs-16 fw-600 text-color-typo-primary">{field.value}</h6>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div> */}
+     
         {/* SKU Details */}
         <div className="px-28 py-20 border border-color-disabled-lite bg-color-light-gray">
           <div className="row">
@@ -313,7 +384,7 @@ const Sku_Page = () => {
                 ))}
                 </div>
                 {/* Add Product Images Button */}
-                <div className="d-flex align-items-center col-3 justify-content-end">
+                <div className="d-flex align-items-center mt-4 col-3 justify-content-end">
                   <button
                     className="btn bg-transparent shadow-none fs-14 d-flex py-0  fw-600 text-secondary px-0"
                     onClick={handleAddProductImageClick}

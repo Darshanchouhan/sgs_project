@@ -1,9 +1,8 @@
-// Breadcrumb.js
 import React from "react";
 import backActionIcon from "./assets/images/back-action-icon.svg";
 import addCommentIcon from "./assets/images/add-comment-icon.svg";
 
-const Breadcrumb = ({ onBackClick, onSaveClick, componentName }) => {
+const Breadcrumb = ({ onBackClick, onSaveClick, componentName,pageType,saveSkuData }) => {
   return (
     <div className="py-10 bg-color-light-shade">
       <div className="container-fluid px-5">
@@ -49,10 +48,16 @@ const Breadcrumb = ({ onBackClick, onSaveClick, componentName }) => {
             >
               <img src={addCommentIcon} alt="icon" />
             </button>
-            {/* Add Save button here as part of the breadcrumb */}
-            <button className="save-button" onClick={onSaveClick}>
-              Save & Close
-            </button>
+              {/* Conditionally Render One Button */}
+              {pageType === "sku" ? (
+              <button className="save-button" onClick={onSaveClick}>
+                Save & Validate
+              </button>
+            ) : (
+              <button className="save-button" onClick={saveSkuData}>
+                Save & Close
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -5,10 +5,12 @@ import PkgDataForm from "./PkgDataForm"; // Adjust path based on your project st
 import Sku_Page from "./Sku_Page"; // Replace with your SKU page component
 import { SkuProvider } from "./SkuContext"; // Import the context provider
 import { PkgDataProvider } from "./Pkg_DataContext";
+import { VendorProvider } from "./VendorContext";
 
 const App = () => {
   return (
     <SkuProvider>
+      <VendorProvider>
       <PkgDataProvider>
         <Router>
           <div>
@@ -25,6 +27,7 @@ const App = () => {
           </div>
         </Router>
       </PkgDataProvider>
+      </VendorProvider>
     </SkuProvider>
   );
 };

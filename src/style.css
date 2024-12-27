@@ -22575,6 +22575,11 @@ input[type="radio"] {
   width: 40%;
 }
 
+.bg-color-draft {
+  background-color: #007bff !important; /* Blue Background */
+  color: white !important; /* White Text */
+}
+
 
 
 

@@ -12,12 +12,13 @@ const Pko_Chart = ({ labels, data }) => {
       {
         data,
         backgroundColor: ["#EDEDED", "#257CFF", "#30AB30"], // Colors: Not Started, Draft, Completed
-        hoverBackgroundColor: ["#8C8C8C", "#D43F3F", "#1E7B1E"], // Slightly darker on hover
+        hoverBackgroundColor: ["#8C8C8C", "#257CFF", "#1E7B1E"], // Slightly darker on hover
         borderWidth: 1, // Add slight border for better segmentation
         cutout: "68%", // Adjust thickness for a cleaner look
       },
     ],
   };
+  
 
   const options = {
     cutout: "65%", // Controls the thickness of the donut

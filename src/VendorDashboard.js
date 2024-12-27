@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext  } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import "./style.css";
+import { VendorContext } from "./VendorContext"; // Import Vendor Context
 import addActiveIndicator from "./assets/images/active-Indicator.svg";
 import addFilter from "./assets/images/filter.svg";
 import addSearch from "./assets/images/search.svg";
@@ -17,7 +18,7 @@ const VendorDashboard = () => {
   const [loading, setLoading] = useState(true); // Loading indicator
   const [pkoData, setPkoData] = useState(null); // State to hold PKO data
   const [selectedPkoId, setSelectedPkoId] = useState(""); // State for selected PKO ID
-
+  const { skuStatuses, updateSkuStatus } = useContext(VendorContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,7 +41,7 @@ const VendorDashboard = () => {
     fetchData();
   }, []);
 
-  // 📦 Fetch PKO Data Based on Selected PKO ID
+  // Fetch PKO Data Based on Selected PKO ID
   useEffect(() => {
     const fetchPkoData = async () => {
       if (!selectedPkoId) return;
@@ -59,15 +60,38 @@ const VendorDashboard = () => {
     fetchPkoData();
   }, [selectedPkoId]);
 
-  // 📦 Handle PKO Selection Change
+  //  Handle PKO Selection Change
   const handlePkoChange = (e) => {
     setSelectedPkoId(e.target.value);
   };
 
-  // 📦 Handle SKU Navigation
-  const handleForwardClick = (sku) => {
-    navigate("/sku_page", { state: { pkoData, skuDetails: sku } });
-  };
+ // Handle SKU Navigation and Status Update
+const handleForwardClick = (sku) => {
+  // Update the SKU status in the context
+  updateSkuStatus(sku.sku_id, "Draft"); 
+
+  // Update SKU Data state to ensure it reflects locally
+  setPkoData((prevPkoData) => {
+    const updatedSkus = prevPkoData.skus.map((item) =>
+      item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item
+    );
+    return { ...prevPkoData, skus: updatedSkus };
+  });
+
+  navigate("/sku_page", {
+    state: {
+      skuId: sku.sku_id,
+      skuDetails: null, // Clear stale SKU Details
+      pkoData: pkoData || null,
+    },
+  });
+};
+
+
+
+
+ 
+
 
   //loading state
   if (loading) {
@@ -166,7 +190,13 @@ const VendorDashboard = () => {
                     id="active-pkos"
                   >
                     <span className="fs-14 text-color-labels">Active PKOs</span>
-                    <p className="fs-24 text-color-draft fw-600 mb-0">02</p>
+                    <p className="fs-24 text-color-draft fw-600 mb-0">
+      {
+        pkoData?.skus?.filter(
+          (sku) => new Date(pkoData.duedate) >= new Date(pkoData.startdate)
+        ).length || 0
+      }
+    </p>
                   </div>
                   <div
                     className="d-flex flex-column p-3 bg-color-light-gray flex-fill cursor-pointer"
@@ -176,7 +206,13 @@ const VendorDashboard = () => {
                     id="closed-pkos"
                   >
                     <span className="fs-14 text-color-labels">Closed PKOs</span>
-                    <p className="fs-24 text-color-completed fw-600 mb-0">04</p>
+                    <p className="fs-24 text-color-completed fw-600 mb-0">
+      {
+        pkoData?.skus?.filter(
+          (sku) => new Date(pkoData.duedate) < new Date(pkoData.startdate)
+        ).length || 0
+      }
+    </p>
                   </div>
                 </div>
               </div>
@@ -229,17 +265,15 @@ const VendorDashboard = () => {
                 <div className="d-flex align-items-center w-100 h-100 gap-3">
                   <div className="graph w-60 h-100">
                   <div className="mt-3">
-                      <Pko_Chart
-                        labels={["Not Started", "Draft", "Completed"]}
-                        data={[
-                          skuData.filter((sku) => sku.status === "Not Started")
-                            .length,
-                          skuData.filter((sku) => sku.status === "Draft")
-                            .length,
-                          skuData.filter((sku) => sku.status === "Completed")
-                            .length,
-                        ]}
-                      />
+                  <Pko_Chart
+  labels={["Not Started", "Draft", "Completed"]}
+  data={[
+    skuData.filter((sku) => skuStatuses[sku.sku_id] === "Not Started" || (!skuStatuses[sku.sku_id] && sku.status === "Not Started")).length,
+    skuData.filter((sku) => skuStatuses[sku.sku_id] === "Draft" || (!skuStatuses[sku.sku_id] && sku.status === "Draft")).length,
+    skuData.filter((sku) => skuStatuses[sku.sku_id] === "Completed" || (!skuStatuses[sku.sku_id] && sku.status === "Completed")).length,
+  ]}
+/>
+
                     </div>
                   </div>
                   <div className="status-labels w-40">
@@ -252,13 +286,14 @@ const VendorDashboard = () => {
                           </p>
                         </div>
                         {/* Dynamically display the count of "Not Started" SKUs */}
-                        <span className="fs-12 fw-700">
-                          {
-                            skuData.filter(
-                              (sku) => sku.status === "Not Started"
-                            ).length
-                          }
-                        </span>
+                       {/* Dynamically display the count of "Not Started" SKUs */}
+<span className="fs-12 fw-700">
+  {
+    skuData.filter(
+      (sku) => skuStatuses[sku.sku_id] === "Not Started" || (!skuStatuses[sku.sku_id] && sku.status === "Not Started")
+    ).length
+  }
+</span>
                       </li>
                       <li className="d-flex align-items-center justify-content-between mb-3">
                         <div className="d-flex align-items-center gap-2">
@@ -267,13 +302,14 @@ const VendorDashboard = () => {
                             Draft
                           </p>
                         </div>
-                        {/* Dynamically display the count of "In Progress" SKUs */}
-                        <span className="fs-12 fw-700">
-                          {
-                            skuData.filter((sku) => sku.status === "Draft")
-                              .length
-                          }
-                        </span>
+                        {/* Dynamically display the count of "Draft" SKUs */}
+<span className="fs-12 fw-700">
+  {
+    skuData.filter(
+      (sku) => skuStatuses[sku.sku_id] === "Draft" || (!skuStatuses[sku.sku_id] && sku.status === "Draft")
+    ).length
+  }
+</span>
                       </li>
                       <li className="d-flex align-items-center justify-content-between mb-3">
                         <div className="d-flex align-items-center gap-2">
@@ -283,12 +319,13 @@ const VendorDashboard = () => {
                           </p>
                         </div>
                         {/* Dynamically display the count of "Completed" SKUs */}
-                        <span className="fs-12 fw-700">
-                          {
-                            skuData.filter((sku) => sku.status === "Completed")
-                              .length
-                          }
-                        </span>
+<span className="fs-12 fw-700">
+  {
+    skuData.filter(
+      (sku) => skuStatuses[sku.sku_id] === "Completed" || (!skuStatuses[sku.sku_id] && sku.status === "Completed")
+    ).length
+  }
+</span>
                       </li>
                     </ul>
                     {/* Donut Chart Below SKU Status */}
@@ -375,21 +412,37 @@ const VendorDashboard = () => {
                   <td>{sku.size}</td>
 
                   <td>{sku.duedate}</td>
+                  
 
                   <td>
-                    <span className="fw-600 text-nowrap px-12 py-2 rounded-pill bg-color-light-border text-color-typo-secondary">
-                      {sku.status}
-                    </span>
+                  <span
+                    className={`fw-600 text-nowrap px-12 py-2 rounded-pill ${
+                      skuStatuses[sku.sku_id] === "Draft"
+                        ? "bg-color-draft text-white"
+                        : "bg-color-light-border text-color-typo-secondary"
+                    }`}
+                  >
+                    {skuStatuses[sku.sku_id] || sku.status}
+                  </span>
                   </td>
+  
+                  <td>
+                  <button
+                    className="btn p-0 border-0 shadow-none"
+                    onClick={() => handleForwardClick(sku)}
+                  >
+                    <img src={forwardArrowIcon} alt="Forward" />
+                  </button>
+                </td>
 
-                  <td className="h-51 px-12 align-middle d-flex align-items-center justify-content-between">
+                  {/* <td className="h-51 px-12 align-middle d-flex align-items-center justify-content-between">
                     <button
                       className="btn p-0 border-0 shadow-none"
                       onClick={() => handleForwardClick(sku)} // Navigate on click
                     >
                       <img src={forwardArrowIcon} alt="Forward" />
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -397,124 +450,167 @@ const VendorDashboard = () => {
         </div>
       </div>
       {/* Offcanvas for Active and Closed PKOs */}
-      <div className="offcanvas offcanvas-end" id="offcanvasRight">
-        <div className="offcanvas-header">
-          <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="offcanvas"
-          ></button>
-        </div>
-        <div className="offcanvas-body">
-          <nav>
-            <div
-              className="nav nav-tabs border-bottom border-3"
-              id="nav-tab"
-              role="tablist"
-            >
-              <button
-                className="nav-link pb-20 text-color-typo-primary bg-transparent border-0 active"
-                id="nav-home-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#nav-home"
-                type="button"
-                role="tab"
-                aria-controls="nav-home"
-                aria-selected="true"
-              >
-                Active PKOs
-              </button>
-              <button
-                className="nav-link pb-20 text-color-typo-primary bg-transparent border-0"
-                id="nav-profile-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#nav-profile"
-                type="button"
-                role="tab"
-                aria-controls="nav-profile"
-                aria-selected="false"
-              >
-                Closed PKOs
-              </button>
-            </div>
-          </nav>
-          <div className="tab-content mt-4" id="nav-tabContent">
-            <div
-              className="tab-pane fade show active"
-              id="nav-home"
-              role="tabpanel"
-              aria-labelledby="nav-home-tab"
-              tabIndex="0"
-            >
-              <div className="active-pko-tbl">
-                <table className="table table-bordered fs-14">
-                  <thead>
-                    <tr>
-                      <th className="text-color-typo-primary opacity-90">
-                        Project ID
-                      </th>
-                      <th className="text-color-typo-primary opacity-90">
-                        Business Unit
-                      </th>
-                      <th className="text-color-typo-primary opacity-90">
-                        SKUs Assigned
-                      </th>
-                      <th className="text-color-typo-primary opacity-90">
-                        Start Date
-                      </th>
-                      <th className="text-color-typo-primary opacity-90">
-                        Due Date
-                      </th>
-                      <th className="text-color-typo-primary opacity-90">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="h-51 px-12 align-middle">PRJ1188</td>
-                      <td className="h-51 px-12 align-middle">Health Care</td>
-                      <td className="h-51 px-12 align-middle">20</td>
-                      <td className="h-51 px-12 align-middle">10/11/2024</td>
-                      <td className="h-51 px-12 align-middle">
-                        20/11/2024{" "}
-                        <span className="text-secondary">(5 days delayed)</span>
-                      </td>
-                      <td className="h-51 px-12 align-middle">
-                        <div className="d-flex align-items-center justify-content-between">
-                          <div className="progress custom-progress w-92 h-20">
-                            <div
-                              className="progress-bar"
-                              role="progressbar"
-                              style={{ width: "50%" }}
-                              aria-valuenow="50"
-                              aria-valuemin="0"
-                              aria-valuemax="100"
-                            ></div>
-                          </div>
-                          <span>
-                            <span className="text-secondary">18</span> / 20
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* Repeat rows as needed */}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div
-              className="tab-pane fade"
-              id="nav-profile"
-              role="tabpanel"
-              aria-labelledby="nav-profile-tab"
-              tabIndex="0"
-            >
-              ...
-            </div>
-          </div>
+     {/* Offcanvas for Active and Closed PKOs */}
+<div className="offcanvas offcanvas-end" id="offcanvasRight">
+  <div className="offcanvas-header">
+    <button
+      type="button"
+      className="btn-close"
+      data-bs-dismiss="offcanvas"
+    ></button>
+  </div>
+  <div className="offcanvas-body">
+    <nav>
+      <div
+        className="nav nav-tabs border-bottom border-3"
+        id="nav-tab"
+        role="tablist"
+      >
+        <button
+          className="nav-link pb-20 text-color-typo-primary bg-transparent border-0 active"
+          id="nav-home-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#nav-home"
+          type="button"
+          role="tab"
+          aria-controls="nav-home"
+          aria-selected="true"
+        >
+          Active PKOs
+        </button>
+        <button
+          className="nav-link pb-20 text-color-typo-primary bg-transparent border-0"
+          id="nav-profile-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#nav-profile"
+          type="button"
+          role="tab"
+          aria-controls="nav-profile"
+          aria-selected="false"
+        >
+          Closed PKOs
+        </button>
+      </div>
+    </nav>
+    <div className="tab-content mt-4" id="nav-tabContent">
+      {/* Active PKOs Table */}
+      <div
+        className="tab-pane fade show active"
+        id="nav-home"
+        role="tabpanel"
+        aria-labelledby="nav-home-tab"
+        tabIndex="0"
+      >
+        <div className="active-pko-tbl">
+          <table className="table table-bordered fs-14">
+            <thead>
+              <tr>
+                <th className="text-color-typo-primary opacity-90">Project ID</th>
+                <th className="text-color-typo-primary opacity-90">Business Unit</th>
+                <th className="text-color-typo-primary opacity-90">SKUs Assigned</th>
+                <th className="text-color-typo-primary opacity-90">Start Date</th>
+                <th className="text-color-typo-primary opacity-90">Due Date</th>
+                <th className="text-color-typo-primary opacity-90">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pkoData && (
+                <tr>
+                  {/* Project ID */}
+                  <td className="h-51 px-12 align-middle">{selectedPkoId || "N/A"}</td>
+                  
+                  {/* Business Unit */}
+                  <td className="h-51 px-12 align-middle">
+                    {pkoData.businessunit || "N/A"}
+                  </td>
+                  
+                  {/* SKUs Assigned */}
+                  <td className="h-51 px-12 align-middle">
+                    {pkoData.skus?.length || 0}
+                  </td>
+                  
+                  {/* Start Date */}
+                  <td className="h-51 px-12 align-middle">
+                    {pkoData.startdate || "N/A"}
+                  </td>
+                  
+                  {/* Due Date */}
+                  <td className="h-51 px-12 align-middle">
+                    {pkoData.duedate || "N/A"}
+                  </td>
+                  
+                  {/* Status */}
+                  <td className="h-51 px-12 align-middle">
+                    {new Date(pkoData.duedate) < new Date(pkoData.startdate)
+                      ? "Closed"
+                      : "Active"}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* Closed PKOs Table */}
+      <div
+        className="tab-pane fade"
+        id="nav-profile"
+        role="tabpanel"
+        aria-labelledby="nav-profile-tab"
+        tabIndex="0"
+      >
+        <div className="active-pko-tbl">
+          <table className="table table-bordered fs-14">
+            <thead>
+              <tr>
+                <th className="text-color-typo-primary opacity-90">Project ID</th>
+                <th className="text-color-typo-primary opacity-90">Business Unit</th>
+                <th className="text-color-typo-primary opacity-90">SKUs Assigned</th>
+                <th className="text-color-typo-primary opacity-90">Start Date</th>
+                <th className="text-color-typo-primary opacity-90">Due Date</th>
+                <th className="text-color-typo-primary opacity-90">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pkoData &&
+                new Date(pkoData.duedate) < new Date(pkoData.startdate) && (
+                  <tr>
+                    {/* Project ID */}
+                    <td className="h-51 px-12 align-middle">{selectedPkoId || "N/A"}</td>
+                    
+                    {/* Business Unit */}
+                    <td className="h-51 px-12 align-middle">
+                      {pkoData.businessunit || "N/A"}
+                    </td>
+                    
+                    {/* SKUs Assigned */}
+                    <td className="h-51 px-12 align-middle">
+                      {pkoData.skus?.length || 0}
+                    </td>
+                    
+                    {/* Start Date */}
+                    <td className="h-51 px-12 align-middle">
+                      {pkoData.startdate || "N/A"}
+                    </td>
+                    
+                    {/* Due Date */}
+                    <td className="h-51 px-12 align-middle">
+                      {pkoData.duedate || "N/A"}
+                    </td>
+                    
+                    {/* Status */}
+                    <td className="h-51 px-12 align-middle">Closed</td>
+                  </tr>
+                )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
       {/* Offcanvas for Contacts */}
       <div
@@ -565,5 +661,6 @@ const VendorDashboard = () => {
     </div>
   );
 };
+
 
 export default VendorDashboard;
