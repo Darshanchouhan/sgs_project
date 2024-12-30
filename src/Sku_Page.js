@@ -35,6 +35,8 @@ const Sku_Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
   const skuId = location.state?.skuId; // Retrieve SKU ID from navigation
 
+  
+
   // Retrieve pkoData and skuDetails from location.state or fallback to context
   useEffect(() => {
     if (location.state) {
@@ -46,6 +48,66 @@ const Sku_Page = () => {
       }
     }
   }, [location.state, setSkuDetails, setPkoData]);
+
+  useEffect(() => {
+    // Reset SKU Data and Details when entering SKU Page
+    setSkuData({
+      dimensionsAndWeights: {
+        height: "",
+        width: "",
+        depth: "",
+        netWeight: "",
+        tareWeight: "",
+        grossWeight: "",
+      },
+      recycleLabel: "",
+      isMultipack: "",
+      additionalComments: "",
+      components: [],
+      showTable: false,
+      newComponent: "",
+      componentNumber: 0,
+      showInput: true,
+      hasAddedFirstComponent: false,
+      isCancelDisabled: true,
+    });
+  
+    setSkuDetails(null);
+    setPkoData(null);
+  }, []);
+  
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+        setSkuData({
+          dimensionsAndWeights: {
+            height: "",
+            width: "",
+            depth: "",
+            netWeight: "",
+            tareWeight: "",
+            grossWeight: "",
+          },
+          recycleLabel: "",
+          isMultipack: "",
+          additionalComments: "",
+          components: [],
+          showTable: false,
+          newComponent: "",
+          componentNumber: 0,
+          showInput: true,
+          hasAddedFirstComponent: false,
+          isCancelDisabled: true,
+        });
+        setSkuDetails(null);
+        setPkoData(null);
+      }
+    };
+  
+    handleRefresh();
+  }, []);
+  
 
   //fetch SKU Details
   useEffect(() => {
@@ -60,13 +122,30 @@ const Sku_Page = () => {
         const data = await response.json();
         setSkuDetails(data);
         setSkuData({
-          dimensionsAndWeights: data.primary_packaging_details || {},
-          components: data.components || [],
+          dimensionsAndWeights: {
+            height: "",
+            width: "",
+            depth: "",
+            netWeight: "",
+            tareWeight: "",
+            grossWeight: "",
+          },
+          recycleLabel: "",
+          isMultipack: "",
+          additionalComments: "",
+          components: [],
+          showTable: false,
+          newComponent: "",
+          componentNumber: 0,
+          showInput: true,
+          hasAddedFirstComponent: false,
+          isCancelDisabled: true,
         });
       } catch (error) {
         console.error("Error fetching SKU details:", error);
       }
     };
+      
   
     fetchSkuDetails();
   }, [skuId,setSkuData, setSkuDetails]);
@@ -76,7 +155,7 @@ const Sku_Page = () => {
     const fetchQuestions = async () => {
       try {
         const response = await fetch(
-          "https://demo.gramener.com/api/questionnaire/"
+          "demo.gramener.com/api/questionnaire/"
         );
         if (!response.ok) throw new Error("Failed to fetch questions");
         const data = await response.json();
@@ -89,50 +168,146 @@ const Sku_Page = () => {
     fetchQuestions();
   }, []);
 
-   // 📦 Save SKU Data
-   const saveSkuData = async () => {
-    if (!skuId) {
-      console.error("SKU ID is missing");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        sku_id: skuId,
-        description: skuDetails?.description || "",
-        primary_packaging_details: {
-          ...skuData.dimensionsAndWeights,
+  //  // 📦 Save SKU Data
+  //  const saveSkuData = async () => {
+  //   if (!skuId) {
+  //     console.error("SKU ID is missing");
+  //     return;
+  //   }
+  //   setIsSubmitting(true);
+  //   try {
+  //     const payload = {
+  //       sku_id: skuId,
+  //       description: skuDetails?.description || "",
+  //       primary_packaging_details: {
+  //         ...skuData.dimensionsAndWeights,
 
-        },
-        components: skuData.components.map((comp) => ({
-          id: comp.id || null,
-          sku: skuId,
-          name: comp.name,
-          form_status: comp.formStatus,
-          responses: comp.responses || {},
-        })),
-      };
+  //       },
+  //       components: skuData.components.map((comp) => ({
+  //         id: comp.id || null,
+  //         sku: skuId,
+  //         name: comp.name,
+  //         form_status: comp.formStatus,
+  //         responses: comp.responses || {},
+  //       })),
+  //     };
 
-      console.log("submitting Payload:", payload);
+  //     console.log("submitting Payload:", payload);
 
-      const response = await fetch(`https://demo.gramener.com/api/skus/${skuId}/`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  //     const response = await fetch(`https://demo.gramener.com/api/skus/${skuId}/`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(payload),
+  //     });
 
-      if (!response.ok) throw new Error("Failed to save SKU data");
-      updateSkuStatus(skuId, "Completed");
-      alert("SKU data saved successfully!");
+  //     if (!response.ok) throw new Error("Failed to save SKU data");
+  //     updateSkuStatus(skuId, "Completed");
+  //     // Clear state after successful submission
+  //   setSkuData({
+  //     dimensionsAndWeights: {
+  //       height: "",
+  //       width: "",
+  //       depth: "",
+  //       netWeight: "",
+  //       tareWeight: "",
+  //       grossWeight: "",
+  //     },
+  //     recycleLabel: "",
+  //     isMultipack: "",
+  //     additionalComments: "",
+  //     components: [],
+  //     showTable: false,
+  //     newComponent: "",
+  //     componentNumber: 0,
+  //     showInput: true,
+  //     hasAddedFirstComponent: false,
+  //     isCancelDisabled: true,
+  //   });
+  //   setSkuDetails(null);
+  //   setPkoData(null);
+  //     alert("SKU data saved successfully!");
       
-      navigate("/");
-    } catch (error) {
-      console.error("Error during Save:", error);
-      alert("Failed to submit SKU data. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+  //     navigate("/");
+  //   } catch (error) {
+  //     console.error("Error during Save:", error);
+  //     alert("Failed to submit SKU data. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+const saveSkuData = async () => {
+  if (!skuId) {
+    console.error("SKU ID is missing");
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    // Build the payload
+    const payload = {
+      sku_id: skuId,
+      description: skuDetails?.description || "",
+      primary_packaging_details: {
+        ...skuData.dimensionsAndWeights,
+      },
+      components: skuData.components.map((comp, index) => ({
+        id: comp.id || null,
+        sku: skuId,
+        name: comp.name || `Component_${index + 1}`, // Ensure a name exists
+        form_status: comp.formStatus || "Pending", // Default status if missing
+        responses: comp.responses || {}, // Ensure responses are included
+      })),
+    };
+
+    console.log("🔄 Submitting Payload:", payload);
+
+    // Submit to backend
+    const response = await fetch(`https://demo.gramener.com/api/skus/${skuId}/`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save SKU data");
     }
-  };
+
+    updateSkuStatus(skuId, "Completed");
+
+    // Clear state after successful submission
+    setSkuData({
+      dimensionsAndWeights: {
+        height: "",
+        width: "",
+        depth: "",
+        netWeight: "",
+        tareWeight: "",
+        grossWeight: "",
+      },
+      recycleLabel: "",
+      isMultipack: "",
+      additionalComments: "",
+      components: [],
+      showTable: false,
+      newComponent: "",
+      componentNumber: 0,
+      showInput: true,
+      hasAddedFirstComponent: false,
+      isCancelDisabled: true,
+    });
+
+    setSkuDetails(null);
+    setPkoData(null);
+
+    alert("✅ SKU data saved successfully!");
+    navigate("/");
+  } catch (error) {
+    console.error("❌ Error during Save:", error);
+    alert("Failed to submit SKU data. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // 📦 Handle Input Change (Primary Packaging Details)
   const handleInputChange = (field, value) => {
@@ -196,15 +371,7 @@ const Sku_Page = () => {
       });
     }
   };
-    // ✅ Render Dynamic Fields for Primary Packaging
-  const primaryPackagingFields = [
-    { key: "depth", label: "Depth" },
-    { key: "width", label: "Width" },
-    { key: "height", label: "Height" },
-    { key: "netWeight", label: "Net Weight" },
-    { key: "tareWeight", label: "Tare Weight" },
-    { key: "grossWeight", label: "Gross Weight" },
-  ];
+ 
   const dynamicFields = [
     { label: "Description", value: skuDetails?.description || "N/A" },
     { label: "Subcategory", value: pkoData?.subcategory || "N/A" },
@@ -271,11 +438,18 @@ const Sku_Page = () => {
                 }
               >
                 <option value="">unit</option>
-                {question.dropdown_options.map((option, index) => (
-                  <option key={index} value={option}>
-                    {option}
-                  </option>
-                ))}
+                 {/* Filter out 'unit' explicitly */}
+          {question.dropdown_options
+            ?.filter(
+              (option) =>
+                option.trim().toLowerCase() !== "unit" &&
+                option.trim() !== ""
+            )
+            .map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
               </select>
             </div>
             {question.instructions && (

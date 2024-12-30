@@ -34,7 +34,7 @@ const PkgDataForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://demo.gramener.com/api/questionnaire/");
+        const response = await fetch("demo.gramener.com/api/questionnaire/");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
