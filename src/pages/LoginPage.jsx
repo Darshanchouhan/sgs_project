@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthentication from "../hooks/useAuthentication"; // Import the custom hook
-import Login from "../components/login/Login";
+import Login from "../components/login/login";
 import { fetchUserProfile } from "../services/authService";
 import useInactivityTimer from "../hooks/useInactivityTimer";
 
