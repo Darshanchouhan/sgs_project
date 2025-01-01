@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+$font-primary: "Open Sans", sans-serif;
+$primary: #D43014;
+$secondary: #D42D1F;
+$light-shade: #FFF3F2;
+$breadcrumb-divider: url("/assets/images/breadcrumb-devider.svg");
+
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "color-light-shade": $light-shade,
+  "color-typo-primary": #2D2D2D,
+  "color-typo-secondary": #ABABAB,
+  "color-light-gray": #FAFAFA,
+  "color-dark": #1F243F,
+  "color-grey-btn": #A9A9A9,
+  "color-black": #000000,
+  "color-desabled-lite": #E0E0E0,
+  "color-labels": #676767,
+  "color-light-border": #EDEDED,
+  "color-not-started": #ABABAB,
+  "color-draft": #257CFF,
+  "color-in-review": #FEB343,
+  "color-responce-pending": #EB4747,
+  "color-completed": #30AB30,
+  "color-modal-text": #838383,
+);
+
+// padding Config
+$spacer: 1rem;
+$spacers: (
+  0: $spacer * 0,
+  1: $spacer * 0.25,
+  2: $spacer * 0.5,
+  3: $spacer * 1,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: $spacer * 0.375,
+  10: $spacer * 0.625,
+  12: $spacer * 0.75,
+  14: $spacer * 0.875,
+  18: $spacer * 1.125,
+  20: $spacer * 1.25,
+  22: $spacer * 1.375,
+  24: $spacer * 1.5,
+  25: $spacer * 1.563,
+  26: $spacer * 1.625,
+  28: $spacer * 1.75,
+  30: $spacer * 1.875,
+  40: $spacer * 2.5,
+  58: $spacer * 3.625,
+  60: $spacer * 3.75,
+  70: $spacer * 4.375,
+  115: $spacer * 7.188,
+  154: $spacer * 9.625,
+);
+
+// Define opacity variables from 10 to 100
+:root {
+  @for $i from 1 through 10 {
+    --opacity-#{$i * 10}: #{$i / 10};
+  }
+}
+
+// Generate utility classes for opacity
+@for $i from 1 through 10 {
+  .opacity-#{$i * 10} {
+    opacity: $i / 10;
+  }
+}
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+  xxxl: 1600px,
+  ) !default;
+
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1160px,
+  xxl: 1320px,
+  xxxl: 1440px,
+  ) !default;
+
+// @import "theme/bootstrap5";
+@import "node_modules/bootstrap/scss/bootstrap.scss";
+
+$sizes: (
+  0: 0rem,
+  7: 0.438rem,
+  8: 0.5rem,
+  9: 0.563rem,
+  10: 0.625rem,
+  11: 0.688rem,
+  12: 0.75rem,
+  13: 0.813rem,
+  14: 0.875rem,
+  15: 0.938rem,
+  16: 1rem,
+  17: 1.063rem,
+  18: 1.125rem,
+  19: 1.188rem,
+  20: 1.25rem,
+  22: 1.375rem,
+  23: 1.438rem,
+  24: 1.5rem,
+  44: 2.75rem,
+  48: 3rem,
+);
+
+@each $element, $size in $sizes {
+  .fs-#{$element} {
+    font-size: $size;
+  }
+}
+
+// font-weights config
+$weights: (
+  200: 200,
+  300: 300,
+  400: 400,
+  500: 500,
+  600: 600,
+  700: 700,
+  800: 800,
+  900: 900,
+);
+
+@each $element, $weight in $weights {
+  .fw-#{$element} {
+    font-weight: $weight;
+  }
+}
+
+$line-heights: (
+  8: 0.5rem,
+  19: 1.188rem,
+);
+
+@each $element, $line-height in $line-heights {
+  .lh-#{$element} {
+    line-height: $line-height;
+  }
+}
+
+// Letter spacing
+$letter-spacings: (
+  2: 0.25px,
+  4: 0.4px,
+);
+
+@each $element, $letter-spacing in $letter-spacings {
+  .ls-#{$element} {
+    letter-spacing: $letter-spacing;
+  }
+}
+
+// column gap
+$column-gaps: (
+  8: 0.5rem,
+  24: 1.5rem,
+);
+
+@each $element, $column-gap in $column-gaps {
+  .gap-#{$element} {
+    column-gap: $column-gap;
+  }
+}
+
+// height
+@each $h in (20, 44, 51, 72) {
+  .h-#{$h} {
+    height: unquote($h + "px !important");
+  }
+}
+
+// width
+@each $w in (92, 165, 320, 350, 395) {
+  .w-#{$w} {
+    width: unquote($w + "px !important");
+  }
+}
+
+
+
+body {
+  font-family: $font-primary; // This now uses the updated font from the variable
+  font-weight: 400;
+}
+
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
+
+.font-mulish {
+  font-family: "Mulish", sans-serif;
+}
+
+input:focus {
+  outline: none;
+}
+
+.shadow-1 {
+  box-shadow: 0px 8px 24px -4px #3030301A;
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+.offcanvas .nav-tabs .nav-link.active{
+  color: #D42D1F !important;
+  font-weight: 600;
+}
+
+.width-80{
+  width: 80% !important;
+}
+
+.form-heading::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background-color: #ABABAB;
+  margin-left: 8px;
+}
+
+.form-select {
+  background-image: url(/assets/images/chevron-down.svg) !important;
+  background-size: 24px 24px;
+}
+
+.form-select,
+.form-control {
+  font-size: .875rem !important;
+  font-weight: 600;
+}
+
+
+// login css start
+.login-bg {
+  background-image: url(/assets/images/login-bg.png);
+  height: 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+}
+
+.login-float-section {
+  background: linear-gradient(-90deg, #1048B7 50.5%, rgba(13, 58, 147, 0.785714) 68.5%, rgba(10, 45, 115, 0.6) 87.5%, rgba(7, 32, 81, 0.4) 100%);
+  position: absolute;
+  top: 20%;
+  left: -4%;
+  border-bottom-right-radius: 90px;
+}
+
+// login css end
+
+.gap-70 {
+  gap: 4.375rem;
+}
+
+.container-height {
+  height: calc(100vh - 144px);
+}
+
+.circle-labels {
+  height: 12px;
+  width: 12px;
+}
+
+.table-container-pko {
+  flex-grow: 1;
+  /* Allows table container to take up remaining space */
+  overflow-y: auto;
+  /* Makes the table scrollable */
+
+  th {
+    position: sticky;
+    /* Keeps the header in place while scrolling */
+    top: 0;
+    /* Fixes the header to the top of the table */
+    background-color: #FFF3F2 !important;
+    /* Prevents the header from blending into the body */
+    z-index: 1;
+    /* Ensures the header stays on top of the table body */
+    border-color: #EDEDED !important;
+  }
+
+  td {
+    border-color: #EDEDED !important;
+  }
+}
+
+.active-pko-tbl, .contact-tbl{
+
+  table thead th{
+    background-color: #FFE6E2 !important;
+    border-color: #EDEDED !important;
+  }
+
+  td {
+    border-color: #EDEDED !important;
+  }
+}
+
+// onload modal
+/* Apply a blur effect to the modal backdrop */
+.modal-backdrop {
+  position: fixed; /* Make the backdrop cover the entire screen */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+  z-index: 1040; /* Make sure the backdrop is behind the modal */
+}
+
+/* Apply blur effect when the modal is shown */
+.modal-backdrop.show {
+  backdrop-filter: blur(10px); /* Adjust the blur intensity as needed */
+}

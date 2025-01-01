@@ -1,0 +1,103 @@
+/* Modal Overlay (background) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Dark background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure modal is above other content */
+}
+  
+/* Modal Dialog */
+.modal-dialog {
+  background-color: white;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 900px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Close Button */
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 20px 0;
+}
+
+/* Title and Text Styling */
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.feature-cards {
+  display: flex;
+  justify-content: space-between;
+  margin: 70px 0;
+}
+
+.feature-card {
+  text-align: center;
+}
+
+.feature-card img {
+  margin-bottom: 20px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #007bff;
+  margin-bottom: 30px;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Continue Button */
+.continue-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.continue-btn:hover {
+  background-color: #0056b3;
+}
+
+.continue-btn img {
+  margin-left: 8px;
+}
