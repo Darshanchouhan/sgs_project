@@ -388,7 +388,7 @@ const VendorDashboard = () => {
 
         {/* Table Section */}
 
-        <div className="table-container-pko mt-3">
+        <div className="table-container-pko-tbl mt-3">
           <table className="table table-bordered fs-14">
             <thead>
               <tr>

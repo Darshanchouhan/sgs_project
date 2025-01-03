@@ -280,10 +280,10 @@ input:focus {
   width: 12px;
 }
 
-.table-container-pko {
-  flex-grow: 1;
+.table-container-pko-tbl {
+  // flex-grow: 1;
   /* Allows table container to take up remaining space */
-  overflow-y: auto;
+  // overflow-y: auto;
   /* Makes the table scrollable */
 
   th {
