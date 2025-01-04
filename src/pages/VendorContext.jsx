@@ -1,4 +1,3 @@
-// VendorContext.js
 import React, { createContext, useState } from "react";
 
 // Create Vendor Context

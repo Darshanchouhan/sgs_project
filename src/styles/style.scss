@@ -1,30 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 $font-primary: "Open Sans", sans-serif;
-$primary: #D43014;
-$secondary: #D42D1F;
-$light-shade: #FFF3F2;
+$primary: #d43014;
+$secondary: #d42d1f;
+$light-shade: #fff3f2;
 $breadcrumb-divider: url("/assets/images/breadcrumb-devider.svg");
 
 $theme-colors: (
   "primary": $primary,
   "secondary": $secondary,
   "color-light-shade": $light-shade,
-  "color-typo-primary": #2D2D2D,
-  "color-typo-secondary": #ABABAB,
-  "color-light-gray": #FAFAFA,
-  "color-dark": #1F243F,
-  "color-grey-btn": #A9A9A9,
+  "color-typo-primary": #2d2d2d,
+  "color-typo-secondary": #ababab,
+  "color-light-gray": #fafafa,
+  "color-dark": #1f243f,
+  "color-grey-btn": #a9a9a9,
   "color-black": #000000,
-  "color-desabled-lite": #E0E0E0,
+  "color-desabled-lite": #e0e0e0,
   "color-labels": #676767,
-  "color-light-border": #EDEDED,
-  "color-not-started": #ABABAB,
-  "color-draft": #257CFF,
-  "color-in-review": #FEB343,
-  "color-responce-pending": #EB4747,
-  "color-completed": #30AB30,
+  "color-light-border": #ededed,
+  "color-not-started": #ababab,
+  "color-draft": #257cff,
+  "color-in-review": #feb343,
+  "color-responce-pending": #eb4747,
+  "color-completed": #30ab30,
   "color-modal-text": #838383,
 );
 
@@ -79,7 +79,7 @@ $grid-breakpoints: (
   xl: 1200px,
   xxl: 1400px,
   xxxl: 1600px,
-  ) !default;
+) !default;
 
 $container-max-widths: (
   sm: 540px,
@@ -88,7 +88,7 @@ $container-max-widths: (
   xl: 1160px,
   xxl: 1320px,
   xxxl: 1440px,
-  ) !default;
+) !default;
 
 // @import "theme/bootstrap5";
 @import "node_modules/bootstrap/scss/bootstrap.scss";
@@ -189,8 +189,6 @@ $column-gaps: (
   }
 }
 
-
-
 body {
   font-family: $font-primary; // This now uses the updated font from the variable
   font-weight: 400;
@@ -209,19 +207,19 @@ input:focus {
 }
 
 .shadow-1 {
-  box-shadow: 0px 8px 24px -4px #3030301A;
+  box-shadow: 0px 8px 24px -4px #3030301a;
 }
 
-.cursor-pointer{
+.cursor-pointer {
   cursor: pointer;
 }
 
-.offcanvas .nav-tabs .nav-link.active{
-  color: #D42D1F !important;
+.offcanvas .nav-tabs .nav-link.active {
+  color: #d42d1f !important;
   font-weight: 600;
 }
 
-.width-80{
+.width-80 {
   width: 80% !important;
 }
 
@@ -230,7 +228,7 @@ input:focus {
   display: block;
   width: 100%;
   height: 1px;
-  background-color: #ABABAB;
+  background-color: #ababab;
   margin-left: 8px;
 }
 
@@ -241,10 +239,9 @@ input:focus {
 
 .form-select,
 .form-control {
-  font-size: .875rem !important;
+  font-size: 0.875rem !important;
   font-weight: 600;
 }
-
 
 // login css start
 .login-bg {
@@ -258,7 +255,13 @@ input:focus {
 }
 
 .login-float-section {
-  background: linear-gradient(-90deg, #1048B7 50.5%, rgba(13, 58, 147, 0.785714) 68.5%, rgba(10, 45, 115, 0.6) 87.5%, rgba(7, 32, 81, 0.4) 100%);
+  background: linear-gradient(
+    -90deg,
+    #1048b7 50.5%,
+    rgba(13, 58, 147, 0.785714) 68.5%,
+    rgba(10, 45, 115, 0.6) 87.5%,
+    rgba(7, 32, 81, 0.4) 100%
+  );
   position: absolute;
   top: 20%;
   left: -4%;
@@ -291,27 +294,27 @@ input:focus {
     /* Keeps the header in place while scrolling */
     top: 0;
     /* Fixes the header to the top of the table */
-    background-color: #FFF3F2 !important;
+    background-color: #fff3f2 !important;
     /* Prevents the header from blending into the body */
     z-index: 1;
     /* Ensures the header stays on top of the table body */
-    border-color: #EDEDED !important;
+    border-color: #ededed !important;
   }
 
   td {
-    border-color: #EDEDED !important;
+    border-color: #ededed !important;
   }
 }
 
-.active-pko-tbl, .contact-tbl{
-
-  table thead th{
-    background-color: #FFE6E2 !important;
-    border-color: #EDEDED !important;
+.active-pko-tbl,
+.contact-tbl {
+  table thead th {
+    background-color: #ffe6e2 !important;
+    border-color: #ededed !important;
   }
 
   td {
-    border-color: #EDEDED !important;
+    border-color: #ededed !important;
   }
 }
 

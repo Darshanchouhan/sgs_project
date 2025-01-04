@@ -24,8 +24,8 @@ function App() {
   return (
     <Router>
       {/* Wrap all providers around the Router */}
-      <SkuProvider>
-        <VendorProvider>
+      <VendorProvider>
+        <SkuProvider>
           <PkgDataProvider>
             <Routes>
               {/* Redirect root (/) to /login */}
@@ -55,8 +55,8 @@ function App() {
               {/* Other routes can go here */}
             </Routes>
           </PkgDataProvider>
-        </VendorProvider>
-      </SkuProvider>
+        </SkuProvider>
+      </VendorProvider>
     </Router>
   );
 }

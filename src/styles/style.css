@@ -428,6 +428,8 @@ body {
   background-color: var(--bs-body-bg);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  height: 100%;
+  overflow: auto;
 }
 
 hr {
@@ -22308,8 +22310,8 @@ textarea {
 .w-130 {
   width: 130px;
 }
-.w-395{
-  width:395px;
+.w-395 {
+  width: 395px;
 }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -22418,10 +22420,10 @@ input[type="radio"] {
   color: #555;
 }
 
-.sku-status{
-  width:120px !important; 
+.sku-status {
+  width: 120px !important;
 }
-.background-position{
+.background-position {
   background-position: 38px;
 }
 /*...........*/
@@ -22431,7 +22433,6 @@ input[type="radio"] {
   gap: 20px; /* Adds spacing between items */
 }
 .sku-details-item {
-
   flex: 1 1 calc(25% - 20px); /* Ensures 4 items per row */
   min-width: 150px; /* Minimum width to avoid items shrinking too small */
   word-wrap: break-word; /* Ensures long text breaks into the next line */
@@ -22453,8 +22454,8 @@ input[type="radio"] {
   line-height: 1.4; /* Adjusts line spacing for readability */
 }
 
-.view-all{
-  color: #257CFF;
+.view-all {
+  color: #257cff;
 }
 
 /* Donut Chart Styling */
@@ -22476,15 +22477,15 @@ input[type="radio"] {
 
 /* Specific Colors for Status Dots */
 .status-dot.not-started {
-  background-color: #ABABAB; /* Gray */
+  background-color: #ababab; /* Gray */
 }
 
 .status-dot.draft {
-  background-color:#257CFF; /* blue */
+  background-color: #257cff; /* blue */
 }
 
 .status-dot.completed {
-  background-color: #30AB30; /* Green */
+  background-color: #30ab30; /* Green */
 }
 
 /* Vendor Page Loader */
@@ -22502,7 +22503,7 @@ input[type="radio"] {
 .pkgdataform-loader .progress-percentage-text {
   font-size: 14px;
   font-weight: 600;
-  color: #D42D1F;
+  color: #d42d1f;
 }
 
 .pkgdataform-loader .progress-loader-wrapper {
@@ -22551,8 +22552,6 @@ input[type="radio"] {
   overflow: hidden;
 }
 
-
-
 .text-color-black {
   color: #000;
 }
@@ -22568,7 +22567,7 @@ input[type="radio"] {
 .cursor-not-allowed {
   cursor: not-allowed;
 }
-.w-60{
+.w-60 {
   width: 60%;
 }
 .w-40 {

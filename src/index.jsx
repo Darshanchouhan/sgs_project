@@ -14,5 +14,5 @@ createRoot(document.getElementById("root")).render(
       {/* Provide the Redux store to the App component */}
       <App /> {/* Main component of the app */}
     </Provider>
-  </StrictMode>
+  </StrictMode>,
 );

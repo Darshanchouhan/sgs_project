@@ -22,7 +22,7 @@ const useAuthentication = () => {
         login({
           token: tokens.access,
           user: tokens.user, // Assuming user data is returned
-        })
+        }),
       );
 
       // Set token in axios default headers for future requests
@@ -84,7 +84,7 @@ const useAuthentication = () => {
           .map(function (c) {
             return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
           })
-          .join("")
+          .join(""),
       );
       return JSON.parse(jsonPayload);
     } catch (e) {

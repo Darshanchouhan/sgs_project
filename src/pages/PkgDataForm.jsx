@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useContext } from "react";
+import { SkuContext } from "./SkuContext";
 import Header from "../components/Header";
 import Breadcrumb from "./Breadcrumb";
 import "./../styles/style.css";
@@ -12,10 +13,17 @@ import ProgressLoader from "./ProgressLoader"; // Import ProgressLoader
 
 const PkgDataForm = () => {
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
+  const {
+    skuData,
+    setSkuData,
+    skuDetails,
+    setSkuDetails,
+    pkoData,
+    setPkoData,
+  } = useContext(SkuContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const { componentName } = location.state || {}; // Retrieve the component name
-
+  const { componentName, pkoId, description } = location.state || {}; // Retrieve the component name
   const sectionRefs = useRef({}); // Store refs for each section
 
   const savePkgData = async () => {
@@ -25,6 +33,80 @@ const PkgDataForm = () => {
       headers: { "Content-Type": "application/json" },
     });
   };
+
+  useEffect(() => {
+    const calculatePkgFormProgress = () => {
+      // Count total mandatory questions
+      const totalMandatory = Object.values(pkgData.sections).reduce(
+        (total, section) => total + section.filter((q) => q.mandatory).length,
+        0,
+      );
+
+      // Count answered mandatory questions
+      const answeredMandatory = Object.values(pkgData.sections).reduce(
+        (total, section) =>
+          total +
+          section.filter(
+            (q) =>
+              q.mandatory &&
+              pkgData.answers[q.question_id] !== undefined &&
+              pkgData.answers[q.question_id] !== "",
+          ).length,
+        0,
+      );
+
+      // Update the state with mandatory question counts
+      setPkgData((prev) => ({
+        ...prev,
+        totalMandatoryCount: totalMandatory,
+        mandatoryAnsweredCount: answeredMandatory,
+        pkgFormProgress:
+          totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
+      }));
+
+      console.log("Total Mandatory:", totalMandatory);
+      console.log("Answered Mandatory:", answeredMandatory);
+      console.log(
+        "Progress Percentage:",
+        totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
+      );
+    };
+
+    calculatePkgFormProgress();
+  }, [pkgData.answers, pkgData.sections, setPkgData]);
+
+  // useEffect(() => {
+  //   if (location.state) {
+  //     if (location.state.pkoId) {
+  //       setPkoData((prev) => ({ ...prev, pko_id: location.state.pkoId }));
+  //     }
+  //     if (location.state.description) {
+  //       setSkuDetails((prev) => ({ ...prev, description: location.state.description }));
+  //     }
+  //   }
+  // }, [location.state, setPkoData, setSkuDetails]);
+  useEffect(() => {
+    if (location.state) {
+      setSkuDetails((prev) => location.state.skuDetails || prev);
+      setPkoData((prev) => location.state.pkoData || prev);
+      setSkuData((prev) => ({
+        ...prev,
+        componentName: location.state.componentName,
+      }));
+    }
+  }, [location.state, setSkuDetails, setPkoData, setSkuData]);
+
+  console.log("Persisted SKU Data:", skuData);
+  console.log("Persisted SKU Details:", skuDetails);
+  console.log("Persisted PKO Data:", pkoData);
+
+  useEffect(() => {
+    console.log("Received State in PkgDataForm:", {
+      componentName,
+      pkoId,
+      description,
+    });
+  }, [componentName, pkoId, description]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,7 +281,7 @@ const PkgDataForm = () => {
               onChange={(e) =>
                 handleInputChange(
                   `${question.question_id}_unit`,
-                  e.target.value
+                  e.target.value,
                 )
               }
             >
@@ -241,7 +323,7 @@ const PkgDataForm = () => {
               onChange={(e) =>
                 handleInputChange(
                   `${question.question_id}_unit`,
-                  e.target.value
+                  e.target.value,
                 )
               }
             >
@@ -316,7 +398,7 @@ const PkgDataForm = () => {
       const parentAnswer = pkgData.answers[question.dependent_question];
       const isDependentVisible = isAnswerMatch(
         question.field_dependency,
-        parentAnswer
+        parentAnswer,
       );
 
       if (question.dependent_question && !isDependentVisible) {
@@ -378,7 +460,7 @@ const PkgDataForm = () => {
                 unit: question.unit || null,
               };
             })
-            .filter((q) => q !== null) // Filter out null (unanswered questions)
+            .filter((q) => q !== null), // Filter out null (unanswered questions)
       );
       //if no questions are answered, notify the user and return
       if (answeredQuestions.length === 0) {
@@ -391,7 +473,7 @@ const PkgDataForm = () => {
 
       console.log(
         "Request Body (Data to be sent to the server):",
-        JSON.stringify(requestBody, null, 2)
+        JSON.stringify(requestBody, null, 2),
       );
       //make the post request to save the answers
       const response = await axiosInstance.post(
@@ -399,7 +481,7 @@ const PkgDataForm = () => {
         requestBody,
         {
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
 
       if (response.ok) {
@@ -423,6 +505,8 @@ const PkgDataForm = () => {
       <Breadcrumb
         onBackClick={handleBackClick}
         onSaveClick={handleSave}
+        pkoId={pkoId || "N/A"} // Pass PKO ID
+        description={description || "N/A"} // Pass Description
         componentName={componentName || "Default Component"}
       />
       <Autosave saveFunction={savePkgData} dependencies={[pkgData.answers]} />

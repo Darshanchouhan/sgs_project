@@ -11,9 +11,12 @@ const ModalLoad = () => {
 
   // Auto-close the modal after 5 seconds (optional, adjust as needed)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      closeModal();
-    }, 5 * 60 * 1000); // Auto close after 5 seconds
+    const timer = setTimeout(
+      () => {
+        closeModal();
+      },
+      5 * 60 * 1000,
+    ); // Auto close after 5 seconds
 
     return () => clearTimeout(timer); // Cleanup timer on component unmount
   }, []);

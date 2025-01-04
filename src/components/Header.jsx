@@ -11,7 +11,7 @@ const Header = () => {
             alt="Logo"
             style={{ height: "40px", marginRight: "10px" }}
           />
-          Sustainable Packaging Platform
+          AI for Sustainable Packaging
         </a>
 
         {/* Navbar toggler for mobile */}

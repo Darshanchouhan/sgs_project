@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
-import Breadcrumb from "./Breadcrumb";
 import "./../styles/style.css";
 import axiosInstance from "../services/axiosInstance";
 import { SkuContext } from "./SkuContext"; // Import Context
@@ -27,6 +26,43 @@ const Sku_Page = () => {
   const [questions, setQuestions] = useState([]); // Store questions from API
   const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
   const skuId = location.state?.skuId; // Retrieve SKU ID from navigation
+  const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
+  const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
+
+  useEffect(() => {
+    if (location.state?.skuDetails) {
+      setSkuDetails((prev) => prev || location.state.skuDetails);
+    }
+    if (location.state?.pkoData) {
+      setPkoData((prev) => prev || location.state.pkoData);
+    }
+    if (location.state?.skuData) {
+      setSkuData((prev) => prev || location.state.skuData);
+    }
+  }, [location.state, setSkuDetails, setPkoData, setSkuData]);
+
+  useEffect(() => {
+    const duedate = location.state?.duedate || pkoData?.duedate || null;
+
+    if (duedate) {
+      setSubmissionLastDate(
+        new Date(duedate).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+      );
+    }
+  }, [location.state, pkoData]);
+
+  useEffect(() => {
+    // Avoid overwriting the state on reload
+    if (!skuData.components.length && !skuDetails) {
+      setSkuData((prev) => prev);
+      setSkuDetails((prev) => prev);
+      setPkoData((prev) => prev);
+    }
+  }, []);
 
   // Retrieve pkoData and skuDetails from location.state or fallback to context
   useEffect(() => {
@@ -40,63 +76,7 @@ const Sku_Page = () => {
     }
   }, [location.state, setSkuDetails, setPkoData]);
 
-  useEffect(() => {
-    // Reset SKU Data and Details when entering SKU Page
-    setSkuData({
-      dimensionsAndWeights: {
-        height: "",
-        width: "",
-        depth: "",
-        netWeight: "",
-        tareWeight: "",
-        grossWeight: "",
-      },
-      recycleLabel: "",
-      isMultipack: "",
-      additionalComments: "",
-      components: [],
-      showTable: false,
-      newComponent: "",
-      componentNumber: 0,
-      showInput: true,
-      hasAddedFirstComponent: false,
-      isCancelDisabled: true,
-    });
-
-    setSkuDetails(null);
-    setPkoData(null);
-  }, []);
-
-  useEffect(() => {
-    const handleRefresh = () => {
-      if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
-        setSkuData({
-          dimensionsAndWeights: {
-            height: "",
-            width: "",
-            depth: "",
-            netWeight: "",
-            tareWeight: "",
-            grossWeight: "",
-          },
-          recycleLabel: "",
-          isMultipack: "",
-          additionalComments: "",
-          components: [],
-          showTable: false,
-          newComponent: "",
-          componentNumber: 0,
-          showInput: true,
-          hasAddedFirstComponent: false,
-          isCancelDisabled: true,
-        });
-        setSkuDetails(null);
-        setPkoData(null);
-      }
-    };
-
-    handleRefresh();
-  }, []);
+  console.log("pkoData in skupage:", pkoData);
 
   //fetch SKU Details
   useEffect(() => {
@@ -106,29 +86,18 @@ const Sku_Page = () => {
         return;
       }
       try {
+        console.log(data.components);
         const response = await axiosInstance.get(`skus/${skuId}/`);
         const data = response.data;
         setSkuDetails(data);
-        setSkuData({
+        setSkuData((prev) => ({
+          ...prev,
           dimensionsAndWeights: {
-            height: "",
-            width: "",
-            depth: "",
-            netWeight: "",
-            tareWeight: "",
-            grossWeight: "",
+            ...data.dimensionsAndWeights,
+            ...prev.dimensionsAndWeights,
           },
-          recycleLabel: "",
-          isMultipack: "",
-          additionalComments: "",
-          components: [],
-          showTable: false,
-          newComponent: "",
-          componentNumber: 0,
-          showInput: true,
-          hasAddedFirstComponent: false,
-          isCancelDisabled: true,
-        });
+          components: data.components || prev.components,
+        }));
       } catch (error) {
         console.error("Error fetching SKU details:", error);
       }
@@ -151,73 +120,6 @@ const Sku_Page = () => {
     fetchQuestions();
   }, []);
 
-  //  // 📦 Save SKU Data
-  //  const saveSkuData = async () => {
-  //   if (!skuId) {
-  //     console.error("SKU ID is missing");
-  //     return;
-  //   }
-  //   setIsSubmitting(true);
-  //   try {
-  //     const payload = {
-  //       sku_id: skuId,
-  //       description: skuDetails?.description || "",
-  //       primary_packaging_details: {
-  //         ...skuData.dimensionsAndWeights,
-
-  //       },
-  //       components: skuData.components.map((comp) => ({
-  //         id: comp.id || null,
-  //         sku: skuId,
-  //         name: comp.name,
-  //         form_status: comp.formStatus,
-  //         responses: comp.responses || {},
-  //       })),
-  //     };
-
-  //     console.log("submitting Payload:", payload);
-
-  //     const response = await axiosInstance.put(
-  //   `skus/${skuId}/`,
-  //   payload,
-  //   {
-  //     headers: { "Content-Type": "application/json" },
-  //   }
-  // );
-  //     updateSkuStatus(skuId, "Completed");
-  //     // Clear state after successful submission
-  //   setSkuData({
-  //     dimensionsAndWeights: {
-  //       height: "",
-  //       width: "",
-  //       depth: "",
-  //       netWeight: "",
-  //       tareWeight: "",
-  //       grossWeight: "",
-  //     },
-  //     recycleLabel: "",
-  //     isMultipack: "",
-  //     additionalComments: "",
-  //     components: [],
-  //     showTable: false,
-  //     newComponent: "",
-  //     componentNumber: 0,
-  //     showInput: true,
-  //     hasAddedFirstComponent: false,
-  //     isCancelDisabled: true,
-  //   });
-  //   setSkuDetails(null);
-  //   setPkoData(null);
-  //     alert("SKU data saved successfully!");
-
-  //     navigate("/");
-  //   } catch (error) {
-  //     console.error("Error during Save:", error);
-  //     alert("Failed to submit SKU data. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
   const saveSkuData = async () => {
     if (!skuId) {
       console.error("SKU ID is missing");
@@ -236,22 +138,23 @@ const Sku_Page = () => {
         components: skuData.components.map((comp, index) => ({
           id: comp.id || null,
           sku: skuId,
-          name: comp.name || `Component_${index + 1}`, // Ensure a name exists
-          form_status: comp.formStatus || "Pending", // Default status if missing
-          responses: comp.responses || {}, // Ensure responses are included
+          name: comp.name || `Component_${index + 1}`,
+          form_status: comp.formStatus || "Pending",
+          responses: comp.responses || {},
         })),
       };
 
-      console.log("🔄 Submitting Payload:", payload);
+      console.log(" Submitting Payload:", payload);
 
       // Submit to backend
       await axiosInstance.put(`skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
 
-      updateSkuStatus(skuId, "Completed");
+      // Update status to 'Draft' in the VendorContext
+      updateSkuStatus(skuId, "Draft");
 
-      // Clear state after successful submission
+      // Clear local states
       setSkuData({
         dimensionsAndWeights: {
           height: "",
@@ -276,17 +179,47 @@ const Sku_Page = () => {
       setSkuDetails(null);
       setPkoData(null);
 
-      alert("✅ SKU data saved successfully!");
-      navigate("/");
+      alert(" SKU data saved successfully in Draft mode!");
+      navigate("/"); // Return to Vendor Dashboard
     } catch (error) {
-      console.error("❌ Error during Save:", error);
+      console.error(" Error during Save:", error);
       alert("Failed to submit SKU data. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 📦 Handle Input Change (Primary Packaging Details)
+  // Autosave function (No alerts, no user navigation)
+  const autosaveSkuData = async () => {
+    if (!skuId) {
+      console.error("SKU ID is missing");
+      return;
+    }
+
+    try {
+      const payload = {
+        sku_id: skuId,
+        description: skuDetails?.description || "",
+        primary_packaging_details: { ...skuData.dimensionsAndWeights },
+        components: skuData.components.map((comp, index) => ({
+          id: comp.id || null,
+          // sku: skuId,
+          name: comp.name || `Component_${index + 1}`,
+          form_status: comp.formStatus || "Pending",
+          responses: comp.responses || {},
+        })),
+      };
+
+      await axiosInstance.put(`skus/${skuId}/`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log("Autosave successful at", new Date().toLocaleTimeString());
+    } catch (error) {
+      console.error("Autosave failed:", error);
+    }
+  };
+
+  // Handle Input Change (Primary Packaging Details)
   const handleInputChange = (field, value) => {
     setSkuData((prev) => ({
       ...prev,
@@ -299,7 +232,7 @@ const Sku_Page = () => {
 
   // Define the back action
   const handleBackClick = () => {
-    navigate("/"); // Navigate to Vendor Dashboard
+    navigate("/vendordashboard"); // Navigate to Vendor Dashboard
   };
 
   const handleAddProductImageClick = () => {
@@ -314,17 +247,21 @@ const Sku_Page = () => {
   // Handle adding a component
   const handleAddComponent = () => {
     if (skuData.newComponent.trim()) {
-      setSkuData((prev) => ({
-        ...prev,
-        components: [
-          ...prev.components,
-          { name: prev.newComponent, formStatus: "Pending" },
-        ],
-        newComponent: "",
-        showInput: false,
-        hasAddedFirstComponent: true,
-        isCancelDisabled: false,
-      }));
+      setSkuData((prev) => {
+        const updatedData = {
+          ...prev,
+          components: [
+            ...prev.components,
+            { name: prev.newComponent, formStatus: "Pending" },
+          ],
+          newComponent: "",
+          showInput: false,
+          hasAddedFirstComponent: true,
+          isCancelDisabled: false,
+        };
+        localStorage.setItem("skuData", JSON.stringify(updatedData)); // Persist to localStorage
+        return updatedData;
+      });
     }
   };
 
@@ -339,10 +276,14 @@ const Sku_Page = () => {
 
   // Navigate to PkgDataForm
   const handleForwardClick = (index) => {
-    const selectedComponent = skuData.components[index]; // Get the selected component
+    const selectedComponent = skuData.components[index];
     if (selectedComponent) {
       navigate("/component", {
-        state: { componentName: selectedComponent.name },
+        state: {
+          componentName: selectedComponent.name,
+          pkoId: pkoData?.pko_id || "N/A",
+          description: skuDetails?.description || "Description Not Available",
+        },
       });
     }
   };
@@ -412,7 +353,7 @@ const Sku_Page = () => {
                 onChange={(e) =>
                   handleInputChange(
                     `${question.question_id}_unit`,
-                    e.target.value
+                    e.target.value,
                   )
                 }
               >
@@ -422,7 +363,7 @@ const Sku_Page = () => {
                   ?.filter(
                     (option) =>
                       option.trim().toLowerCase() !== "unit" &&
-                      option.trim() !== ""
+                      option.trim() !== "",
                   )
                   .map((option, index) => (
                     <option key={index} value={option}>
@@ -489,21 +430,58 @@ const Sku_Page = () => {
   return (
     <>
       <Header></Header>
-      {/* <Breadcrumb onBackClick={handleBackClick} /> */}
-      <Breadcrumb
-        onBackClick={handleBackClick}
-        onSaveClick={saveSkuData}
-        componentName="SKU Page"
-        pageType="sku"
-        isSubmitting={isSubmitting}
-      />
-      <Autosave saveFunction={saveSkuData} dependencies={[skuData]} />
+      {/* Breadcrumb (Directly integrated here) */}
+      <div className="py-10 bg-color-light-shade">
+        <div className="container-fluid px-5">
+          <div className="d-flex align-items-center justify-content-between">
+            {/* Back Button and Component Name */}
+            <div className="d-flex align-items-center">
+              <button
+                type="button"
+                className="btn p-0 border-none bg-transparent me-4"
+                onClick={handleBackClick}
+              >
+                <img src="/assets/images/back-action-icon.svg" alt="icon" />
+              </button>
+              <div className="d-flex flex-column">
+                <nav aria-label="breadcrumb">
+                  <ol className="breadcrumb mb-0">
+                    <li className="breadcrumb-item">
+                      <a
+                        href="#"
+                        className="text-decoration-none text-secondary fw-600 fs-14"
+                      >
+                        PKO Project ID: {pkoId}
+                      </a>
+                    </li>
+                  </ol>
+                </nav>
+                <h6 className="fw-600 text-color-typo-primary mb-0 mt-2">
+                  {skuDetails?.description || "Description Not Available"}
+                </h6>
+              </div>
+            </div>
+
+            {/* Submission Last Date or Save Button */}
+            <div className="d-flex align-items-center">
+              <p className="text-color-black fst-italic mb-0 opacity-70">
+                Submission Last Date: {submissionLastDate}
+              </p>
+
+              <button className="save-button" onClick={saveSkuData}>
+                Save & Validate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Autosave saveFunction={autosaveSkuData} dependencies={[skuData]} />
       <div className="container-fluid px-5 d-flex flex-column container-height">
         {/* Header Section */}
         <div className="d-flex align-items-center justify-content-between py-3">
           <div className="d-flex align-items-center">
             <h6 className="fs-18 text-color-black mb-0">
-              PKO Project ID: {pkoData?.pko_id || "N/A"}
+              PKO Project ID: {pkoId}
             </h6>
             <img
               src="/assets/images/active-Indicator.svg"
@@ -511,9 +489,9 @@ const Sku_Page = () => {
               className="ms-12"
             />
           </div>
-          <p className="text-color-black fst-italic mb-0 opacity-70">
+          {/* <p className="text-color-black fst-italic mb-0 opacity-70">
             Submission Last Date: {pkoData?.submissionlastdate || "N/A"}
-          </p>
+          </p> */}
         </div>
 
         {/* SKU Details */}
@@ -647,7 +625,7 @@ const Sku_Page = () => {
                             <td>{component.formStatus}</td>
                             <td>
                               <span>
-                                {index}{" "}
+                                {0}{" "}
                                 <img
                                   src="/assets/images/image-pic.png"
                                   alt="Imag"

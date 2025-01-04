@@ -1,45 +1,64 @@
-import React, { createContext, useState,} from "react";
+import React, { createContext, useState, useEffect } from "react";
 
-// Create Context
 export const SkuContext = createContext();
 
-// Context Provider
 export const SkuProvider = ({ children }) => {
-  const [skuData, setSkuData] = useState({
-    dimensionsAndWeights: {
-      height: "",
-      width: "",
-      depth: "",
-      netWeight: "",
-      tareWeight: "",
-      grossWeight: "",
-    },
-    recycleLabel: "",
-    isMultipack: "",
-    additionalComments: "",
-    components: [],
-    showTable: false,
-    newComponent: "",
-    componentNumber: 0,
-    showInput: true,
-    hasAddedFirstComponent: false,
-    isCancelDisabled: true,
+  const [skuData, setSkuData] = useState(() => {
+    const savedData = localStorage.getItem("skuData");
+    return savedData
+      ? JSON.parse(savedData)
+      : {
+          dimensionsAndWeights: {
+            height: "",
+            width: "",
+            depth: "",
+            netWeight: "",
+            tareWeight: "",
+            grossWeight: "",
+          },
+          recycleLabel: "",
+          isMultipack: "",
+          additionalComments: "",
+          components: [],
+          showTable: false,
+          newComponent: "",
+          componentNumber: 0,
+          showInput: true,
+          hasAddedFirstComponent: false,
+          isCancelDisabled: true,
+        };
   });
-   // Add state for SKU Details and PKO Data
-   const [skuDetails, setSkuDetails] = useState(null);
-   const [pkoData, setPkoData] = useState(null);
-  
+
+  const [skuDetails, setSkuDetails] = useState(() => {
+    const savedDetails = localStorage.getItem("skuDetails");
+    return savedDetails ? JSON.parse(savedDetails) : null;
+  });
+
+  const [pkoData, setPkoData] = useState(() => {
+    const savedPkoData = localStorage.getItem("pkoData");
+    return savedPkoData ? JSON.parse(savedPkoData) : null;
+  });
+
+  useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("skuData") || "{}");
+    setSkuData((prev) => ({
+      ...prev,
+      ...savedData,
+      components: savedData.components || prev.components,
+    }));
+  }, []);
 
   return (
-    <SkuContext.Provider value={{ 
-      skuData,
-     setSkuData,
-     skuDetails,
-     setSkuDetails,
-     pkoData,
-     setPkoData,
-
-      }}>
+    <SkuContext.Provider
+      value={{
+        skuData,
+        setSkuData,
+        skuDetails,
+        setSkuDetails,
+        pkoData,
+        setPkoData,
+      }}
+    >
       {children}
     </SkuContext.Provider>
   );

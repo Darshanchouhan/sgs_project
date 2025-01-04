@@ -18,7 +18,6 @@ const Pko_Chart = ({ labels, data }) => {
       },
     ],
   };
-  
 
   const options = {
     cutout: "65%", // Controls the thickness of the donut

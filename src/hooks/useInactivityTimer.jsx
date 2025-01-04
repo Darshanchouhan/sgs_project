@@ -24,10 +24,13 @@ const useInactivityTimer = () => {
     }
 
     // Set a new inactivity timer for 5 minutes (300,000 ms)
-    inactivityTimerRef.current = setTimeout(() => {
-      console.log("User has been inactive for 5 minutes, logging out...");
-      logoutUserOnInactivity();
-    }, 1 * 60 * 1000); // 5 minutes of inactivity
+    inactivityTimerRef.current = setTimeout(
+      () => {
+        console.log("User has been inactive for 5 minutes, logging out...");
+        logoutUserOnInactivity();
+      },
+      30 * 60 * 1000,
+    ); // 30 minutes of inactivity
   };
 
   useEffect(() => {

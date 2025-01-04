@@ -16,6 +16,7 @@ const VendorDashboard = () => {
   const [pkoData, setPkoData] = useState(null); // State to hold PKO data
   const [selectedPkoId, setSelectedPkoId] = useState(""); // State for selected PKO ID
   const { skuStatuses, updateSkuStatus } = useContext(VendorContext);
+  const [selectedSkuStatus, setSelectedSkuStatus] = useState("All");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,15 +62,13 @@ const VendorDashboard = () => {
     setSelectedPkoId(e.target.value);
   };
 
-  // Handle SKU Navigation and Status Update
+  //handle forward click
   const handleForwardClick = (sku) => {
-    // Update the SKU status in the context
     updateSkuStatus(sku.sku_id, "Draft");
 
-    // Update SKU Data state to ensure it reflects locally
     setPkoData((prevPkoData) => {
       const updatedSkus = prevPkoData.skus.map((item) =>
-        item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item
+        item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item,
       );
       return { ...prevPkoData, skus: updatedSkus };
     });
@@ -77,11 +76,17 @@ const VendorDashboard = () => {
     navigate("/skus", {
       state: {
         skuId: sku.sku_id,
-        skuDetails: null, // Clear stale SKU Details
+        skuDetails: sku,
         pkoData: pkoData || null,
+        duedate: pkoData?.duedate || null, // Pass Submission Last Date explicitly
+        skuData: {
+          ...skuData,
+          components: skuData.components,
+        },
       },
     });
   };
+  console.log("Navigating with PKO Data:", pkoData);
 
   //loading state
   if (loading) {
@@ -181,11 +186,13 @@ const VendorDashboard = () => {
                   >
                     <span className="fs-14 text-color-labels">Active PKOs</span>
                     <p className="fs-24 text-color-draft fw-600 mb-0">
-                      {pkoData?.skus?.filter(
-                        (sku) =>
-                          new Date(pkoData.duedate) >=
-                          new Date(pkoData.startdate)
-                      ).length || 0}
+                      {vendorData.pkos.find(
+                        (pko) =>
+                          pko.pko_id === selectedPkoId &&
+                          new Date(pko.duedate) >= new Date(pko.startdate),
+                      )
+                        ? "01"
+                        : "00"}
                     </p>
                   </div>
                   <div
@@ -197,11 +204,13 @@ const VendorDashboard = () => {
                   >
                     <span className="fs-14 text-color-labels">Closed PKOs</span>
                     <p className="fs-24 text-color-completed fw-600 mb-0">
-                      {pkoData?.skus?.filter(
-                        (sku) =>
-                          new Date(pkoData.duedate) <
-                          new Date(pkoData.startdate)
-                      ).length || 0}
+                      {vendorData.pkos.find(
+                        (pko) =>
+                          pko.pko_id === selectedPkoId &&
+                          new Date(pko.duedate) < new Date(pko.startdate),
+                      )
+                        ? "01"
+                        : "00"}
                     </p>
                   </div>
                 </div>
@@ -224,7 +233,16 @@ const VendorDashboard = () => {
                       Submission Last Date
                     </span>
                     <p className="fs-24 text-color-labels fw-600 mb-0">
-                      5 Dec, 2024
+                      {pkoData?.duedate
+                        ? new Date(pkoData.duedate).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )
+                        : "N/A"}
                     </p>
                   </div>
                 </div>
@@ -265,19 +283,19 @@ const VendorDashboard = () => {
                             (sku) =>
                               skuStatuses[sku.sku_id] === "Not Started" ||
                               (!skuStatuses[sku.sku_id] &&
-                                sku.status === "Not Started")
+                                sku.status === "Not Started"),
                           ).length,
                           skuData.filter(
                             (sku) =>
                               skuStatuses[sku.sku_id] === "Draft" ||
                               (!skuStatuses[sku.sku_id] &&
-                                sku.status === "Draft")
+                                sku.status === "Draft"),
                           ).length,
                           skuData.filter(
                             (sku) =>
                               skuStatuses[sku.sku_id] === "Completed" ||
                               (!skuStatuses[sku.sku_id] &&
-                                sku.status === "Completed")
+                                sku.status === "Completed"),
                           ).length,
                         ]}
                       />
@@ -300,7 +318,7 @@ const VendorDashboard = () => {
                               (sku) =>
                                 skuStatuses[sku.sku_id] === "Not Started" ||
                                 (!skuStatuses[sku.sku_id] &&
-                                  sku.status === "Not Started")
+                                  sku.status === "Not Started"),
                             ).length
                           }
                         </span>
@@ -319,7 +337,7 @@ const VendorDashboard = () => {
                               (sku) =>
                                 skuStatuses[sku.sku_id] === "Draft" ||
                                 (!skuStatuses[sku.sku_id] &&
-                                  sku.status === "Draft")
+                                  sku.status === "Draft"),
                             ).length
                           }
                         </span>
@@ -338,7 +356,7 @@ const VendorDashboard = () => {
                               (sku) =>
                                 skuStatuses[sku.sku_id] === "Completed" ||
                                 (!skuStatuses[sku.sku_id] &&
-                                  sku.status === "Completed")
+                                  sku.status === "Completed"),
                             ).length
                           }
                         </span>
@@ -363,26 +381,16 @@ const VendorDashboard = () => {
               </label>
               <select
                 className="fs-14 sku-status px-12 border border-secondary text-secondary rounded-2 h-44 w-165 fw-600 form-select form-list"
-                aria-label="Default select example"
+                aria-label="SKU Status Filter"
+                value={selectedSkuStatus}
+                onChange={(e) => setSelectedSkuStatus(e.target.value)}
               >
-                {/* Dynamically display the total number of SKUs */}
-                <option selected>All SKUs ({skuData.length})</option>
-                {/* Dynamically generate options for each SKU ID */}
-                {skuData.map((sku) => (
-                  <option key={sku.sku_id} value={sku.sku_id}>
-                    {sku.sku_id}
-                  </option>
-                ))}
+                <option value="All">All SKUs ({skuData.length})</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Draft">Draft</option>
+                <option value="Completed">Completed</option>
               </select>
             </div>
-          </div>
-          <div className="d-flex align-items-center gap-4">
-            <button type="button" className="bg-transparent border-0 px-0">
-              <img src="/assets/images/search.svg" alt="search" />
-            </button>
-            <button type="button" className="bg-transparent border-0 px-0">
-              <img src="/assets/images/filter.svg" alt="filter" />
-            </button>
           </div>
         </div>
 
@@ -411,63 +419,57 @@ const VendorDashboard = () => {
                 <th>Actions</th>
               </tr>
             </thead>
-
             <tbody>
-              {skuData.map((sku) => (
-                <tr key={sku.sku_id}>
-                  <td>{sku.sku_id}</td>
+              {skuData
+                .filter((sku) => {
+                  const status =
+                    skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Prioritize Context State
 
-                  <td>{sku.description}</td>
+                  if (selectedSkuStatus === "All") return true; // Show all SKUs
+                  return status === selectedSkuStatus; // Filter based on selected status
+                })
+                .map((sku) => {
+                  const status =
+                    skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Fetch updated status
 
-                  <td>{pkoData?.category}</td>
-
-                  <td>{sku.brand}</td>
-
-                  <td>{sku.upc}</td>
-
-                  <td>{sku.size}</td>
-
-                  <td>{sku.duedate}</td>
-
-                  <td>
-                    <span
-                      className={`fw-600 text-nowrap px-12 py-2 rounded-pill ${
-                        skuStatuses[sku.sku_id] === "Draft"
-                          ? "bg-color-draft text-white"
-                          : "bg-color-light-border text-color-typo-secondary"
-                      }`}
-                    >
-                      {skuStatuses[sku.sku_id] || sku.status}
-                    </span>
-                  </td>
-
-                  <td>
-                    <button
-                      className="btn p-0 border-0 shadow-none"
-                      onClick={() => handleForwardClick(sku)}
-                    >
-                      <img
-                        src="/assets/images/forward-arrow-img.png"
-                        alt="Forward"
-                      />
-                    </button>
-                  </td>
-
-                  {/* <td className="h-51 px-12 align-middle d-flex align-items-center justify-content-between">
-                    <button
-                      className="btn p-0 border-0 shadow-none"
-                      onClick={() => handleForwardClick(sku)} // Navigate on click
-                    >
-                      <img src="/assets/images/forward-arrow-img.png" alt="Forward" />
-                    </button>
-                  </td> */}
-                </tr>
-              ))}
+                  return (
+                    <tr key={sku.sku_id}>
+                      <td>{sku.sku_id}</td>
+                      <td>{sku.description}</td>
+                      <td>{pkoData?.category}</td>
+                      <td>{sku.brand}</td>
+                      <td>{sku.upc}</td>
+                      <td>{sku.size}</td>
+                      <td>{sku.duedate}</td>
+                      <td>
+                        <span
+                          className={`fw-600 text-nowrap px-12 py-2 rounded-pill ${
+                            status === "Draft"
+                              ? "bg-color-draft text-white"
+                              : "bg-color-light-border text-color-typo-secondary"
+                          }`}
+                        >
+                          {status}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="btn p-0 border-0 shadow-none"
+                          onClick={() => handleForwardClick(sku)}
+                        >
+                          <img
+                            src="/assets/images/forward-arrow-img.png"
+                            alt="Forward"
+                          />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
       </div>
-      {/* Offcanvas for Active and Closed PKOs */}
       {/* Offcanvas for Active and Closed PKOs */}
       <div className="offcanvas offcanvas-end" id="offcanvasRight">
         <div className="offcanvas-header">
@@ -696,7 +698,7 @@ const VendorDashboard = () => {
                       <td>{vendorData[`${contactType}_contact_email`]}</td>
                       <td>{vendorData[`${contactType}_contact_phone`]}</td>
                     </tr>
-                  )
+                  ),
                 )}
               </tbody>
             </table>

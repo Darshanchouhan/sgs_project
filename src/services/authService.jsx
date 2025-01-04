@@ -36,7 +36,7 @@ export const refreshAccessToken = async () => {
   } catch (error) {
     console.error(
       "Failed to refresh access token:",
-      error.response?.data || error
+      error.response?.data || error,
     );
     return null; // Return null if refresh fails
   }
@@ -59,7 +59,7 @@ export const fetchUserProfile = async () => {
 
     // Make the API call to fetch user profile using the username
     const response = await axiosInstance.get(
-      `getLoggedInUserDetails?username=${username}/`
+      `getLoggedInUserDetails?username=${username}/`,
     );
 
     // Store the 'cvs_supplier' value in localStorage for further use
@@ -70,7 +70,7 @@ export const fetchUserProfile = async () => {
   } catch (error) {
     console.error(
       "Failed to fetch user profile:",
-      error.response?.data || error
+      error.response?.data || error,
     );
     throw error;
   }
