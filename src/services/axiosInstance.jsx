@@ -4,7 +4,7 @@ import { refreshAccessToken } from "./authService";
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: "http://sgs.gramener.com/api/", // Replace with your Django backend URL
+  baseURL: "https://demo.gramener.com/api/", // Replace with your Django backend URL
   headers: {
     "Content-Type": "application/json",
   },
