@@ -23,15 +23,80 @@ const PkgDataForm = () => {
   } = useContext(SkuContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const { componentName, pkoId, description } = location.state || {}; // Retrieve the component name
   const sectionRefs = useRef({}); // Store refs for each section
+  const {
+    componentName,
+    pkoId,
+    description,
+    skuId: passedSkuId,
+  } = location.state || {};
 
-  const savePkgData = async () => {
-    // Save the package data to the backend
-    console.log("Autosaving Package Data:", pkgData.answers);
-    await axiosInstance.post("package/save/", pkgData.answers, {
-      headers: { "Content-Type": "application/json" },
-    });
+  // Fallback to skuData.skuId if not explicitly passed
+  const skuId = passedSkuId || skuData?.skuId || "N/A";
+
+  // const savePkgData = async () => {
+  //   // Save the package data to the backend
+  //   console.log("Autosaving Package Data:", pkgData.answers);
+  //   await axiosInstance.post("package/save/", pkgData.answers, {
+  //     headers: { "Content-Type": "application/json" },
+  //   });
+  // };
+  const autosavePkgData = async () => {
+    if (!skuId || !skuData.componentId || !skuData.componentName || !pkoId) {
+      console.warn(
+        "Missing SKU ID, Component ID, Component Name, or PKO ID. Autosave skipped.",
+      );
+      return;
+    }
+
+    try {
+      const payload = {
+        name: skuData.componentName,
+        form_status: "Pending",
+        pko_id: pkoId,
+        sku_id: skuId,
+        responses: {}, // Initialize responses
+      };
+
+      // Map answers using question_text and handle units
+      Object.keys(pkgData.answers).forEach((questionId) => {
+        const question = Object.values(pkgData.sections)
+          .flat()
+          .find((q) => q.question_id === questionId);
+
+        if (question && question.question_text) {
+          // Check if the question has a unit
+          if (
+            question.question_type.includes("Dropdown") &&
+            pkgData.answers[`${questionId}_unit`]
+          ) {
+            payload.responses[question.question_text] =
+              `${pkgData.answers[questionId]} ${pkgData.answers[`${questionId}_unit`]}`;
+          } else {
+            payload.responses[question.question_text] =
+              pkgData.answers[questionId];
+          }
+        } else {
+          console.warn(
+            `Question with ID ${questionId} not found or missing question_text.`,
+          );
+        }
+      });
+
+      console.log("Autosave Payload:", JSON.stringify(payload, null, 2));
+
+      await axiosInstance.put(
+        `/sku/${skuId}/components/${skuData.componentId}/`,
+        payload,
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      console.log("Autosave successful at", new Date().toLocaleTimeString());
+    } catch (error) {
+      console.error("Autosave failed:", error.message);
+    }
   };
 
   useEffect(() => {
@@ -85,16 +150,101 @@ const PkgDataForm = () => {
   //     }
   //   }
   // }, [location.state, setPkoData, setSkuDetails]);
+  // useEffect(() => {
+  //   if (location.state) {
+  //     setSkuDetails((prev) => location.state.skuDetails || prev);
+  //     setPkoData((prev) => location.state.pkoData || prev);
+  //     setSkuData((prev) => ({
+  //       ...prev,
+  //       skuId,
+  //       componentId: location.state.componentId,
+  //       componentName: location.state.componentName,
+  //       formStatus: location.state.formStatus,
+  //       responses: location.state.responses || {},
+  //     }));
+  //   }
+  // }, [location.state, setSkuDetails, setPkoData, setSkuData]);
+
+  // useEffect(() => {
+  //   if (location.state) {
+  //     setSkuDetails((prev) => location.state.skuDetails || prev);
+  //     setPkoData((prev) => location.state.pkoData || prev);
+
+  //     setSkuData((prev) => ({
+  //       ...prev,
+  //       skuId,
+  //       componentId: location.state.componentId,
+  //       componentName: location.state.componentName,
+  //       formStatus: location.state.formStatus,
+  //     }));
+
+  //     // Populate answers from responses if available
+  //     if (location.state.responses) {
+  //       const answers = {};
+  //       Object.entries(location.state.responses).forEach(([questionText, response]) => {
+  //         const question = Object.values(pkgData.sections)
+  //           .flat()
+  //           .find((q) => q.question_text === questionText);
+
+  //         if (question) {
+  //           answers[question.question_id] = response;
+  //         }
+  //       });
+  // console.log("pkg data answer response",pkgData.sections,answers,location.state.responses)
+  //       setPkgData((prev) => ({
+  //         ...prev,
+  //         answers,
+  //       }));
+  //     }
+  //   }
+  // }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
+
   useEffect(() => {
     if (location.state) {
       setSkuDetails((prev) => location.state.skuDetails || prev);
       setPkoData((prev) => location.state.pkoData || prev);
+
       setSkuData((prev) => ({
         ...prev,
-        componentName: location.state.componentName,
+        skuId: location.state.skuId || prev.skuId,
+        componentId: location.state.componentId || prev.componentId,
+        componentName: location.state.componentName || prev.componentName,
+        formStatus: location.state.formStatus || prev.formStatus,
       }));
+
+      console.log("SKU Data after initialization:", skuData);
     }
   }, [location.state, setSkuDetails, setPkoData, setSkuData]);
+
+  useEffect(() => {
+    // Ensure both pkgData.sections and location.state.responses are available
+    if (location.state?.responses && Object.keys(pkgData.sections).length > 0) {
+      setPkgData((prev) => {
+        const updatedAnswers = { ...prev.answers }; // Preserve existing answers
+
+        Object.entries(location.state.responses).forEach(
+          ([questionText, response]) => {
+            const question = Object.values(pkgData.sections)
+              .flat()
+              .find((q) => q.question_text === questionText);
+
+            if (question) {
+              updatedAnswers[question.question_id] = response;
+            } else {
+              console.warn(`Question not found for text: ${questionText}`);
+            }
+          },
+        );
+
+        console.log("Mapped Answers from Responses:", updatedAnswers);
+
+        return {
+          ...prev,
+          answers: updatedAnswers, // Update answers without clearing existing ones
+        };
+      });
+    }
+  }, [pkgData.sections, location.state?.responses, setPkgData]);
 
   console.log("Persisted SKU Data:", skuData);
   console.log("Persisted SKU Details:", skuDetails);
@@ -441,59 +591,76 @@ const PkgDataForm = () => {
     });
   };
   const handleSave = async () => {
+    if (!skuId || !skuData.componentId || !skuData.componentName || !pkoId) {
+      console.error("Missing SKU ID, Component ID, Component Name, or PKO ID.");
+      alert("Cannot save data. Missing necessary information.");
+      return;
+    }
+
     try {
-      // Convert the sections object to an array of questions
+      const payload = {
+        name: skuData.componentName,
+        form_status: "Pending",
+        pko_id: pkoId,
+        sku_id: skuId,
+        responses: {}, // Initialize responses
+      };
+
+      // 📝 Flatten and map all answered questions
       const answeredQuestions = Object.values(pkgData.sections).flatMap(
         (section) =>
           section
             .map((question) => {
-              // Check if the question has an answer (ignoring unanswered questions)
               const answer = pkgData.answers[question.question_id];
+              const unit =
+                pkgData.answers[`${question.question_id}_unit`] || null;
+
               if (answer === undefined || answer === "") return null;
 
-              // Return the question formatted correctly if it has an answer
+              // Handle different question types
+              if (question.question_type.includes("Dropdown") && unit) {
+                return {
+                  question_text: question.question_text,
+                  response: `${answer}${unit}`.trim(),
+                };
+              }
+
               return {
-                question_id: question.question_id,
                 question_text: question.question_text,
-                question_type: question.question_type,
                 response: answer,
-                unit: question.unit || null,
               };
             })
-            .filter((q) => q !== null), // Filter out null (unanswered questions)
+            .filter((q) => q !== null),
       );
-      //if no questions are answered, notify the user and return
-      if (answeredQuestions.length === 0) {
-        alert("No questions have been answered.");
-        return;
-      }
 
-      const requestBody = { questions: answeredQuestions };
-      console.log("formatted question is):", answeredQuestions);
+      // 🛠️ Build the `responses` object dynamically
+      answeredQuestions.forEach((q) => {
+        payload.responses[q.question_text] = q.response;
+      });
 
-      console.log(
-        "Request Body (Data to be sent to the server):",
-        JSON.stringify(requestBody, null, 2),
-      );
-      //make the post request to save the answers
-      const response = await axiosInstance.post(
-        "component/2/questionnaire/",
-        requestBody,
+      console.log("Save Payload:", JSON.stringify(payload, null, 2));
+
+      const response = await axiosInstance.put(
+        `/sku/${skuId}/components/${skuData.componentId}/`,
+        payload,
         {
           headers: { "Content-Type": "application/json" },
         },
       );
 
-      if (response.ok) {
-        alert("Data saved successfully!");
+      if (response.status === 200) {
+        console.log("Save Response:", response.data);
+        alert("Component data saved successfully!");
       } else {
-        alert("Failed to save data.");
+        console.warn("Unexpected response status:", response.status);
+        alert("Failed to save component data. Please try again.");
       }
     } catch (error) {
-      console.error("Error saving data:", error);
-      alert("An error occurred while saving.");
+      console.error("Error saving component data:", error);
+      alert("An error occurred while saving the component data.");
     }
   };
+
   const progressPercentage =
     pkgData.totalMandatoryCount === 0
       ? 0
@@ -509,7 +676,10 @@ const PkgDataForm = () => {
         description={description || "N/A"} // Pass Description
         componentName={componentName || "Default Component"}
       />
-      <Autosave saveFunction={savePkgData} dependencies={[pkgData.answers]} />
+      <Autosave
+        saveFunction={autosavePkgData}
+        dependencies={[pkgData.answers]}
+      />
       <div className="container-fluid px-5 py-58">
         <div className="row">
           <div className="col-12 col-md-3">

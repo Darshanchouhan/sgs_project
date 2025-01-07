@@ -25,21 +25,26 @@ const Sku_Page = () => {
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
   const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
-  const skuId = location.state?.skuId; // Retrieve SKU ID from navigation
+  const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
   const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
 
   useEffect(() => {
-    if (location.state?.skuDetails) {
-      setSkuDetails((prev) => prev || location.state.skuDetails);
-    }
-    if (location.state?.pkoData) {
-      setPkoData((prev) => prev || location.state.pkoData);
-    }
-    if (location.state?.skuData) {
-      setSkuData((prev) => prev || location.state.skuData);
-    }
-  }, [location.state, setSkuDetails, setPkoData, setSkuData]);
+    if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
+    if (location.state?.pkoData) setPkoData(location.state.pkoData);
+  }, [location.state, setSkuDetails, setPkoData]);
+
+  // useEffect(() => {
+  //   if (location.state?.skuDetails) {
+  //     setSkuDetails((prev) => prev || location.state.skuDetails);
+  //   }
+  //   if (location.state?.pkoData) {
+  //     setPkoData((prev) => prev || location.state.pkoData);
+  //   }
+  //   if (location.state?.skuData) {
+  //     setSkuData((prev) => prev || location.state.skuData);
+  //   }
+  // }, [location.state, setSkuDetails, setPkoData, setSkuData]);
 
   useEffect(() => {
     const duedate = location.state?.duedate || pkoData?.duedate || null;
@@ -81,22 +86,35 @@ const Sku_Page = () => {
   //fetch SKU Details
   useEffect(() => {
     const fetchSkuDetails = async () => {
-      if (!skuId) {
-        console.warn("SKU ID is missing. Skipping fetch.");
+      if (!skuId || !pkoId) {
+        console.log(
+          "SKU ID or PKO ID is missing. Skipping fetch.",
+          skuId,
+          pkoId,
+        );
+        console.warn(
+          "SKU ID or PKO ID is missing. Skipping fetch.",
+          skuId,
+          pkoId,
+        );
         return;
       }
+
       try {
-        console.log(data.components);
-        const response = await axiosInstance.get(`skus/${skuId}/`);
+        const response = await axiosInstance.get(
+          `/skus/${skuId}/?pko_id=${pkoId}`,
+        );
         const data = response.data;
+
+        console.log("Fetched SKU Details:", data);
+
+        // Update SKU and PKO details
         setSkuDetails(data);
         setSkuData((prev) => ({
           ...prev,
-          dimensionsAndWeights: {
-            ...data.dimensionsAndWeights,
-            ...prev.dimensionsAndWeights,
-          },
-          components: data.components || prev.components,
+          dimensionsAndWeights: data.primary_packaging_details || {},
+          components: data.components || [],
+          description: data.description || "",
         }));
       } catch (error) {
         console.error("Error fetching SKU details:", error);
@@ -104,7 +122,7 @@ const Sku_Page = () => {
     };
 
     fetchSkuDetails();
-  }, [skuId, setSkuData, setSkuDetails]);
+  }, [skuId, pkoId, setSkuDetails, setSkuData]);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -121,20 +139,18 @@ const Sku_Page = () => {
   }, []);
 
   const saveSkuData = async () => {
-    if (!skuId) {
-      console.error("SKU ID is missing");
+    if (!skuId || !pkoId) {
+      console.error("SKU ID or PKO ID is missing");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Build the payload
       const payload = {
+        pko_id: pkoId,
         sku_id: skuId,
         description: skuDetails?.description || "",
-        primary_packaging_details: {
-          ...skuData.dimensionsAndWeights,
-        },
+        primary_packaging_details: { ...skuData.dimensionsAndWeights },
         components: skuData.components.map((comp, index) => ({
           id: comp.id || null,
           sku: skuId,
@@ -144,46 +160,19 @@ const Sku_Page = () => {
         })),
       };
 
-      console.log(" Submitting Payload:", payload);
+      console.log("Submitting SKU Data:", payload);
 
-      // Submit to backend
-      await axiosInstance.put(`skus/${skuId}/`, payload, {
+      await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
 
-      // Update status to 'Draft' in the VendorContext
       updateSkuStatus(skuId, "Draft");
 
-      // Clear local states
-      setSkuData({
-        dimensionsAndWeights: {
-          height: "",
-          width: "",
-          depth: "",
-          netWeight: "",
-          tareWeight: "",
-          grossWeight: "",
-        },
-        recycleLabel: "",
-        isMultipack: "",
-        additionalComments: "",
-        components: [],
-        showTable: false,
-        newComponent: "",
-        componentNumber: 0,
-        showInput: true,
-        hasAddedFirstComponent: false,
-        isCancelDisabled: true,
-      });
-
-      setSkuDetails(null);
-      setPkoData(null);
-
-      alert(" SKU data saved successfully in Draft mode!");
-      navigate("/"); // Return to Vendor Dashboard
+      alert("SKU data saved successfully in Draft mode!");
+      navigate("/vendordashboard");
     } catch (error) {
-      console.error(" Error during Save:", error);
-      alert("Failed to submit SKU data. Please try again.");
+      console.error("Error saving SKU data:", error);
+      alert("Failed to save SKU data. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -203,14 +192,13 @@ const Sku_Page = () => {
         primary_packaging_details: { ...skuData.dimensionsAndWeights },
         components: skuData.components.map((comp, index) => ({
           id: comp.id || null,
-          // sku: skuId,
           name: comp.name || `Component_${index + 1}`,
           form_status: comp.formStatus || "Pending",
           responses: comp.responses || {},
         })),
       };
 
-      await axiosInstance.put(`skus/${skuId}/`, payload, {
+      await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Autosave successful at", new Date().toLocaleTimeString());
@@ -235,33 +223,53 @@ const Sku_Page = () => {
     navigate("/vendordashboard"); // Navigate to Vendor Dashboard
   };
 
-  const handleAddProductImageClick = () => {
-    // Show Offcanvas manually via Bootstrap API
-    const offcanvasElement = document.getElementById("offcanvasRight-image");
-    if (offcanvasElement) {
-      const offcanvas = new Offcanvas(offcanvasElement);
-      offcanvas.show();
-    }
-  };
-
   // Handle adding a component
-  const handleAddComponent = () => {
+  const handleAddComponent = async () => {
     if (skuData.newComponent.trim()) {
-      setSkuData((prev) => {
-        const updatedData = {
+      try {
+        const payload = {
+          pko_id: pkoId,
+          name: skuData.newComponent,
+          form_status: "Pending",
+        };
+
+        if (!skuId) {
+          console.error("SKU ID is missing. Cannot add a component.");
+          return;
+        }
+
+        const response = await axiosInstance.post(
+          `/sku/${skuId}/components/`,
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        setSkuData((prev) => ({
           ...prev,
+          skuId, // Ensure skuId is set in the context
           components: [
             ...prev.components,
-            { name: prev.newComponent, formStatus: "Pending" },
+            {
+              id: response.data?.id || null,
+              name: skuData.newComponent,
+              formStatus: response.data?.form_status || "",
+            },
           ],
           newComponent: "",
-          showInput: false,
-          hasAddedFirstComponent: true,
-          isCancelDisabled: false,
-        };
-        localStorage.setItem("skuData", JSON.stringify(updatedData)); // Persist to localStorage
-        return updatedData;
-      });
+        }));
+
+        console.log("Component added successfully:", response.data);
+        alert("Component added successfully!");
+      } catch (error) {
+        console.error("Error adding component:", error);
+        alert("Failed to add component. Please try again.");
+      }
+    } else {
+      alert("Component name cannot be empty!");
     }
   };
 
@@ -274,17 +282,129 @@ const Sku_Page = () => {
     }));
   };
 
-  // Navigate to PkgDataForm
-  const handleForwardClick = (index) => {
-    const selectedComponent = skuData.components[index];
-    if (selectedComponent) {
-      navigate("/component", {
-        state: {
-          componentName: selectedComponent.name,
-          pkoId: pkoData?.pko_id || "N/A",
-          description: skuDetails?.description || "Description Not Available",
+  // Handle forward action for a component
+  // const handleForwardClick = async (index) => {
+  //   if (!skuId || !pkoId) {
+  //     console.error("SKU ID or PKO ID is missing. Cannot fetch component details.");
+  //     return;
+  //   }
+
+  //   try {
+  //     // Fetch all components for the SKU
+  //     const response = await axiosInstance.get(`/sku/${skuId}/components/?pko_id=${pkoId}`, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     if (response.status === 200) {
+  //       const components = response.data; // Expecting an array of component objects
+
+  //       console.log("Fetched Components:", components);
+
+  //       const selectedComponent = components[index];
+  //       if (selectedComponent) {
+  //         // Pass skuId along with other state
+  //         navigate("/component", {
+  //           state: {
+  //             skuId, // Explicitly passing skuId
+  //             componentId: selectedComponent.id,
+  //             componentName: selectedComponent.name,
+  //             formStatus: selectedComponent.form_status,
+  //             responses: selectedComponent.responses,
+  //             pkoId: pkoData?.pko_id || "N/A",
+  //             description: skuDetails?.description || "Description Not Available",
+  //           },
+  //         });
+  //       } else {
+  //         console.warn("Selected component not found in API response.");
+  //       }
+  //     } else {
+  //       console.error("Failed to fetch components. Status:", response.status);
+  //       alert("Failed to fetch component details. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching component details:", error);
+  //     alert("An error occurred while fetching component details.");
+  //   }
+  // };
+
+  const handleForwardClick = async (index) => {
+    if (!skuId || !pkoId) {
+      console.error(
+        "SKU ID or PKO ID is missing. Cannot fetch component details.",
+      );
+      return;
+    }
+
+    try {
+      // Fetch specific component details including responses
+      const response = await axiosInstance.get(
+        `/sku/${skuId}/components/?pko_id=${pkoId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
+
+      if (response.status === 200) {
+        const components = response.data; // Expecting an array of component objects
+
+        console.log("Fetched Components:", components);
+
+        const selectedComponent = components[index];
+        if (selectedComponent) {
+          // Fetch component details for responses
+          const componentResponse = await axiosInstance.get(
+            `/sku/${skuId}/components/${selectedComponent.id}?pko_id=${pkoId}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          const componentData = componentResponse.data;
+          console.log(
+            "Fetched Component Details with Responses:",
+            componentData,
+          );
+
+          // Navigate to PkgDataForm with all necessary data
+          navigate("/component", {
+            state: {
+              skuId, // Pass SKU ID
+              componentId: selectedComponent.id,
+              componentName: selectedComponent.name,
+              formStatus: selectedComponent.form_status,
+              responses: componentData.responses || {}, // Pass fetched responses
+              pkoId: pkoData?.pko_id || "N/A",
+              description:
+                skuDetails?.description || "Description Not Available",
+              skuDetails,
+              pkoData,
+            },
+          });
+        } else {
+          console.warn("Selected component not found in API response.");
+        }
+      } else {
+        console.error("Failed to fetch components. Status:", response.status);
+        alert("Failed to fetch component details. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error fetching component details:", error);
+      alert("An error occurred while fetching component details.");
+    }
+  };
+
+  const handleAddProductImageClick = () => {
+    // Show Offcanvas manually via Bootstrap API
+    const offcanvasElement = document.getElementById("offcanvasRight-image");
+    if (offcanvasElement) {
+      const offcanvas = new Offcanvas(offcanvasElement);
+      offcanvas.show();
     }
   };
 
@@ -622,7 +742,7 @@ const Sku_Page = () => {
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
                             <td>{component.name}</td>
-                            <td>{component.formStatus}</td>
+                            <td>{component.form_status}</td>
                             <td>
                               <span>
                                 {0}{" "}

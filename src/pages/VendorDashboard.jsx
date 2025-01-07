@@ -63,29 +63,56 @@ const VendorDashboard = () => {
   };
 
   //handle forward click
-  const handleForwardClick = (sku) => {
-    updateSkuStatus(sku.sku_id, "Draft");
+  // Handle forward click for SKU
+  const handleForwardClick = async (sku) => {
+    try {
+      console.log("Sending PUT request with:", {
+        pko_id: selectedPkoId,
+        status: "Draft",
+      });
 
-    setPkoData((prevPkoData) => {
-      const updatedSkus = prevPkoData.skus.map((item) =>
-        item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item,
-      );
-      return { ...prevPkoData, skus: updatedSkus };
-    });
-
-    navigate("/skus", {
-      state: {
-        skuId: sku.sku_id,
-        skuDetails: sku,
-        pkoData: pkoData || null,
-        duedate: pkoData?.duedate || null, // Pass Submission Last Date explicitly
-        skuData: {
-          ...skuData,
-          components: skuData.components,
+      const response = await axiosInstance.put(
+        `/skus/${sku.sku_id}/update_status/`,
+        {
+          pko_id: selectedPkoId,
+          status: "Draft",
         },
-      },
-    });
+      );
+
+      if (response.status === 200) {
+        console.log("SKU status updated successfully:", response.data);
+
+        updateSkuStatus(sku.sku_id, "Draft");
+
+        setPkoData((prevPkoData) => {
+          const updatedSkus = prevPkoData.skus.map((item) =>
+            item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item,
+          );
+          return { ...prevPkoData, skus: updatedSkus };
+        });
+
+        // Navigate to SKU Page with necessary state
+        navigate("/skus", {
+          state: {
+            skuId: sku.sku_id,
+            skuDetails: sku,
+            pkoData: pkoData || null,
+            duedate: pkoData?.duedate || null,
+          },
+        });
+      } else {
+        console.warn(
+          "Failed to update SKU status. Status code:",
+          response.status,
+        );
+        alert("Failed to update SKU status. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during forward action for SKU:", error);
+      alert(`Failed to update SKU status: ${error.message}`);
+    }
   };
+
   console.log("Navigating with PKO Data:", pkoData);
 
   //loading state
@@ -449,7 +476,7 @@ const VendorDashboard = () => {
                               : "bg-color-light-border text-color-typo-secondary"
                           }`}
                         >
-                          {status}
+                          {sku.status}
                         </span>
                       </td>
                       <td>
