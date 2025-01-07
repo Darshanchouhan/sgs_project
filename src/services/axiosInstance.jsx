@@ -4,7 +4,7 @@ import { refreshAccessToken } from "./authService";
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8001/api/", // Replace with your Django backend URL
+  baseURL: "https://demo.gramener.com/api/", // Replace with your Django backend URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,7 +21,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 // Interceptor to handle token expiry (refresh token logic)
@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default axiosInstance;
