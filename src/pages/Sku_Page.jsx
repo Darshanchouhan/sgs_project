@@ -34,18 +34,6 @@ const Sku_Page = () => {
     if (location.state?.pkoData) setPkoData(location.state.pkoData);
   }, [location.state, setSkuDetails, setPkoData]);
 
-  // useEffect(() => {
-  //   if (location.state?.skuDetails) {
-  //     setSkuDetails((prev) => prev || location.state.skuDetails);
-  //   }
-  //   if (location.state?.pkoData) {
-  //     setPkoData((prev) => prev || location.state.pkoData);
-  //   }
-  //   if (location.state?.skuData) {
-  //     setSkuData((prev) => prev || location.state.skuData);
-  //   }
-  // }, [location.state, setSkuDetails, setPkoData, setSkuData]);
-
   useEffect(() => {
     const duedate = location.state?.duedate || pkoData?.duedate || null;
 
@@ -81,17 +69,12 @@ const Sku_Page = () => {
     }
   }, [location.state, setSkuDetails, setPkoData]);
 
-  console.log("pkoData in skupage:", pkoData);
+  // console.log("pkoData in skupage:", pkoData);
 
   //fetch SKU Details
   useEffect(() => {
     const fetchSkuDetails = async () => {
       if (!skuId || !pkoId) {
-        console.log(
-          "SKU ID or PKO ID is missing. Skipping fetch.",
-          skuId,
-          pkoId,
-        );
         console.warn(
           "SKU ID or PKO ID is missing. Skipping fetch.",
           skuId,
@@ -106,7 +89,7 @@ const Sku_Page = () => {
         );
         const data = response.data;
 
-        console.log("Fetched SKU Details:", data);
+        // console.log("Fetched SKU Details:", data);
 
         // Update SKU and PKO details
         setSkuDetails(data);
@@ -160,7 +143,7 @@ const Sku_Page = () => {
         })),
       };
 
-      console.log("Submitting SKU Data:", payload);
+      // console.log("Submitting SKU Data:", payload);
 
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
@@ -281,53 +264,6 @@ const Sku_Page = () => {
       showInput: false,
     }));
   };
-
-  // Handle forward action for a component
-  // const handleForwardClick = async (index) => {
-  //   if (!skuId || !pkoId) {
-  //     console.error("SKU ID or PKO ID is missing. Cannot fetch component details.");
-  //     return;
-  //   }
-
-  //   try {
-  //     // Fetch all components for the SKU
-  //     const response = await axiosInstance.get(`/sku/${skuId}/components/?pko_id=${pkoId}`, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-
-  //     if (response.status === 200) {
-  //       const components = response.data; // Expecting an array of component objects
-
-  //       console.log("Fetched Components:", components);
-
-  //       const selectedComponent = components[index];
-  //       if (selectedComponent) {
-  //         // Pass skuId along with other state
-  //         navigate("/component", {
-  //           state: {
-  //             skuId, // Explicitly passing skuId
-  //             componentId: selectedComponent.id,
-  //             componentName: selectedComponent.name,
-  //             formStatus: selectedComponent.form_status,
-  //             responses: selectedComponent.responses,
-  //             pkoId: pkoData?.pko_id || "N/A",
-  //             description: skuDetails?.description || "Description Not Available",
-  //           },
-  //         });
-  //       } else {
-  //         console.warn("Selected component not found in API response.");
-  //       }
-  //     } else {
-  //       console.error("Failed to fetch components. Status:", response.status);
-  //       alert("Failed to fetch component details. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching component details:", error);
-  //     alert("An error occurred while fetching component details.");
-  //   }
-  // };
 
   const handleForwardClick = async (index) => {
     if (!skuId || !pkoId) {
@@ -454,7 +390,7 @@ const Sku_Page = () => {
               <input
                 type="number"
                 step="any"
-                className="form-control border-0 rounded-0 px-2"
+                className="form-control border-0 rounded-2 px-2"
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
                 value={skuData.dimensionsAndWeights[question.question_id] || ""}
@@ -588,7 +524,7 @@ const Sku_Page = () => {
                 Submission Last Date: {submissionLastDate}
               </p>
 
-              <button className="save-button" onClick={saveSkuData}>
+              <button className="save-button ms-3 px-4 py-12 fs-14 fw-600 border-0" onClick={saveSkuData}>
                 Save & Validate
               </button>
             </div>
@@ -633,13 +569,17 @@ const Sku_Page = () => {
                 ))}
               </div>
               {/* Add Product Images Button */}
-              <div className="d-flex align-items-center mt-4 col-3 justify-content-end">
+              <div className="d-flex align-items-center  col-3 justify-content-end">
+                <div className="d-flex align-items-center mb-4">
+                <p class="fs-14 fw-600 text-color-typo-primary mb-0">2/5 images uploaded <span class="ps-12 text-color-draft text-decoration-underline cursor-pointer" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight-image" aria-controls="offcanvasRight-image">View</span></p>
                 <button
-                  className="btn bg-transparent shadow-none fs-14 d-flex py-0  fw-600 text-secondary px-0"
+                  className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
                   onClick={handleAddProductImageClick}
                 >
                   + Add product images
                 </button>
+
+                </div>
               </div>
             </div>
           </div>
@@ -695,11 +635,16 @@ const Sku_Page = () => {
                   <h6 className="fs-22 fw-600 text-color-black mb-3">
                     SKU Components
                   </h6>
-                  {skuData.hasAddedFirstComponent && (
+                  {/* Add SKU Component Button */}
+                  {skuData.components.length > 0 && (
                     <button
                       className="btn btn-outline-primary"
                       onClick={() =>
-                        setSkuData((prev) => ({ ...prev, showInput: true }))
+                        setSkuData((prev) => ({
+                          ...prev,
+                          showInput: true,
+                          isCancelDisabled: false, // Enable cancel button for subsequent adds
+                        }))
                       }
                     >
                       + Add SKU Components
@@ -707,7 +652,8 @@ const Sku_Page = () => {
                   )}
                 </div>
 
-                {!skuData.showTable ? (
+                {/* Case 1: No Components Exist */}
+                {skuData.components.length === 0 && !skuData.showTable ? (
                   <div className="text-center">
                     <img
                       src="/assets/images/BoxImg.png"
@@ -721,16 +667,23 @@ const Sku_Page = () => {
                     </p>
                     <button
                       className="btn btn-outline-primary"
-                      onClick={() =>
-                        setSkuData((prev) => ({ ...prev, showTable: true }))
-                      }
+                      onClick={() => {
+                        setSkuData((prev) => ({
+                          ...prev,
+                          showTable: true,
+                          showInput: true,
+                          isCancelDisabled: true, // Disable cancel for the first addition
+                        }));
+                      }}
                     >
                       + Add SKU Components
                     </button>
                   </div>
                 ) : (
+                  /* Case 2: Components Exist or Table is Shown */
                   <div>
-                    <table className="table fs-14 w-100 ">
+                    {/* Components Table */}
+                    <table className="table fs-14 w-100">
                       <thead>
                         <tr>
                           <th scope="col">Component Name</th>
@@ -748,7 +701,7 @@ const Sku_Page = () => {
                                 {0}{" "}
                                 <img
                                   src="/assets/images/image-pic.png"
-                                  alt="Imag"
+                                  alt="Image"
                                   style={{
                                     width: "16px",
                                     marginRight: "8px",
@@ -773,8 +726,10 @@ const Sku_Page = () => {
                         ))}
                       </tbody>
                     </table>
+
+                    {/* Add Component Input Section */}
                     {skuData.showInput && (
-                      <div className="d-flex align-items-center gap-3">
+                      <div className="d-flex align-items-center gap-3 mt-3">
                         <input
                           type="text"
                           className="form-control border border-color-typo-secondary rounded-2 h-44 w-280"
@@ -789,7 +744,15 @@ const Sku_Page = () => {
                         />
                         <div
                           className="d-flex align-items-center cursor-pointer text-color-primary"
-                          onClick={handleAddComponent}
+                          onClick={() => {
+                            handleAddComponent();
+                            setSkuData((prev) => ({
+                              ...prev,
+                              showInput: false, // Hide input after adding a component
+                              newComponent: "",
+                              isCancelDisabled: false, // Enable cancel for next time
+                            }));
+                          }}
                         >
                           <img
                             src="/assets/images/plus-add_blue.png"
@@ -806,7 +769,14 @@ const Sku_Page = () => {
                               : ""
                           }`}
                           onClick={
-                            !skuData.isCancelDisabled ? handleCancel : null
+                            !skuData.isCancelDisabled
+                              ? () =>
+                                  setSkuData((prev) => ({
+                                    ...prev,
+                                    showInput: false,
+                                    newComponent: "",
+                                  }))
+                              : null
                           }
                         >
                           <img

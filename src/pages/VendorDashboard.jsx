@@ -17,9 +17,20 @@ const VendorDashboard = () => {
   const [selectedPkoId, setSelectedPkoId] = useState(""); // State for selected PKO ID
   const { skuStatuses, updateSkuStatus } = useContext(VendorContext);
   const [selectedSkuStatus, setSelectedSkuStatus] = useState("All");
+  const [loadCount, setLoadCount] = useState(0); // State to track page load count
+  const [isModalVisible, setIsModalVisible] = useState(true); // Modal visibility state
   const navigate = useNavigate();
 
+  // Function to close the modal
+  const closeModal = () => {
+    setIsModalVisible(false); // Close the modal
+  };
+
   useEffect(() => {
+    // Retrieve the current load count from localStorage (or sessionStorage)
+    const currentCount = parseInt(localStorage.getItem("loadCount")) || 0;
+    setLoadCount(currentCount);
+
     const fetchData = async () => {
       try {
         const cvsSupplier = localStorage.getItem("cvs_supplier"); // Retrieve 'cvs_supplier' from localStorage
@@ -122,9 +133,20 @@ const VendorDashboard = () => {
   //no data state
   if (!vendorData) {
     return <div className="text-center py-5">No data available</div>;
+  } else {
+    var activePKOsCount = 0;
+    var closedPKOsCount = 0;
+
+    vendorData.pkos.forEach((pko) => {
+      if (new Date(pko.duedate) < new Date(pko.startdate)) {
+        closedPKOsCount++;
+      } else {
+        activePKOsCount++;
+      }
+    });
   }
 
-  const skuData = pkoData?.skus || []; // Ensure no errors if SKUs are missing
+  var skuData = pkoData?.skus || []; // Ensure no errors if SKUs are missing
   // const selectedPko = vendorData.pkos[0] || {};
 
   return (
@@ -193,7 +215,7 @@ const VendorDashboard = () => {
                     </span>
                     <button
                       type="button"
-                      className="btn p-0 border-0 shadow-none fw-700 text-color-draft view-all"
+                      className="bg-transparent p-0 border-0 shadow-none fw-700 text-color-draft view-all"
                       data-bs-toggle="offcanvas"
                       data-bs-target="#offcanvasRight-contact"
                       aria-controls="offcanvasRight-contact"
@@ -211,15 +233,15 @@ const VendorDashboard = () => {
                     aria-controls="offcanvasRight"
                     id="active-pkos"
                   >
+                    <div className="d-flex align-items-center justify-content-between">
                     <span className="fs-14 text-color-labels">Active PKOs</span>
-                    <p className="fs-24 text-color-draft fw-600 mb-0">
-                      {vendorData.pkos.find(
-                        (pko) =>
-                          pko.pko_id === selectedPkoId &&
-                          new Date(pko.duedate) >= new Date(pko.startdate),
-                      )
-                        ? "01"
-                        : "00"}
+                    <img
+                            src="/assets/images/arrow-right-forward-blue.svg"
+                            alt="Forward"
+                          />
+                    </div>
+                    <p className="fs-24 text-color-typo-primary fw-600 mb-0">
+                      {activePKOsCount}
                     </p>
                   </div>
                   <div
@@ -229,15 +251,16 @@ const VendorDashboard = () => {
                     aria-controls="offcanvasRight"
                     id="closed-pkos"
                   >
+                    
+                    <div className="d-flex align-items-center justify-content-between">
                     <span className="fs-14 text-color-labels">Closed PKOs</span>
-                    <p className="fs-24 text-color-completed fw-600 mb-0">
-                      {vendorData.pkos.find(
-                        (pko) =>
-                          pko.pko_id === selectedPkoId &&
-                          new Date(pko.duedate) < new Date(pko.startdate),
-                      )
-                        ? "01"
-                        : "00"}
+                    <img
+                            src="/assets/images/arrow-right-forward-blue.svg"
+                            alt="Forward"
+                          />
+                    </div>
+                    <p className="fs-24 text-color-typo-primary fw-600 mb-0">
+                      {closedPKOsCount}
                     </p>
                   </div>
                 </div>
@@ -248,14 +271,14 @@ const VendorDashboard = () => {
           {/* PKO Status */}
           <div className="col-12 col-md-4">
             <div className="d-flex gap-3 h-100 p-4 shadow-1">
-              <div className="d-flex flex-column flex-fill">
+              <div className="d-flex flex-column flex-fill border-end">
                 <h6 className="text-color-typo-primary fw-600">PKO Status</h6>
                 <div className="d-flex flex-column h-100 align-items-start justify-content-end">
                   <img
                     src="/assets/images/active-Indicator.svg"
                     alt="Active Indicator"
                   />
-                  <div className="d-flex flex-column p-3 bg-color-light-gray text-nowrap">
+                  <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap">
                     <span className="text-color-labels">
                       Submission Last Date
                     </span>
@@ -274,8 +297,8 @@ const VendorDashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="d-flex border-start ps-4 flex-wrap flex-fill">
-                <h6 className="text-color-typo-primary fw-600 mb-0">
+              <div className="d-flex  justify-content-center align-items-center flex-column flex-fill">
+                <h6 className="text-color-typo-primary fw-600 mb-40">
                   Overall Progress
                 </h6>
                 <div className=" d-flex align-items-center h-100">
@@ -294,7 +317,7 @@ const VendorDashboard = () => {
 
           {/* SKU Status */}
           <div className="col-12 col-md-4">
-            <div className="card h-100 border-0 shadow-1 py-4 d-flex flex-column">
+            <div className="card h-100 border-0 shadow-1 py-4 d-flex flex-column px-3">
               <div className="card-header py-0 text-color-typo-primary fw-600 border-0 bg-transparent">
                 SKU Status
               </div>
@@ -448,29 +471,30 @@ const VendorDashboard = () => {
             </thead>
             <tbody>
               {skuData
+                .sort((a, b) => {
+                  // Sorting SKU data by SKU ID in ascending order
+                  return a.sku_id.localeCompare(b.sku_id); // This ensures that the SKU IDs are compared as strings
+                })
                 .filter((sku) => {
-                  const status =
-                    skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Prioritize Context State
-
+                  // Filter based on selectedSkuStatus
                   if (selectedSkuStatus === "All") return true; // Show all SKUs
-                  return status === selectedSkuStatus; // Filter based on selected status
+                  return sku.status === selectedSkuStatus; // Filter based on selected status
                 })
                 .map((sku) => {
                   const status =
                     skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Fetch updated status
-
                   return (
                     <tr key={sku.sku_id}>
-                      <td>{sku.sku_id}</td>
-                      <td>{sku.description}</td>
-                      <td>{pkoData?.category}</td>
-                      <td>{sku.brand}</td>
-                      <td>{sku.upc}</td>
-                      <td>{sku.size}</td>
-                      <td>{sku.duedate}</td>
-                      <td>
+                      <td className="align-middle">{sku.sku_id}</td>
+                      <td className="align-middle">{sku.description}</td>
+                      <td className="align-middle">{pkoData?.category}</td>
+                      <td className="align-middle">{sku.brand}</td>
+                      <td className="align-middle">{sku.upc}</td>
+                      <td className="align-middle">{sku.size}</td>
+                      <td className="align-middle">{sku.duedate}</td>
+                      <td className="align-middle">
                         <span
-                          className={`fw-600 text-nowrap px-12 py-2 rounded-pill ${
+                          className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
                             status === "Draft"
                               ? "bg-color-draft text-white"
                               : "bg-color-light-border text-color-typo-secondary"
@@ -479,7 +503,7 @@ const VendorDashboard = () => {
                           {sku.status}
                         </span>
                       </td>
-                      <td>
+                      <td className="align-middle">
                         <button
                           className="btn p-0 border-0 shadow-none"
                           onClick={() => handleForwardClick(sku)}
@@ -733,7 +757,12 @@ const VendorDashboard = () => {
         </div>
       </div>
 
-      <ModalLoad />
+      {/* Pass loadCount to the ModalLoad component */}
+      <ModalLoad
+        count={loadCount}
+        isVisible={isModalVisible}
+        closeModal={closeModal}
+      />
     </div>
   );
 };

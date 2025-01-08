@@ -3,8 +3,7 @@ import "./../styles/style.css";
 
 const initialImageState = {
   "Product Images": [],
-  "Component Images - Box": [],
-  "Component Images - Protective Film": [],
+  "Component Images": [],
 };
 
 const SkuProduct_Img = () => {

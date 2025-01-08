@@ -33,14 +33,7 @@ const PkgDataForm = () => {
 
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
-
-  // const savePkgData = async () => {
-  //   // Save the package data to the backend
-  //   console.log("Autosaving Package Data:", pkgData.answers);
-  //   await axiosInstance.post("package/save/", pkgData.answers, {
-  //     headers: { "Content-Type": "application/json" },
-  //   });
-  // };
+  const isFirstLoad = useRef(true);
   const autosavePkgData = async () => {
     if (!skuId || !skuData.componentId || !skuData.componentName || !pkoId) {
       console.warn(
@@ -52,40 +45,47 @@ const PkgDataForm = () => {
     try {
       const payload = {
         name: skuData.componentName,
-        form_status: "Pending",
+        form_status: "Pending", // Autosave keeps it as Pending
         pko_id: pkoId,
         sku_id: skuId,
         responses: {}, // Initialize responses
       };
 
-      // Map answers using question_text and handle units
-      Object.keys(pkgData.answers).forEach((questionId) => {
-        const question = Object.values(pkgData.sections)
-          .flat()
-          .find((q) => q.question_id === questionId);
+      //Flatten and map all answered questions
+      const answeredQuestions = Object.values(pkgData.sections).flatMap(
+        (section) =>
+          section
+            .map((question) => {
+              const answer = pkgData.answers[question.question_id];
+              const unit =
+                pkgData.answers[`${question.question_id}_unit`] || null;
 
-        if (question && question.question_text) {
-          // Check if the question has a unit
-          if (
-            question.question_type.includes("Dropdown") &&
-            pkgData.answers[`${questionId}_unit`]
-          ) {
-            payload.responses[question.question_text] =
-              `${pkgData.answers[questionId]} ${pkgData.answers[`${questionId}_unit`]}`;
-          } else {
-            payload.responses[question.question_text] =
-              pkgData.answers[questionId];
-          }
-        } else {
-          console.warn(
-            `Question with ID ${questionId} not found or missing question_text.`,
-          );
-        }
+              if (answer === undefined || answer === "") return null;
+
+              // Handle different question types
+              if (question.question_type.includes("Dropdown") && unit) {
+                return {
+                  question_text: question.question_text,
+                  response: `${answer}${unit}`.trim(),
+                };
+              }
+
+              return {
+                question_text: question.question_text,
+                response: answer,
+              };
+            })
+            .filter((q) => q !== null),
+      );
+
+      //Build the `responses` object dynamically
+      answeredQuestions.forEach((q) => {
+        payload.responses[q.question_text] = q.response;
       });
 
       console.log("Autosave Payload:", JSON.stringify(payload, null, 2));
 
-      await axiosInstance.put(
+      const response = await axiosInstance.put(
         `/sku/${skuId}/components/${skuData.componentId}/`,
         payload,
         {
@@ -93,7 +93,11 @@ const PkgDataForm = () => {
         },
       );
 
-      console.log("Autosave successful at", new Date().toLocaleTimeString());
+      if (response.status === 200) {
+        console.log("Autosave successful at", new Date().toLocaleTimeString());
+      } else {
+        console.warn("Autosave failed with status:", response.status);
+      }
     } catch (error) {
       console.error("Autosave failed:", error.message);
     }
@@ -140,65 +144,6 @@ const PkgDataForm = () => {
     calculatePkgFormProgress();
   }, [pkgData.answers, pkgData.sections, setPkgData]);
 
-  // useEffect(() => {
-  //   if (location.state) {
-  //     if (location.state.pkoId) {
-  //       setPkoData((prev) => ({ ...prev, pko_id: location.state.pkoId }));
-  //     }
-  //     if (location.state.description) {
-  //       setSkuDetails((prev) => ({ ...prev, description: location.state.description }));
-  //     }
-  //   }
-  // }, [location.state, setPkoData, setSkuDetails]);
-  // useEffect(() => {
-  //   if (location.state) {
-  //     setSkuDetails((prev) => location.state.skuDetails || prev);
-  //     setPkoData((prev) => location.state.pkoData || prev);
-  //     setSkuData((prev) => ({
-  //       ...prev,
-  //       skuId,
-  //       componentId: location.state.componentId,
-  //       componentName: location.state.componentName,
-  //       formStatus: location.state.formStatus,
-  //       responses: location.state.responses || {},
-  //     }));
-  //   }
-  // }, [location.state, setSkuDetails, setPkoData, setSkuData]);
-
-  // useEffect(() => {
-  //   if (location.state) {
-  //     setSkuDetails((prev) => location.state.skuDetails || prev);
-  //     setPkoData((prev) => location.state.pkoData || prev);
-
-  //     setSkuData((prev) => ({
-  //       ...prev,
-  //       skuId,
-  //       componentId: location.state.componentId,
-  //       componentName: location.state.componentName,
-  //       formStatus: location.state.formStatus,
-  //     }));
-
-  //     // Populate answers from responses if available
-  //     if (location.state.responses) {
-  //       const answers = {};
-  //       Object.entries(location.state.responses).forEach(([questionText, response]) => {
-  //         const question = Object.values(pkgData.sections)
-  //           .flat()
-  //           .find((q) => q.question_text === questionText);
-
-  //         if (question) {
-  //           answers[question.question_id] = response;
-  //         }
-  //       });
-  // console.log("pkg data answer response",pkgData.sections,answers,location.state.responses)
-  //       setPkgData((prev) => ({
-  //         ...prev,
-  //         answers,
-  //       }));
-  //     }
-  //   }
-  // }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
-
   useEffect(() => {
     if (location.state) {
       setSkuDetails((prev) => location.state.skuDetails || prev);
@@ -212,13 +157,44 @@ const PkgDataForm = () => {
         formStatus: location.state.formStatus || prev.formStatus,
       }));
 
-      console.log("SKU Data after initialization:", skuData);
+      // Reset answers when componentId changes
+      setPkgData((prev) => ({
+        ...prev,
+        answers: {}, // Clear previous answers
+      }));
+
+      // Populate answers from responses if available
+      if (location.state.responses) {
+        const answers = {};
+        Object.entries(location.state.responses).forEach(
+          ([questionText, response]) => {
+            const question = Object.values(pkgData.sections)
+              .flat()
+              .find((q) => q.question_text === questionText);
+
+            if (question) {
+              answers[question.question_id] = response;
+            }
+          },
+        );
+
+        console.log("Populated answers for component:", answers);
+
+        setPkgData((prev) => ({
+          ...prev,
+          answers,
+        }));
+      }
     }
-  }, [location.state, setSkuDetails, setPkoData, setSkuData]);
+  }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
 
   useEffect(() => {
     // Ensure both pkgData.sections and location.state.responses are available
-    if (location.state?.responses && Object.keys(pkgData.sections).length > 0) {
+    if (
+      isFirstLoad.current &&
+      location.state?.responses &&
+      Object.keys(pkgData.sections).length > 0
+    ) {
       setPkgData((prev) => {
         const updatedAnswers = { ...prev.answers }; // Preserve existing answers
 
@@ -229,7 +205,22 @@ const PkgDataForm = () => {
               .find((q) => q.question_text === questionText);
 
             if (question) {
-              updatedAnswers[question.question_id] = response;
+              if (
+                question.question_type == "Integer + Dropdown" ||
+                question.question_type == "Float + Dropdown"
+              ) {
+                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/;
+                const match = response.match(regex);
+
+                if (match) {
+                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
+                  const unit = match[3]; // Extract unit part
+                  updatedAnswers[question.question_id] = value;
+                  updatedAnswers[`${question.question_id}_unit`] = unit;
+                }
+              } else {
+                updatedAnswers[question.question_id] = response;
+              }
             } else {
               console.warn(`Question not found for text: ${questionText}`);
             }
@@ -237,7 +228,8 @@ const PkgDataForm = () => {
         );
 
         console.log("Mapped Answers from Responses:", updatedAnswers);
-
+        // Mark as loaded to prevent future runs
+        isFirstLoad.current = false;
         return {
           ...prev,
           answers: updatedAnswers, // Update answers without clearing existing ones
@@ -246,9 +238,9 @@ const PkgDataForm = () => {
     }
   }, [pkgData.sections, location.state?.responses, setPkgData]);
 
-  console.log("Persisted SKU Data:", skuData);
-  console.log("Persisted SKU Details:", skuDetails);
-  console.log("Persisted PKO Data:", pkoData);
+  // console.log("Persisted SKU Data:", skuData);
+  // console.log("Persisted SKU Details:", skuDetails);
+  // console.log("Persisted PKO Data:", pkoData);
 
   useEffect(() => {
     console.log("Received State in PkgDataForm:", {
@@ -633,7 +625,7 @@ const PkgDataForm = () => {
             .filter((q) => q !== null),
       );
 
-      // 🛠️ Build the `responses` object dynamically
+      // Build the `responses` object dynamically
       answeredQuestions.forEach((q) => {
         payload.responses[q.question_text] = q.response;
       });
@@ -701,17 +693,6 @@ const PkgDataForm = () => {
                 </p>
               ))}
 
-              {/* <div className="circle-loader-container mt-4">
-                    <CircleLoader
-                      className="circle-loader"
-                      width="24"
-                      height="24"
-                      style={{ transform: "rotate(-90deg)" }}
-                    />
-                    <span className="percentage-text ml-3">
-                      {Math.round(progressPercentage)}% Completed
-                    </span>
-                  </div> */}
               <div className="progress-loader-container pkgdataform-loader mt-4 d-flex align-items-center">
                 <ProgressLoader
                   percentage={Math.round(progressPercentage)}

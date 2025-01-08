@@ -1,18 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import ModalLoad from "../pages/ModalLoad";
+import useAuthentication from "../hooks/useAuthentication";
 
 const Header = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
+  const { logoutUserAction } = useAuthentication(); // Using the custom hook
+
+  const handleLogout = () => {
+    logoutUserAction(); // Call the logout function from the custom hook
+  };
+
+  // Function to open the modal
+  const openModal = () => {
+    setIsModalVisible(true);
+  };
+
+  // Function to close the modal
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-primary py-3">
       <div className="container-fluid px-5">
         {/* Logo and Heading on the left side */}
-        <a className="text-decoration-none text-white fs-18" href="#">
+        <Link
+          to="/vendordashboard"
+          className="text-decoration-none text-white fs-18"
+        >
           <img
             src="/assets/images/home-icon.svg"
             alt="Logo"
             style={{ height: "40px", marginRight: "10px" }}
           />
           AI for Sustainable Packaging
-        </a>
+        </Link>
 
         {/* Navbar toggler for mobile */}
         <button
@@ -35,11 +58,12 @@ const Header = () => {
               <button
                 type="button"
                 className="btn p-0 border-none bg-transparent me-4"
+                onClick={openModal} // Open modal on click
               >
                 <img src="/assets/images/help-circle.png" alt="help-circle" />
               </button>
             </li>
-            <li className="nav-item">
+            <li className="nav-item d-none">
               <button
                 type="button"
                 className="btn p-0 border-none bg-transparent me-4"
@@ -57,8 +81,26 @@ const Header = () => {
               >
                 <img src="/assets/images/user-icon.png" alt="user-icon" />
               </button>
+              {/* Adding logout span */}
+              <span
+                onClick={handleLogout}
+                className="logout-span"
+                style={{
+                  marginLeft: "10px",
+                  cursor: "pointer",
+                  color: "white", // Custom styles for the logout button
+                }}
+              >
+                Logout
+              </span>
             </li>
           </ul>
+          {/* ModalLoad Component with count passed as prop */}
+          <ModalLoad
+            count={0}
+            isVisible={isModalVisible}
+            closeModal={closeModal}
+          />
         </div>
       </div>
     </nav>

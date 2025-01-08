@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from "react";
 import "./../styles/ModalLoad.css"; // Import the custom CSS file for the modal
 
-const ModalLoad = () => {
-  const [isModalVisible, setIsModalVisible] = useState(true); // Modal visibility state
-
-  // Close the modal
-  const closeModal = () => {
-    setIsModalVisible(false);
-  };
+const ModalLoad = ({ count, isVisible, closeModal }) => {
+  // Save the updated count back to localStorage
+  localStorage.setItem("loadCount", 1);
 
   // Auto-close the modal after 5 seconds (optional, adjust as needed)
   useEffect(() => {
-    const timer = setTimeout(
-      () => {
-        closeModal();
-      },
-      5 * 60 * 1000,
-    ); // Auto close after 5 seconds
+    if (count === 0) {
+      const timer = setTimeout(
+        () => {
+          closeModal();
+        },
+        5 * 60 * 1000,
+      ); // Auto close after 5 seconds
 
-    return () => clearTimeout(timer); // Cleanup timer on component unmount
-  }, []);
+      return () => clearTimeout(timer); // Cleanup timer on component unmount
+    }
+  }, [isVisible, count, closeModal]);
+
+  // Don't render the modal if count is greater than 0
+  if (count > 0) return null;
 
   return (
-    isModalVisible && (
+    isVisible && (
       <div className="modal-overlay">
         <div className="modal-dialog">
           <div className="modal-content">

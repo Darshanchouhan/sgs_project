@@ -49,7 +49,7 @@ const Breadcrumb = ({
 
           {/* Save & Close Button */}
           <div className="d-flex align-items-center">
-            <button className="save-button" onClick={onSaveClick}>
+            <button className="save-button fs-14 fw-600 border-0 px-4 py-12" onClick={onSaveClick}>
               Save & Close
             </button>
           </div>

@@ -18,7 +18,7 @@ const authSlice = createSlice({
     login: (state, action) => {
       state.token = action.payload.token; // Set the token from the action's payload
       state.isAuthenticated = true; // Set isAuthenticated to true
-      state.user = action.payload.user; // Set the user information from the action's payload
+      state.refershToken = action.payload.refershToken; // Set the user information from the action's payload
       localStorage.setItem("authToken", action.payload.token); // Store the token in localStorage for persistence
     },
 
@@ -31,14 +31,14 @@ const authSlice = createSlice({
     },
 
     // Reducer to manually set the user information (optional, if needed)
-    setUser: (state, action) => {
-      state.user = action.payload; // Set the user data from the action's payload
-    },
+    // setUser: (state, action) => {
+    //   state.user = action.payload; // Set the user data from the action's payload
+    // },
   },
 });
 
 // Exporting the actions so they can be dispatched in components or other parts of the app
-export const { login, logout, setUser } = authSlice.actions;
+export const { login, logout } = authSlice.actions;
 
 // Exporting the reducer to be included in the store configuration
 export default authSlice.reducer;

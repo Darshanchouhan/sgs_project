@@ -23,7 +23,7 @@ export const SkuProvider = ({ children }) => {
           showTable: false,
           newComponent: "",
           componentNumber: 0,
-          showInput: true,
+          showInput: false,
           hasAddedFirstComponent: false,
           isCancelDisabled: true,
         };

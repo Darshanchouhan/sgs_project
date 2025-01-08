@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { login, logout } from "../store/authSlice"; // Redux actions
-import {
-  fetchLoginTokens,
-  refreshAccessToken,
-  logoutUser,
-} from "../services/authService"; // Service functions
+import { fetchLoginTokens, refreshAccessToken } from "../services/authService"; // Service functions
 import axios from "axios";
 
 const useAuthentication = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Function to login and store token
   const loginUser = async (username, password) => {
@@ -21,7 +19,7 @@ const useAuthentication = () => {
       dispatch(
         login({
           token: tokens.access,
-          user: tokens.user, // Assuming user data is returned
+          refershToken: tokens.token, // Assuming user data is returned
         }),
       );
 
@@ -37,15 +35,15 @@ const useAuthentication = () => {
 
   // Function to logout user and remove token from localStorage and Redux state
   const logoutUserAction = () => {
-    logoutUser(); // Clear tokens from localStorage
     dispatch(logout()); // Clear the Redux authentication state
     delete axios.defaults.headers["Authorization"]; // Remove Authorization header
+    navigate("/login"); // Redirect to login Page
   };
 
   // Function to check if the token is expired and refresh it
   const refreshTokenIfNeeded = async () => {
     const accessToken = localStorage.getItem("authToken");
-    const refreshToken = localStorage.getItem("refresh_token");
+    const refreshToken = localStorage.getItem("refereshToken");
 
     if (!accessToken || !refreshToken) {
       return false; // If no tokens are present, return false

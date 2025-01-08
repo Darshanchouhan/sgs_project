@@ -1,20 +1,13 @@
 import { useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { logout } from "../store/authSlice"; // Adjust the import according to your project structure
+import useAuthentication from "../hooks/useAuthentication";
 
 const useInactivityTimer = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const inactivityTimerRef = useRef(null);
+  const { logoutUserAction } = useAuthentication();
 
   // Function to log out the user after inactivity
   const logoutUserOnInactivity = () => {
-    localStorage.clear(); // Clear localStorage
-    dispatch(logout()); // Clear Redux state
-    delete axios.defaults.headers["Authorization"]; // Remove Authorization header from axios
-    navigate("/login"); // Redirect to login page
+    logoutUserAction();
   };
 
   // Function to reset the inactivity timer
@@ -26,11 +19,10 @@ const useInactivityTimer = () => {
     // Set a new inactivity timer for 5 minutes (300,000 ms)
     inactivityTimerRef.current = setTimeout(
       () => {
-        console.log("User has been inactive for 5 minutes, logging out...");
         logoutUserOnInactivity();
       },
-      30 * 60 * 1000,
-    ); // 30 minutes of inactivity
+      60 * 60 * 1000,
+    ); // 60 minutes of inactivity
   };
 
   useEffect(() => {

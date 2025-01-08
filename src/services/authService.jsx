@@ -11,7 +11,7 @@ export const fetchLoginTokens = async (username, password) => {
     localStorage.setItem("username", username); // save the username
     // Store the tokens in localStorage
     localStorage.setItem("authToken", response.data.access); // Access token
-    localStorage.setItem("refresh_token", response.data.token); // Refresh token
+    localStorage.setItem("refereshToken", response.data.token); // Refresh token
 
     return response.data; // Return both tokens
   } catch (error) {
@@ -22,7 +22,7 @@ export const fetchLoginTokens = async (username, password) => {
 
 // Function to refresh the access token using the refresh token
 export const refreshAccessToken = async () => {
-  const refreshToken = localStorage.getItem("refresh_token");
+  const refreshToken = localStorage.getItem("refereshToken");
 
   try {
     const response = await axiosInstance.post("refresh_token/", {
@@ -40,11 +40,6 @@ export const refreshAccessToken = async () => {
     );
     return null; // Return null if refresh fails
   }
-};
-
-// Function to log out the user and remove tokens from localStorage
-export const logoutUser = () => {
-  localStorage.clear();
 };
 
 // Function to fetch the profile of the currently authenticated user

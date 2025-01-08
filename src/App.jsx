@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import {
   BrowserRouter as Router,
   Routes,
@@ -18,9 +20,36 @@ import { SkuProvider } from "./pages/SkuContext"; // Assuming you have this cont
 import { PkgDataProvider } from "./pages/Pkg_DataContext"; // Assuming you have this context
 import { VendorProvider } from "./pages/VendorContext"; // Assuming you have this context
 
-localStorage.clear(); // Clears the localStorage immediately before the app renders
+// Import Redux actions
+import { login } from "./store/authSlice"; // Import login action
 
 function App() {
+  const dispatch = useDispatch();
+
+  // Check if user is logged in by checking localStorage for token on app load
+  useEffect(() => {
+    const isFirstLogin = localStorage.getItem("isFirstLogin");
+
+    if (isFirstLogin === null) {
+      // If it's the first login, clear localStorage
+      localStorage.clear();
+      // Set flag in localStorage to indicate it's not the first login anymore
+      localStorage.setItem("isFirstLogin", "false");
+    }
+
+    const token = localStorage.getItem("authToken");
+    const refreshToken = localStorage.getItem("refereshToken"); // Assuming you store user info in localStorage
+    if (token && refreshToken) {
+      // Dispatch login to set Redux state with token and user info
+      dispatch(
+        login({
+          token: token,
+          refershToken: refreshToken,
+        }),
+      );
+    }
+  }, [dispatch]);
+
   return (
     <Router>
       {/* Wrap all providers around the Router */}
