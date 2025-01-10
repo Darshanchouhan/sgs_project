@@ -49,6 +49,17 @@ const Sku_Page = () => {
   }, [location.state, pkoData]);
 
   useEffect(() => {
+    // Check if no components exist and reset the state to show the box image
+    if (skuData.components.length === 0) {
+      setSkuData((prev) => ({
+        ...prev,
+        showTable: false, // Do not show the table initially
+        showInput: false, // Hide the input field
+      }));
+    }
+  }, [skuData.components]);
+
+  useEffect(() => {
     // Avoid overwriting the state on reload
     if (!skuData.components.length && !skuDetails) {
       setSkuData((prev) => prev);
@@ -208,61 +219,55 @@ const Sku_Page = () => {
 
   // Handle adding a component
   const handleAddComponent = async () => {
-    if (skuData.newComponent.trim()) {
-      try {
-        const payload = {
-          pko_id: pkoId,
-          name: skuData.newComponent,
-          form_status: "Pending",
-        };
-
-        if (!skuId) {
-          console.error("SKU ID is missing. Cannot add a component.");
-          return;
-        }
-
-        const response = await axiosInstance.post(
-          `/sku/${skuId}/components/`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        setSkuData((prev) => ({
-          ...prev,
-          skuId, // Ensure skuId is set in the context
-          components: [
-            ...prev.components,
-            {
-              id: response.data?.id || null,
-              name: skuData.newComponent,
-              formStatus: response.data?.form_status || "",
-            },
-          ],
-          newComponent: "",
-        }));
-
-        console.log("Component added successfully:", response.data);
-        alert("Component added successfully!");
-      } catch (error) {
-        console.error("Error adding component:", error);
-        alert("Failed to add component. Please try again.");
-      }
-    } else {
+    // Validate the newComponent input
+    if (!skuData.newComponent.trim()) {
       alert("Component name cannot be empty!");
+      return; // Exit early without modifying the state
     }
-  };
 
-  // Handle cancel action
-  const handleCancel = () => {
-    setSkuData((prev) => ({
-      ...prev,
-      newComponent: "",
-      showInput: false,
-    }));
+    try {
+      const payload = {
+        pko_id: pkoId,
+        name: skuData.newComponent,
+        form_status: "Pending",
+      };
+
+      if (!skuId) {
+        console.error("SKU ID is missing. Cannot add a component.");
+        return; // Exit early without modifying the state
+      }
+
+      const response = await axiosInstance.post(
+        `/sku/${skuId}/components/`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      // Update the components list in the state
+      setSkuData((prev) => ({
+        ...prev,
+        components: [
+          ...prev.components,
+          {
+            id: response.data?.id || null,
+            name: skuData.newComponent,
+            formStatus: response.data?.form_status || "",
+          },
+        ],
+        newComponent: "", // Clear the input field
+        showInput: false, // Hide input field after adding the component
+        isCancelDisabled: false, // Enable the cancel button for subsequent adds
+      }));
+
+      alert("Component added successfully!");
+    } catch (error) {
+      console.error("Error adding component:", error);
+      alert("Failed to add component. Please try again.");
+    }
   };
 
   const handleForwardClick = async (index) => {
@@ -524,7 +529,10 @@ const Sku_Page = () => {
                 Submission Last Date: {submissionLastDate}
               </p>
 
-              <button className="save-button ms-3 px-4 py-12 fs-14 fw-600 border-0" onClick={saveSkuData}>
+              <button
+                className="save-button ms-3 px-4 py-12 fs-14 fw-600 border-0"
+                onClick={saveSkuData}
+              >
                 Save & Validate
               </button>
             </div>
@@ -571,14 +579,23 @@ const Sku_Page = () => {
               {/* Add Product Images Button */}
               <div className="d-flex align-items-center  col-3 justify-content-end">
                 <div className="d-flex align-items-center mb-4">
-                <p class="fs-14 fw-600 text-color-typo-primary mb-0">2/5 images uploaded <span class="ps-12 text-color-draft text-decoration-underline cursor-pointer" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight-image" aria-controls="offcanvasRight-image">View</span></p>
-                <button
-                  className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
-                  onClick={handleAddProductImageClick}
-                >
-                  + Add product images
-                </button>
-
+                  <p className="fs-14 fw-600 text-color-typo-primary mb-0">
+                    2/5 images uploaded{" "}
+                    <span
+                      className="ps-12 text-color-draft text-decoration-underline cursor-pointer"
+                      data-bs-toggle="offcanvas"
+                      data-bs-target="#offcanvasRight-image"
+                      aria-controls="offcanvasRight-image"
+                    >
+                      View
+                    </span>
+                  </p>
+                  <button
+                    className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
+                    onClick={handleAddProductImageClick}
+                  >
+                    + Add product images
+                  </button>
                 </div>
               </div>
             </div>
@@ -628,7 +645,7 @@ const Sku_Page = () => {
               </div>
             </div>
 
-            {/* Components Table Section */}
+            {/* Sku Components Section */}
             <div className="col-12 col-md-7">
               <div className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100">
                 <div className="d-flex justify-content-between align-items-center">
@@ -651,7 +668,6 @@ const Sku_Page = () => {
                     </button>
                   )}
                 </div>
-
                 {/* Case 1: No Components Exist */}
                 {skuData.components.length === 0 && !skuData.showTable ? (
                   <div className="text-center">
@@ -667,14 +683,14 @@ const Sku_Page = () => {
                     </p>
                     <button
                       className="btn btn-outline-primary"
-                      onClick={() => {
+                      onClick={() =>
                         setSkuData((prev) => ({
                           ...prev,
                           showTable: true,
-                          showInput: true,
-                          isCancelDisabled: true, // Disable cancel for the first addition
-                        }));
-                      }}
+                          showInput: true, // Allow the input field to appear
+                          isCancelDisabled: true, // Disable the cancel button for the first addition
+                        }))
+                      }
                     >
                       + Add SKU Components
                     </button>
@@ -728,6 +744,7 @@ const Sku_Page = () => {
                     </table>
 
                     {/* Add Component Input Section */}
+                    {/* Add Component Input Section */}
                     {skuData.showInput && (
                       <div className="d-flex align-items-center gap-3 mt-3">
                         <input
@@ -744,15 +761,7 @@ const Sku_Page = () => {
                         />
                         <div
                           className="d-flex align-items-center cursor-pointer text-color-primary"
-                          onClick={() => {
-                            handleAddComponent();
-                            setSkuData((prev) => ({
-                              ...prev,
-                              showInput: false, // Hide input after adding a component
-                              newComponent: "",
-                              isCancelDisabled: false, // Enable cancel for next time
-                            }));
-                          }}
+                          onClick={handleAddComponent}
                         >
                           <img
                             src="/assets/images/plus-add_blue.png"

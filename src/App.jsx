@@ -7,6 +7,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import "./styles/style.scss";
+import useInactivityTimerWithTokenRefresh from "./hooks/useInactivityTimerWithTokenRefresh";
 
 // Import Pages and Components
 import LoginPage from "./pages/LoginPage"; // Login page component
@@ -24,6 +25,9 @@ import { VendorProvider } from "./pages/VendorContext"; // Assuming you have thi
 import { login } from "./store/authSlice"; // Import login action
 
 function App() {
+  // Call the hook to start tracking inactivity and refreshing the token
+  useInactivityTimerWithTokenRefresh();
+
   const dispatch = useDispatch();
 
   // Check if user is logged in by checking localStorage for token on app load

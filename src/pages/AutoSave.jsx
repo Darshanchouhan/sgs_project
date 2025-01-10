@@ -35,15 +35,13 @@ const Autosave = ({ saveFunction, dependencies }) => {
       {isSaving ? (
         <span className="autosave-status">Saving...</span>
       ) : lastSaved ? (
-        
         <span className="autosave-status">Last saved at {lastSaved}</span>
       ) : (
         <div className="d-flex align-items-center justify-content-end">
-          <img
-                            src="/assets/images/check-tick-correct.svg"
-                            alt="Forward"
-                          />
-        <span className="autosave-status ms-12">Your form will be Autosaved</span>
+          <img src="/assets/images/check-tick-correct.svg" alt="Forward" />
+          <span className="autosave-status ms-12">
+            Your form will be Autosaved
+          </span>
         </div>
       )}
     </div>
