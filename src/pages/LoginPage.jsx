@@ -3,11 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useAuthentication from "../hooks/useAuthentication"; // Import the custom hook
 import Login from "../components/login/login";
 import { fetchUserProfile } from "../services/authService";
-import useInactivityTimer from "../hooks/useInactivityTimer";
 
 const LoginPage = () => {
-  // Call the custom hook
-  useInactivityTimer();
   const { loginUser, error: authError } = useAuthentication(); // Use the custom hook
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
