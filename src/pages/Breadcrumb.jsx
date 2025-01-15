@@ -34,7 +34,7 @@ const Breadcrumb = ({
                   <li className="breadcrumb-item">
                     <a
                       href="#"
-                      className="text-decoration-none text-color-typo-secondary fw-600 fs-14"
+                      className="text-decoration-none fw-600 fs-14 text-secondary"
                     >
                       {description}
                     </a>
