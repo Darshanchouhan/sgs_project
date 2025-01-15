@@ -404,8 +404,8 @@ const Sku_Page = () => {
                 }
               />
               <select
-                className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-2"
-                style={{ flex: 1 }}
+                className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-12 w-72 fw-400"
+                
                 value={
                   skuData.dimensionsAndWeights[
                     `${question.question_id}_unit`
@@ -609,7 +609,7 @@ const Sku_Page = () => {
             {/* Primary Packaging Details */}
             <div className="col-12 col-md-5">
               <div
-                className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100"
+                className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100 small-arrow"
                 style={{ maxHeight: "400px", overflowY: "auto" }}
               >
                 <div className="d-flex align-items-center justify-content-between">
@@ -670,7 +670,7 @@ const Sku_Page = () => {
                 </div>
                 {/* Case 1: No Components Exist */}
                 {skuData.components.length === 0 && !skuData.showTable ? (
-                  <div className="text-center">
+                  <div className="text-center h-100 d-flex flex-column justify-content-center align-items-center">
                     <img
                       src="/assets/images/BoxImg.png"
                       alt="Box"
@@ -699,20 +699,20 @@ const Sku_Page = () => {
                   /* Case 2: Components Exist or Table is Shown */
                   <div>
                     {/* Components Table */}
-                    <table className="table fs-14 w-100">
+                    <table className="table fs-14 w-100 component-tbl mt-4">
                       <thead>
                         <tr>
-                          <th scope="col">Component Name</th>
-                          <th scope="col">Form Status</th>
-                          <th scope="col">Actions</th>
+                          <th className="fs-14 fw-600 bg-light-shade" scope="col">Component Name</th>
+                          <th className="fs-14 fw-600 bg-light-shade" scope="col">Form Status</th>
+                          <th className="fs-14 fw-600 bg-light-shade" scope="col">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
-                            <td>{component.name}</td>
-                            <td>{component.form_status}</td>
-                            <td>
+                            <td className="h-52 align-middle">{component.name}</td>
+                            <td className="h-52 align-middle">{component.form_status}</td>
+                            <td className="h-52 align-middle">
                               <span>
                                 {0}{" "}
                                 <img
@@ -767,9 +767,9 @@ const Sku_Page = () => {
                             src="/assets/images/plus-add_blue.png"
                             alt="Add"
                             className="me-2"
-                            style={{ width: "16px", height: "16px" }}
+                            style={{ width: "24px", height: "24px" }}
                           />
-                          <span>Add Component</span>
+                          <span className="fs-14 fw-600 text-color-draft">Add Component</span>
                         </div>
                         <div
                           className={`d-flex align-items-center cursor-pointer text-color-primary ${
@@ -792,9 +792,9 @@ const Sku_Page = () => {
                             src="/assets/images/clear-cross-cancel.png"
                             alt="Cancel"
                             className="me-2"
-                            style={{ width: "16px", height: "16px" }}
+                            style={{ width: "24px", height: "24px" }}
                           />
-                          <span>Cancel</span>
+                          <span className="fs-14 fw-600 text-secondary">Cancel</span>
                         </div>
                       </div>
                     )}

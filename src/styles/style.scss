@@ -26,6 +26,7 @@ $theme-colors: (
   "color-responce-pending": #eb4747,
   "color-completed": #30ab30,
   "color-modal-text": #838383,
+  "color-padding-label": #F9E0E0,
 );
 
 // padding Config
@@ -112,6 +113,7 @@ $sizes: (
   22: 1.375rem,
   23: 1.438rem,
   24: 1.5rem,
+  32: 2rem,
   44: 2.75rem,
   48: 3rem,
 );
@@ -176,14 +178,14 @@ $column-gaps: (
 }
 
 // height
-@each $h in (20, 44, 51, 72) {
+@each $h in (20, 44, 51, 52, 72) {
   .h-#{$h} {
     height: unquote($h + "px !important");
   }
 }
 
 // width
-@each $w in (92, 165, 320, 350, 395) {
+@each $w in (72, 92, 165, 320, 350, 395) {
   .w-#{$w} {
     width: unquote($w + "px !important");
   }

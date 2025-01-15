@@ -362,6 +362,7 @@ const PkgDataForm = () => {
               <label key={option} className="me-3">
                 <input
                   type="radio"
+                  className="me-2"
                   name={question.question_id}
                   value={option}
                   checked={pkgData.answers[question.question_id] === option}
@@ -376,7 +377,7 @@ const PkgDataForm = () => {
 
       case "Dropdown":
         return (
-          <div className="input-group align-items-center">
+          <div className="input-group align-items-center select-arrow-pos">
             <select
               className="w-320 me-2"
               value={pkgData.answers[question.question_id] || ""}

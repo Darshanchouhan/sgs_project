@@ -22207,6 +22207,14 @@ input:focus {
   font-weight: 600;
 }
 
+.small-arrow .form-select{
+  background-size: 16px 16px !important;
+}
+
+.form-select{
+      background-size: 24px 24px;
+}
+
 .login-bg {
   background-image: url(./assets/images/login-bg.png);
   height: 100%;
@@ -22424,7 +22432,7 @@ input[type="radio"] {
   width: 120px !important;
 }
 .background-position {
-  background-position: 38px;
+  background-position: 46px 10px;
 }
 /*...........*/
 .sku-details-box {
@@ -22577,4 +22585,35 @@ input[type="radio"] {
 .bg-color-draft {
   background-color: #007bff !important; /* Blue Background */
   color: white !important; /* White Text */
+}
+
+.fw-400{
+  font-weight: 400 !important;
+}
+
+.component-tbl thead tr th{
+  background-color: #fff3f2 !important;
+}
+
+.component-tbl .circle{
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+  background-color: #eb4747;
+  border-radius: 50%;
+}
+
+.select-arrow-pos select{
+  -webkit-appearance: none;  /* Remove default arrow in WebKit browsers (Safari) */
+  -moz-appearance: none;     /* Remove default arrow in Firefox */
+  appearance: none;   
+  background: url(/public/assets/images/component-down.svg) no-repeat right 16px center;
+  background-size: 24px 24px;
+}
+/* Media Query */
+@media (max-width: 1365px) {
+  .container-height {
+    height: 100% !important;
+    padding-bottom: 1.5rem;
+}
 }

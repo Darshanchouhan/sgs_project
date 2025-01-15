@@ -25,20 +25,22 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
   return (
     isVisible && (
       <div className="modal-overlay">
-        <div className="modal-dialog">
+        <div className="modal-dialog px-60 modal-dialog-scrollable">
           <div className="modal-content">
-            <div className="modal-header">
-              <button className="close-btn" onClick={closeModal}>
-                X
-              </button>
+            <div className="modal-header d-flex justify-content-end">
+              
+              <button className="continue-btn bg-secondary" onClick={closeModal}>
+                  Continue to your dashboard{" "}
+                  <img
+                    src="/assets/images/arrow-right-forward.svg"
+                    alt="arrow-right"
+                  />
+                </button>
             </div>
             <div className="modal-body">
-              <h1 className="title">Sustainable Packaging Platform</h1>
-              <p>
-                Packaging data collection enables the CVS Our brands to submit
-                packaging related data accurately with automated validation
-                checks during the process of data submission, and expert-based
-                validation post submission.
+              <h1 className="title text-secondary mb-12 fs-32">Sustainable Packaging Platform</h1>
+              <p className="fs-16 fw-600 text-color-labels">
+              This application enables suppliers of CVS to submit packaging specifications accurately with clear instructions and automated validation checks. The application serves the following objectives.
               </p>
               <div className="feature-cards">
                 <div className="feature-card">
@@ -47,9 +49,8 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     height="88px"
                     alt="package"
                   />
-                  <p>
-                    To establish a packaging baseline for all CVS Our Brands
-                    products
+                  <p className="fs-14">
+                  To establish a packaging specifications baseline for CVS owned brands.
                   </p>
                 </div>
                 <div className="feature-card">
@@ -58,9 +59,9 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     height="88px"
                     alt="package"
                   />
-                  <p>
-                    Inform an Our Brands packaging strategy (focused on EPR cost
-                    mitigation) and target setting.
+                  <p  className="fs-14">
+                  Inform a packaging strategy focused on sustainable packaging goals and EPR cost mitigation.
+
                   </p>
                 </div>
                 <div className="feature-card">
@@ -69,27 +70,19 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     height="88px"
                     alt="package"
                   />
-                  <p>
-                    To enable accurate reporting for compliance with plastics
-                    and packaging regulations.
+                  <p  className="fs-14">
+                  To enable accurate reporting for compliance with EPR and packaging regulations.
+
                   </p>
                 </div>
               </div>
-              <h2>What will CVS product vendors have to do?</h2>
-              <p>
-                The CVS Our brands will have to complete filling up of forms for
-                sharing information related to packaging for a list of
-                pre-identified product SKUs and submit all forms for review
-                before the last date of submission.
+              <h2 className="text-color-typo-primary fs-22 mb-32">What will CVS product vendors have to do?</h2>
+              <p  className="fs-14">
+              Suppliers will have to submit packaging data for all active PKOs, covering all SKUs assigned in respective PKOs. For each SKU, suppliers will need to add components and then complete component-specific forms. Suppliers will need to submit all forms for review before the last date of submission.
+
               </p>
               <div className="modal-footer">
-                <button className="continue-btn" onClick={closeModal}>
-                  Continue to your dashboard{" "}
-                  <img
-                    src="/assets/images/arrow-right-forward.svg"
-                    alt="arrow-right"
-                  />
-                </button>
+                
               </div>
             </div>
           </div>

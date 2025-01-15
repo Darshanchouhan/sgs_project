@@ -158,7 +158,7 @@ const VendorDashboard = () => {
         <div className="container-fluid px-5">
           <div className="input-group w-395 h-44 border border-secondary rounded-2 fs-14">
             <label
-              className="input-group-text bg-white mb-0 border-0 fs-14 text-color-labels"
+              className="d-flex align-items-center px-10  bg-white rounded-2 mb-0 border-0 fs-14 text-color-labels"
               htmlFor="inputGroupSelect01"
             >
               PKO Project ID
@@ -463,21 +463,21 @@ const VendorDashboard = () => {
           <table className="table table-bordered fs-14">
             <thead>
               <tr>
-                <th>SKU ID</th>
+                <th className="h-52 align-middle">SKU ID</th>
 
-                <th>Description</th>
+                <th className="h-52 align-middle">Description</th>
 
-                <th>Category</th>
+                <th className="h-52 align-middle">Category</th>
 
-                <th>Brand</th>
+                <th className="h-52 align-middle">Brand</th>
 
-                <th>UPC #</th>
+                <th className="h-52 align-middle">UPC #</th>
 
-                <th>Size</th>
+                <th className="h-52 align-middle">Size</th>
 
-                <th>Due</th>
+                <th className="h-52 align-middle">Due</th>
 
-                <th>Status</th>
+                <th className="h-52 align-middle">Status</th>
 
                 <th>Actions</th>
               </tr>
