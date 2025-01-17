@@ -345,13 +345,13 @@ const PkgDataForm = () => {
           <div className="input-group align-items-center">
             <input
               maxLength="100"
-              className="h-42 text-secondary w-320 "
+              className="h-42  w-320 "
               type="text"
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
             />
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -371,7 +371,7 @@ const PkgDataForm = () => {
                 {option}
               </label>
             ))}
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -392,7 +392,7 @@ const PkgDataForm = () => {
                   </option>
                 ))}
             </select>
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -400,7 +400,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 text-secondary w-130 "
+              className="h-42  w-130 "
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
@@ -434,7 +434,7 @@ const PkgDataForm = () => {
                 </option>
               ))}
             </select>
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -442,7 +442,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 text-secondary w-130 "
+              className="h-42 w-130 "
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
@@ -476,7 +476,7 @@ const PkgDataForm = () => {
                 </option>
               ))}
             </select>
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -484,7 +484,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 text-secondary w-130 "
+              className="h-42  w-130 "
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
@@ -502,7 +502,7 @@ const PkgDataForm = () => {
                 }
               }}
             />
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -510,7 +510,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 text-secondary w-130 "
+              className="h-42  w-130 "
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
@@ -528,7 +528,7 @@ const PkgDataForm = () => {
                 }
               }}
             />
-            {infoIcon}
+            <span className="ms-2">{infoIcon}</span>
           </div>
         );
       default:
