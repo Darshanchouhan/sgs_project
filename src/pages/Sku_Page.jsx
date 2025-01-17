@@ -28,6 +28,90 @@ const Sku_Page = () => {
   const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
   const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
+  const [productImageCount, setProductImageCount] = useState(0); // Track product image count
+  const [imagesFromDB, setImagesFromDB] = useState([]); // Images fetched from database
+  const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
+  const [loadingImages, setLoadingImages] = useState(false);
+
+  const handleProductImageCountUpdate = (count) => {
+    setProductImageCount(count);
+  };
+
+  // const handleAddProductImageClick = async () => {
+  //   const offcanvasElement = document.getElementById("offcanvasRight-image");
+  //   if (offcanvasElement) {
+  //     try {
+  //       setLoadingImages(true);
+  //       const response = await axiosInstance.get(
+  //         `http://localhost:8001/api/skus/${skuId}/images/?pko_id=${pkoId}`
+  //       );
+  //       setImagesFromDB(response.data.images || []);
+  //       console.log("Response from fetch images API:", response.data);
+
+  //     } catch (error) {
+
+  //       console.error("Error fetching images:", error);
+  //       alert("Failed to fetch images. Please try again.");
+  //     } finally {
+  //       setLoadingImages(false);
+  //       const offcanvas = new Offcanvas(offcanvasElement);
+  //       offcanvas.show();
+  //     }
+  //   }
+  // };
+  const handleAddProductImageClick = async () => {
+    const offcanvasElement = document.getElementById("offcanvasRight-image");
+    if (offcanvasElement) {
+      try {
+        console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
+        setLoadingImages(true);
+
+        const response = await axiosInstance.get(
+          `http://localhost:8001/api/skus/${skuId}/images/?pko_id=${pkoId}`,
+        );
+
+        console.log("Response from fetch images API:", response.data);
+
+        if (response.data && response.data.images) {
+          setImagesFromDB(response.data.images);
+          console.log("Images fetched from DB:", response.data.images);
+        } else {
+          console.warn("No images found in the database for this SKU.");
+          setImagesFromDB([]);
+        }
+      } catch (error) {
+        console.error("Error fetching images:", error);
+        alert("Failed to fetch images. Please try again.");
+      } finally {
+        setLoadingImages(false);
+        const offcanvas = new Offcanvas(offcanvasElement);
+        offcanvas.show();
+      }
+    }
+  };
+
+  const handleUploadImages = async () => {
+    if (imagesToUpload.length > 0 && skuId && pkoId) {
+      try {
+        const formData = new FormData();
+        imagesToUpload.forEach((image) => {
+          formData.append("images", image);
+        });
+        formData.append("pko_id", pkoId);
+
+        await axiosInstance.post(
+          `http://localhost:8001/api/skus/${skuId}/upload-images/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } },
+        );
+
+        alert("Images uploaded successfully!");
+      } catch (error) {
+        console.error("Error uploading images:", error);
+        alert("Failed to upload images. Please try again.");
+      }
+    }
+  };
 
   useEffect(() => {
     if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
@@ -159,10 +243,12 @@ const Sku_Page = () => {
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
+      alert("SKU data saved successfully in Draft mode!");
 
       updateSkuStatus(skuId, "Draft");
+      // Upload Images after saving SKU data
+      await handleUploadImages();
 
-      alert("SKU data saved successfully in Draft mode!");
       navigate("/vendordashboard");
     } catch (error) {
       console.error("Error saving SKU data:", error);
@@ -340,15 +426,6 @@ const Sku_Page = () => {
     }
   };
 
-  const handleAddProductImageClick = () => {
-    // Show Offcanvas manually via Bootstrap API
-    const offcanvasElement = document.getElementById("offcanvasRight-image");
-    if (offcanvasElement) {
-      const offcanvas = new Offcanvas(offcanvasElement);
-      offcanvas.show();
-    }
-  };
-
   const dynamicFields = [
     { label: "Description", value: skuDetails?.description || "N/A" },
     { label: "Subcategory", value: pkoData?.subcategory || "N/A" },
@@ -365,19 +442,41 @@ const Sku_Page = () => {
     const handleChange = (e) =>
       handleInputChange(question.question_id, e.target.value);
 
+    const handleKeyDown = (e) => {
+      // Allow navigation keys and numbers only
+      const allowedKeys = [
+        "Backspace",
+        "ArrowLeft",
+        "ArrowRight",
+        "Delete",
+        "Tab",
+      ];
+      if (
+        !/^[0-9]$/.test(e.key) && // Allow only digits
+        !allowedKeys.includes(e.key) // Allow navigation keys
+      ) {
+        e.preventDefault();
+      }
+    };
+
     switch (question.question_type) {
       case "Varchar":
       case "Integer":
         return (
           <div className="d-flex align-items-center gap-2">
             <input
-              type={question.question_type === "Integer" ? "number" : "text"}
+              type="text" // Keep text to control input handling
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question.placeholder || "Enter Value"}
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
-              onChange={(e) =>
-                handleInputChange(question.question_id, e.target.value)
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                // Validate input to allow only digits
+                if (/^\d*$/.test(value)) {
+                  handleChange(e); // Update state only if valid
+                }
+              }}
+              onKeyDown={handleKeyDown} // Restrict invalid key presses
             />
             {question.instructions && (
               <InfoOutlinedIcon
@@ -405,7 +504,6 @@ const Sku_Page = () => {
               />
               <select
                 className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-12 w-72 fw-400"
-                
                 value={
                   skuData.dimensionsAndWeights[
                     `${question.question_id}_unit`
@@ -580,28 +678,34 @@ const Sku_Page = () => {
               <div className="d-flex align-items-center  col-3 justify-content-end">
                 <div className="d-flex align-items-center mb-4">
                   <p className="fs-14 fw-600 text-color-typo-primary mb-0">
-                    2/5 images uploaded{" "}
-                    <span
+                    {productImageCount} <span>images uploaded</span>{" "}
+                    {/* <span
                       className="ps-12 text-color-draft text-decoration-underline cursor-pointer"
                       data-bs-toggle="offcanvas"
                       data-bs-target="#offcanvasRight-image"
                       aria-controls="offcanvasRight-image"
                     >
                       View
-                    </span>
+                    </span> */}
                   </p>
-                  <button
+                  {/* <button
                     className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
                     onClick={handleAddProductImageClick}
-                  >
-                    + Add product images
-                  </button>
+
+                 >
+                    View/+ Add images
+                  </button> */}
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <SkuProduct_Img />
+        <SkuProduct_Img
+          updateProductImageCount={handleProductImageCountUpdate}
+          setImagesToUpload={setImagesToUpload}
+          imagesFromDB={imagesFromDB}
+          loadingImages={loadingImages}
+        />
 
         {/* Details Section */}
         <div className="mt-4 h-100">
@@ -654,18 +758,28 @@ const Sku_Page = () => {
                   </h6>
                   {/* Add SKU Component Button */}
                   {skuData.components.length > 0 && (
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() =>
-                        setSkuData((prev) => ({
-                          ...prev,
-                          showInput: true,
-                          isCancelDisabled: false, // Enable cancel button for subsequent adds
-                        }))
-                      }
-                    >
-                      + Add SKU Components
-                    </button>
+                    <div className="d-flex gap-3">
+                      {/* Add Product Images Button */}
+                      <button
+                        className="btn btn-outline-primary"
+                        onClick={handleAddProductImageClick}
+                      >
+                        View/+ Add images
+                      </button>
+                      {/* Add SKU Components Button */}
+                      <button
+                        className="btn btn-outline-primary"
+                        onClick={() =>
+                          setSkuData((prev) => ({
+                            ...prev,
+                            showInput: true,
+                            isCancelDisabled: false, // Enable cancel button for subsequent adds
+                          }))
+                        }
+                      >
+                        + Add SKU Components
+                      </button>
+                    </div>
                   )}
                 </div>
                 {/* Case 1: No Components Exist */}
@@ -681,6 +795,7 @@ const Sku_Page = () => {
                       Add components for this product to enter packaging-related
                       information. You can add multiple components.
                     </p>
+
                     <button
                       className="btn btn-outline-primary"
                       onClick={() =>
@@ -702,18 +817,37 @@ const Sku_Page = () => {
                     <table className="table fs-14 w-100 component-tbl mt-4">
                       <thead>
                         <tr>
-                          <th className="fs-14 fw-600 bg-light-shade" scope="col">Component Name</th>
-                          <th className="fs-14 fw-600 bg-light-shade" scope="col">Form Status</th>
-                          <th className="fs-14 fw-600 bg-light-shade" scope="col">Actions</th>
+                          <th
+                            className="fs-14 fw-600 bg-light-shade"
+                            scope="col"
+                          >
+                            Component Name
+                          </th>
+                          <th
+                            className="fs-14 fw-600 bg-light-shade"
+                            scope="col"
+                          >
+                            Form Status
+                          </th>
+                          <th
+                            className="fs-14 fw-600 bg-light-shade"
+                            scope="col"
+                          >
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
-                            <td className="h-52 align-middle">{component.name}</td>
-                            <td className="h-52 align-middle">{component.form_status}</td>
                             <td className="h-52 align-middle">
-                              <span>
+                              {component.name}
+                            </td>
+                            <td className="h-52 align-middle">
+                              {component.form_status}
+                            </td>
+                            <td className="h-52 align-middle">
+                              {/* <span>
                                 {0}{" "}
                                 <img
                                   src="/assets/images/image-pic.png"
@@ -725,7 +859,7 @@ const Sku_Page = () => {
                                   }}
                                   onClick={handleAddProductImageClick}
                                 />
-                              </span>
+                              </span> */}
                               <img
                                 src="/assets/images/forward-arrow-img.png"
                                 alt="Forward"
@@ -743,7 +877,6 @@ const Sku_Page = () => {
                       </tbody>
                     </table>
 
-                    {/* Add Component Input Section */}
                     {/* Add Component Input Section */}
                     {skuData.showInput && (
                       <div className="d-flex align-items-center gap-3 mt-3">
@@ -769,7 +902,9 @@ const Sku_Page = () => {
                             className="me-2"
                             style={{ width: "24px", height: "24px" }}
                           />
-                          <span className="fs-14 fw-600 text-color-draft">Add Component</span>
+                          <span className="fs-14 fw-600 text-color-draft">
+                            Add Component
+                          </span>
                         </div>
                         <div
                           className={`d-flex align-items-center cursor-pointer text-color-primary ${
@@ -794,7 +929,9 @@ const Sku_Page = () => {
                             className="me-2"
                             style={{ width: "24px", height: "24px" }}
                           />
-                          <span className="fs-14 fw-600 text-secondary">Cancel</span>
+                          <span className="fs-14 fw-600 text-secondary">
+                            Cancel
+                          </span>
                         </div>
                       </div>
                     )}

@@ -22207,12 +22207,12 @@ input:focus {
   font-weight: 600;
 }
 
-.small-arrow .form-select{
+.small-arrow .form-select {
   background-size: 16px 16px !important;
 }
 
-.form-select{
-      background-size: 24px 24px;
+.form-select {
+  background-size: 24px 24px;
 }
 
 .login-bg {
@@ -22587,15 +22587,15 @@ input[type="radio"] {
   color: white !important; /* White Text */
 }
 
-.fw-400{
+.fw-400 {
   font-weight: 400 !important;
 }
 
-.component-tbl thead tr th{
+.component-tbl thead tr th {
   background-color: #fff3f2 !important;
 }
 
-.component-tbl .circle{
+.component-tbl .circle {
   display: inline-block;
   height: 18px;
   width: 18px;
@@ -22603,11 +22603,12 @@ input[type="radio"] {
   border-radius: 50%;
 }
 
-.select-arrow-pos select{
-  -webkit-appearance: none;  /* Remove default arrow in WebKit browsers (Safari) */
-  -moz-appearance: none;     /* Remove default arrow in Firefox */
-  appearance: none;   
-  background: url(/public/assets/images/component-down.svg) no-repeat right 16px center;
+.select-arrow-pos select {
+  -webkit-appearance: none; /* Remove default arrow in WebKit browsers (Safari) */
+  -moz-appearance: none; /* Remove default arrow in Firefox */
+  appearance: none;
+  background: url(/public/assets/images/component-down.svg) no-repeat right 16px
+    center;
   background-size: 24px 24px;
 }
 /* Media Query */
@@ -22615,5 +22616,64 @@ input[type="radio"] {
   .container-height {
     height: 100% !important;
     padding-bottom: 1.5rem;
+  }
 }
+
+.gallery-item {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-item .image-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Transparent dark overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gallery-item:hover .image-actions {
+  opacity: 1;
+}
+
+.image-actions .action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.image-actions .action span {
+  font-size: 12px; /* Set text size to 12px */
+  margin-top: 4px;
+  color: #fff; /* White text for better contrast */
+}
+
+.image-actions .divider {
+  width: 1px;
+  height: 50%; /* Adjust height of the divider */
+  background: #fff;
+  margin: 0 10px;
+}
+
+.action-icon {
+  width: 20px;
+  height: 20px;
 }
