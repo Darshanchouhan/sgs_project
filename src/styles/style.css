@@ -22204,7 +22204,7 @@ input:focus {
 .form-select,
 .form-control {
   font-size: 0.875rem !important;
-  font-weight: 600;
+  /* font-weight: 600; */
 }
 
 .small-arrow .form-select {
@@ -22300,18 +22300,17 @@ textarea {
   margin-top: 0;
 }
 .form-list {
-  background-image: url(/src/assets/images/chevron-down.svg) !important;
-  background-size: 24px 24px;
+  background-image: url(../../public/assets/images/chevron-down.svg) !important;
+  background-size: 20px 20px;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   background-repeat: no-repeat;
-  background-position: right center;
+  background-position: right 6px center;
+  line-height: 20px;
   color: black;
 }
-.form-list:valid {
-  color: red;
-}
+
 .w-70 {
   width: 70px;
 }
@@ -22603,6 +22602,14 @@ input[type="radio"] {
   border-radius: 50%;
 }
 
+.table-striped-one tbody tr:nth-of-type(odd) {
+  background-color: #f9f9f9 !important;
+}
+
+.table-striped-one tbody tr:nth-of-type(even) {
+  background-color: #ffffff !important;
+}
+
 .select-arrow-pos select {
   -webkit-appearance: none; /* Remove default arrow in WebKit browsers (Safari) */
   -moz-appearance: none; /* Remove default arrow in Firefox */
@@ -22676,4 +22683,15 @@ input[type="radio"] {
 .action-icon {
   width: 20px;
   height: 20px;
+}
+
+.table {
+  --bs-table-striped-bg: #fafafa !important;
+}
+.circle {
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+  background-color: #eb4747;
+  border-radius: 50%;
 }

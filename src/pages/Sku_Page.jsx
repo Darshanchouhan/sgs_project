@@ -675,28 +675,28 @@ const Sku_Page = () => {
                 ))}
               </div>
               {/* Add Product Images Button */}
-              <div className="d-flex align-items-center  col-3 justify-content-end">
+              {/* <div className="d-flex align-items-center  col-3 justify-content-end">
                 <div className="d-flex align-items-center mb-4">
                   <p className="fs-14 fw-600 text-color-typo-primary mb-0">
-                    {productImageCount} <span>images uploaded</span>{" "}
-                    {/* <span
+                  {productImageCount} <span>images uploaded</span> {" "}
+                  <span
                       className="ps-12 text-color-draft text-decoration-underline cursor-pointer"
                       data-bs-toggle="offcanvas"
                       data-bs-target="#offcanvasRight-image"
                       aria-controls="offcanvasRight-image"
                     >
                       View
-                    </span> */}
+                    </span>
                   </p>
-                  {/* <button
+                  <button
                     className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
                     onClick={handleAddProductImageClick}
 
                  >
                     View/+ Add images
-                  </button> */}
+                  </button>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -708,7 +708,7 @@ const Sku_Page = () => {
         />
 
         {/* Details Section */}
-        <div className="mt-4 h-100">
+        <div className="py-4 h-100">
           <div className="row h-100">
             {/* Primary Packaging Details */}
             <div className="col-12 col-md-5">
@@ -764,7 +764,7 @@ const Sku_Page = () => {
                         className="btn btn-outline-primary"
                         onClick={handleAddProductImageClick}
                       >
-                        View/+ Add images
+                        Add/View Images
                       </button>
                       {/* Add SKU Components Button */}
                       <button
@@ -784,7 +784,7 @@ const Sku_Page = () => {
                 </div>
                 {/* Case 1: No Components Exist */}
                 {skuData.components.length === 0 && !skuData.showTable ? (
-                  <div className="text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                  <div className="text-center">
                     <img
                       src="/assets/images/BoxImg.png"
                       alt="Box"
@@ -814,39 +814,25 @@ const Sku_Page = () => {
                   /* Case 2: Components Exist or Table is Shown */
                   <div>
                     {/* Components Table */}
-                    <table className="table fs-14 w-100 component-tbl mt-4">
+                    <table className="table fs-14 w-100 bg-transparent table-striped component-tbl mt-4">
                       <thead>
                         <tr>
-                          <th
-                            className="fs-14 fw-600 bg-light-shade"
-                            scope="col"
-                          >
-                            Component Name
-                          </th>
-                          <th
-                            className="fs-14 fw-600 bg-light-shade"
-                            scope="col"
-                          >
-                            Form Status
-                          </th>
-                          <th
-                            className="fs-14 fw-600 bg-light-shade"
-                            scope="col"
-                          >
-                            Actions
-                          </th>
+                          <th scope="col">Component Name</th>
+                          <th scope="col">Form Status</th>
+                          <th scope="col">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
-                            <td className="h-52 align-middle">
-                              {component.name}
+                            <td>{component.name}</td>
+                            <td>
+                              <span className="d-inline-flex align-items-center bg-color-padding-label py-2 px-12 rounded-pill text-secondary fw-600">
+                                <span className="circle me-2"></span>
+                                {component.form_status}
+                              </span>
                             </td>
-                            <td className="h-52 align-middle">
-                              {component.form_status}
-                            </td>
-                            <td className="h-52 align-middle">
+                            <td>
                               {/* <span>
                                 {0}{" "}
                                 <img
@@ -900,11 +886,9 @@ const Sku_Page = () => {
                             src="/assets/images/plus-add_blue.png"
                             alt="Add"
                             className="me-2"
-                            style={{ width: "24px", height: "24px" }}
+                            style={{ width: "16px", height: "16px" }}
                           />
-                          <span className="fs-14 fw-600 text-color-draft">
-                            Add Component
-                          </span>
+                          <span>Add Component</span>
                         </div>
                         <div
                           className={`d-flex align-items-center cursor-pointer text-color-primary ${
@@ -927,11 +911,9 @@ const Sku_Page = () => {
                             src="/assets/images/clear-cross-cancel.png"
                             alt="Cancel"
                             className="me-2"
-                            style={{ width: "24px", height: "24px" }}
+                            style={{ width: "16px", height: "16px" }}
                           />
-                          <span className="fs-14 fw-600 text-secondary">
-                            Cancel
-                          </span>
+                          <span>Cancel</span>
                         </div>
                       </div>
                     )}

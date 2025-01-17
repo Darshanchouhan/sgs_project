@@ -285,14 +285,19 @@ const VendorDashboard = () => {
           <div className="col-12 col-md-4">
             <div className="d-flex gap-3 h-100 p-4 shadow-1">
               <div className="d-flex flex-column flex-fill border-end">
-                <h6 className="text-color-typo-primary fw-600">PKO Status</h6>
+                <h6 className="text-color-typo-primary fw-600 mb-3">
+                  PKO Status
+                </h6>
+                <img
+                  src="/assets/images/active-Indicator.svg"
+                  width="114px"
+                  alt="Active Indicator"
+                />
                 <div className="d-flex flex-column h-100 align-items-start justify-content-end">
-                  <img
-                    src="/assets/images/active-Indicator.svg"
-                    alt="Active Indicator"
-                  />
                   <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap">
-                    <span className="text-color-labels">Due Date</span>
+                    <span className="text-color-labels">
+                      Due Date <span className="fs-12">(mm/dd/yyyy)</span>
+                    </span>
                     <p className="fs-24 text-color-labels fw-600 mb-0">
                       {pkoData?.duedate
                         ? new Date(pkoData.duedate).toLocaleDateString(
@@ -306,6 +311,28 @@ const VendorDashboard = () => {
                         : "N/A"}
                     </p>
                   </div>
+                  {/* <div className="d-flex align-items-center bg-color-light-gray p-3 mt-12">
+                    <span className="text-color-labels fs-12 fw-600 text-nowrap">
+                      Due Date:
+                    </span>
+                    <span
+                      className="text-color-labels fs-14 fw-600 ms-2"
+                      style={{ lineHeight: "1" }}
+                    >
+                      (
+                      {pkoData?.duedate
+                        ? new Date(pkoData.duedate).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "2-digit",
+                              day: "2-digit",
+                              year: "numeric",
+                            },
+                          )
+                        : "mm/dd/yyyy"}
+                      )
+                    </span>
+                  </div> */}
                 </div>
               </div>
               <div className="d-flex  justify-content-center align-items-center flex-column flex-fill">
@@ -437,7 +464,7 @@ const VendorDashboard = () => {
               PKO Project ID: {vendorData.pkos[0]?.pko_id || "N/A"}
             </h6>
             <div className="d-flex align-items-center ps-4 border-start border-color-labels">
-              <label className="fs-14 color-typo-primary me-2 text-nowrap">
+              <label className="fs-14 color-typo-primary me-2 mb-0 text-nowrap">
                 SKU Status
               </label>
               <select
@@ -474,7 +501,7 @@ const VendorDashboard = () => {
                 <th className="h-52 align-middle">Size</th>
                 <th className="h-52 align-middle">Status</th>
 
-                <th>Actions</th>
+                <th className="h-52 align-middle">Actions</th>
               </tr>
             </thead>
             <tbody>

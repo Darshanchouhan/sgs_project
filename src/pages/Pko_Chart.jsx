@@ -33,6 +33,7 @@ const Pko_Chart = ({ labels, data }) => {
             const value = context.raw || 0;
             return `${label}: ${value}`;
           },
+          title: () => "", // Remove the bold title from tooltip
         },
       },
     },

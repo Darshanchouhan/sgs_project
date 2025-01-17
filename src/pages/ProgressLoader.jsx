@@ -34,9 +34,9 @@ const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
         position: "relative",
         width: `${size}px`,
         height: `${size}px`,
-        margin: "0 auto",
+        // margin: "0 auto",
       }}
-      className={`progress-loader-wrapper ${isVendorPage ? "vendor-loader" : "pkg-loader"}`}
+      className={`progress-loader-wrapper me-12 ${isVendorPage ? "vendor-loader" : "pkg-loader"}`}
     >
       <Doughnut data={chartData} options={options} />
 
