@@ -292,16 +292,14 @@ const VendorDashboard = () => {
                     alt="Active Indicator"
                   />
                   <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap">
-                    <span className="text-color-labels">
-                      Submission Last Date
-                    </span>
+                    <span className="text-color-labels">Due Date</span>
                     <p className="fs-24 text-color-labels fw-600 mb-0">
                       {pkoData?.duedate
                         ? new Date(pkoData.duedate).toLocaleDateString(
-                            "en-GB",
+                            "en-US",
                             {
+                              month: "2-digit",
                               day: "2-digit",
-                              month: "short",
                               year: "numeric",
                             },
                           )
@@ -474,9 +472,6 @@ const VendorDashboard = () => {
                 <th className="h-52 align-middle">UPC #</th>
 
                 <th className="h-52 align-middle">Size</th>
-
-                <th className="h-52 align-middle">Due</th>
-
                 <th className="h-52 align-middle">Status</th>
 
                 <th>Actions</th>
@@ -495,16 +490,7 @@ const VendorDashboard = () => {
                       <td className="align-middle">{sku.brand}</td>
                       <td className="align-middle">{sku.upc}</td>
                       <td className="align-middle">{sku.size}</td>
-                      <td className="align-middle">
-                        {" "}
-                        {sku.duedate
-                          ? new Date(sku.duedate).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })
-                          : "N/A"}
-                      </td>
+
                       <td className="align-middle">
                         <span
                           className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
