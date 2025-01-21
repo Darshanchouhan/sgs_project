@@ -1,30 +1,16 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import "./../styles/style.css";
-import { SkuContext } from "./SkuContext";
 
-const SkuProduct_Img = ({
-  updateProductImageCount,
-  imagesFromDB, // Prop for images fetched from the database
-  setImagesToUpload,
-}) => {
-  const [images, setImages] = useState({
-    "Product Images": [],
-  });
+const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
+  const [images, setImages] = useState([]); // State for new images only
   const [selectedImage, setSelectedImage] = useState(null);
 
-  useEffect(() => {
-    // Initialize product images from DB
-    setImages((prev) => ({
-      ...prev,
-      "Product Images": imagesFromDB || [],
-    }));
-  }, [imagesFromDB]);
-
+  // Update the product image count whenever the images array changes
   useEffect(() => {
     if (updateProductImageCount) {
-      updateProductImageCount(images["Product Images"]?.length || 0);
+      updateProductImageCount(images.length);
     }
-  }, [images["Product Images"], updateProductImageCount]);
+  }, [images, updateProductImageCount]);
 
   const handleAddImage = () => {
     const input = document.createElement("input");
@@ -34,11 +20,13 @@ const SkuProduct_Img = ({
 
     input.onchange = (event) => {
       const files = Array.from(event.target.files);
-      setImages((prev) => ({
-        ...prev,
-        "Product Images": [...prev["Product Images"], ...files].slice(0, 5),
+      const newImages = files.map((file) => ({
+        file,
+        url: URL.createObjectURL(file), // Generate temporary URL for display
       }));
-      setImagesToUpload((prev) => [...prev, ...files]);
+
+      setImages((prev) => [...prev, ...newImages]); // Add new images to state
+      setImagesToUpload((prev) => [...prev, ...files]); // Update parent with new files
     };
 
     input.click();
@@ -49,12 +37,10 @@ const SkuProduct_Img = ({
   };
 
   const handleDelete = (imageToDelete) => {
-    setImages((prev) => ({
-      ...prev,
-      "Product Images": prev["Product Images"].filter(
-        (img) => img !== imageToDelete,
-      ),
-    }));
+    setImages((prev) => prev.filter((img) => img.url !== imageToDelete.url));
+    setImagesToUpload((prev) =>
+      prev.filter((file) => file !== imageToDelete.file),
+    ); // Remove from upload list
   };
 
   const handleBackToGallery = () => {
@@ -86,11 +72,7 @@ const SkuProduct_Img = ({
               Back to Gallery View
             </button>
             <img
-              src={
-                selectedImage instanceof File
-                  ? URL.createObjectURL(selectedImage)
-                  : selectedImage
-              }
+              src={selectedImage.url}
               alt="Full View"
               className="full-view-image"
             />
@@ -110,7 +92,7 @@ const SkuProduct_Img = ({
                 />
               </div>
               <div className="gallery-grid">
-                {images["Product Images"].map((img, i) => (
+                {images.map((img, i) => (
                   <div
                     key={i}
                     className="gallery-item"
@@ -121,13 +103,7 @@ const SkuProduct_Img = ({
                       e.currentTarget.classList.remove("hovered");
                     }}
                   >
-                    <img
-                      src={
-                        img instanceof File ? URL.createObjectURL(img) : null // Replace placeholder with null to show no image
-                      }
-                      alt="Uploaded"
-                      style={img ? {} : { display: "none" }} // Hide the <img> element when null
-                    />
+                    <img src={img.url} alt="Uploaded" />
                     <div className="image-actions">
                       <div
                         className="action"

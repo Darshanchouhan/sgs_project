@@ -32,33 +32,13 @@ const Sku_Page = () => {
   const [imagesFromDB, setImagesFromDB] = useState([]); // Images fetched from database
   const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
   const [loadingImages, setLoadingImages] = useState(false);
+  const [dimensionUnit, setDimensionUnit] = useState("Unit"); // Default unit for dimensions
+  const [weightUnit, setWeightUnit] = useState("Unit"); // Default unit for weights
 
   const handleProductImageCountUpdate = (count) => {
     setProductImageCount(count);
   };
 
-  // const handleAddProductImageClick = async () => {
-  //   const offcanvasElement = document.getElementById("offcanvasRight-image");
-  //   if (offcanvasElement) {
-  //     try {
-  //       setLoadingImages(true);
-  //       const response = await axiosInstance.get(
-  //         `http://localhost:8001/api/skus/${skuId}/images/?pko_id=${pkoId}`
-  //       );
-  //       setImagesFromDB(response.data.images || []);
-  //       console.log("Response from fetch images API:", response.data);
-
-  //     } catch (error) {
-
-  //       console.error("Error fetching images:", error);
-  //       alert("Failed to fetch images. Please try again.");
-  //     } finally {
-  //       setLoadingImages(false);
-  //       const offcanvas = new Offcanvas(offcanvasElement);
-  //       offcanvas.show();
-  //     }
-  //   }
-  // };
   const handleAddProductImageClick = async () => {
     const offcanvasElement = document.getElementById("offcanvasRight-image");
     if (offcanvasElement) {
@@ -194,6 +174,15 @@ const Sku_Page = () => {
           components: data.components || [],
           description: data.description || "",
         }));
+        // Set shared state for units
+        const { height_unit, width_unit, depth_unit, netWeight_unit } =
+          data.primary_packaging_details || {};
+        if (height_unit || width_unit || depth_unit) {
+          setDimensionUnit(height_unit || width_unit || depth_unit || "Unit");
+        }
+        if (netWeight_unit) {
+          setWeightUnit(netWeight_unit);
+        }
       } catch (error) {
         console.error("Error fetching SKU details:", error);
       }
@@ -215,6 +204,18 @@ const Sku_Page = () => {
 
     fetchQuestions();
   }, []);
+
+  // Match dependent question visibility based on parent's answer and field dependency
+  const isAnswerMatch = (fieldDependency, parentAnswer) => {
+    if (!fieldDependency) return true; // No dependency, always visible
+
+    const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
+    const conditions = fieldDependency
+      .split(/OR/i)
+      .map((dep) => dep.trim().toLowerCase());
+
+    return conditions.includes(normalizedParentAnswer);
+  };
 
   const saveSkuData = async () => {
     if (!skuId || !pkoId) {
@@ -461,6 +462,23 @@ const Sku_Page = () => {
 
     switch (question.question_type) {
       case "Varchar":
+        return (
+          <div className="d-flex align-items-center gap-2">
+            <input
+              type="text" // Allow any text input
+              className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
+              placeholder={question.placeholder || "Enter Value"}
+              value={skuData.dimensionsAndWeights[question.question_id] || ""}
+              onChange={(e) => handleChange(e)} // Update state directly
+            />
+            {question.instructions && (
+              <InfoOutlinedIcon
+                className="info-icon"
+                titleAccess={question.instructions}
+              />
+            )}
+          </div>
+        );
       case "Integer":
         return (
           <div className="d-flex align-items-center gap-2">
@@ -487,10 +505,14 @@ const Sku_Page = () => {
           </div>
         );
 
-      case "Float + Dropdown":
+      case "Float + Dropdown": {
+        const isDimension = /height|width|depth/i.test(question.question_text); // Check for dimension-related questions
+        const isWeight = /weight/i.test(question.question_text); // Check for weight-related questions
+
         return (
           <div className="d-flex align-items-center gap-2">
             <div className="d-flex align-items-center border border-color-typo-secondary rounded-2">
+              {/* Input Field */}
               <input
                 type="number"
                 step="any"
@@ -502,22 +524,46 @@ const Sku_Page = () => {
                   handleInputChange(question.question_id, e.target.value)
                 }
               />
+
+              {/* Unit Dropdown */}
               <select
                 className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-12 w-72 fw-400"
                 value={
-                  skuData.dimensionsAndWeights[
-                    `${question.question_id}_unit`
-                  ] || ""
-                }
-                onChange={(e) =>
-                  handleInputChange(
-                    `${question.question_id}_unit`,
-                    e.target.value,
-                  )
-                }
+                  isDimension ? dimensionUnit : isWeight ? weightUnit : "Unit"
+                } // Use shared state
+                onChange={(e) => {
+                  const newUnit = e.target.value;
+
+                  if (isDimension) {
+                    setDimensionUnit(newUnit); // Update dimension unit
+                    // Update all dimension-related questions
+                    setSkuData((prev) => ({
+                      ...prev,
+                      dimensionsAndWeights: {
+                        ...prev.dimensionsAndWeights,
+                        height_unit: newUnit,
+                        width_unit: newUnit,
+                        depth_unit: newUnit,
+                      },
+                    }));
+                  } else if (isWeight) {
+                    setWeightUnit(newUnit); // Update weight unit
+                    // Update all weight-related questions
+                    setSkuData((prev) => ({
+                      ...prev,
+                      dimensionsAndWeights: {
+                        ...prev.dimensionsAndWeights,
+                        netWeight_unit: newUnit,
+                        tareWeight_unit: newUnit,
+                        grossWeight_unit: newUnit,
+                      },
+                    }));
+                  }
+                  // Update the specific question's unit
+                  handleInputChange(`${question.question_id}_unit`, newUnit);
+                }}
               >
-                <option value="">unit</option>
-                {/* Filter out 'unit' explicitly */}
+                <option value="Unit">Unit</option>
                 {question.dropdown_options
                   ?.filter(
                     (option) =>
@@ -539,6 +585,7 @@ const Sku_Page = () => {
             )}
           </div>
         );
+      }
 
       case "Dropdown":
         return (
@@ -570,22 +617,53 @@ const Sku_Page = () => {
         return null;
     }
   };
-  const renderFollowUpQuestions = (followUps) => {
-    return followUps.map((followUp) => (
-      <div
-        key={followUp.question_id}
-        className={`col-12 ${
-          followUp.question_type === "Float + Dropdown" ? "col-md-6" : "col-12"
-        } mb-3`}
-      >
-        <label className="fs-14 text-color-typo-primary mb-2 d-block">
-          {followUp.question_text}
-        </label>
-        {renderField(followUp)}
-      </div>
-    ));
-  };
+  // const renderFollowUpQuestions = (followUps) => {
+  //   return followUps.map((followUp) => (
+  //     <div
+  //       key={followUp.question_id}
+  //       className={`col-12 ${
+  //         followUp.question_type === "Float + Dropdown" ? "col-md-6" : "col-12"
+  //       } mb-3`}
+  //     >
+  //       <label className="fs-14 text-color-typo-primary mb-2 d-block">
+  //         {followUp.question_text}
+  //       </label>
+  //       {renderField(followUp)}
+  //     </div>
+  //   ));
+  // };
 
+  // Render Questions with Dependent Logic
+  const renderQuestions = (questions) => {
+    return questions.map((question) => {
+      const parentAnswer =
+        skuData.dimensionsAndWeights[question.dependent_question];
+      const isDependentVisible = isAnswerMatch(
+        question.field_dependency,
+        parentAnswer,
+      );
+
+      if (question.dependent_question && !isDependentVisible) {
+        return null;
+      }
+      return (
+        <div
+          key={question.question_id}
+          className={`col-12 ${
+            question.question_type === "Float + Dropdown" ||
+            question.question_type === "Dropdown"
+              ? "col-md-6"
+              : "col-12"
+          } mb-3`}
+        >
+          <label className="fs-14 text-color-typo-primary mb-2 d-block">
+            {question.question_text}
+          </label>
+          {renderField(question)}
+        </div>
+      );
+    });
+  };
   return (
     <>
       <Header></Header>
@@ -651,9 +729,6 @@ const Sku_Page = () => {
               className="ms-12"
             />
           </div>
-          {/* <p className="text-color-black fst-italic mb-0 opacity-70">
-            Submission Last Date: {pkoData?.submissionlastdate || "N/A"}
-          </p> */}
         </div>
 
         {/* SKU Details */}
@@ -726,7 +801,7 @@ const Sku_Page = () => {
                   Provide all relevant primary packaging details for the SKU
                 </p>
 
-                <div className="row">
+                {/* <div className="row">
                   {questions.map((question) => (
                     <React.Fragment key={question.question_id}>
                       <div
@@ -741,11 +816,13 @@ const Sku_Page = () => {
                           {question.question_text}
                         </label>
                         {renderField(question)}
+
                       </div>
-                      {renderFollowUpQuestions(question.follow_up_questions)}
+
                     </React.Fragment>
                   ))}
-                </div>
+                </div> */}
+                <div className="row">{renderQuestions(questions)}</div>
               </div>
             </div>
 

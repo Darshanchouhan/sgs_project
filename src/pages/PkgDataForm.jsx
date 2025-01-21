@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import { SkuContext } from "./SkuContext";
 import Header from "../components/Header";
 import Breadcrumb from "./Breadcrumb";
@@ -24,6 +24,7 @@ const PkgDataForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const sectionRefs = useRef({}); // Store refs for each section
+  const [isFormFilled, setIsFormFilled] = useState(false); // Track if the form is filled
   const {
     componentName,
     pkoId,
@@ -268,7 +269,7 @@ const PkgDataForm = () => {
 
       let totalMandatory = 0;
       let answeredMandatory = 0;
-
+      //populate the questionMap with initial questions
       questions.forEach((q) => {
         questionMap.set(q.question_id, { ...q, children: [] });
         if (q.mandatory) {
@@ -278,12 +279,28 @@ const PkgDataForm = () => {
           }
         }
       });
+      //Add child questions to their respective parent
+      // questions.forEach((q) => {
+      //   if (q.dependent_question) {
+      //     questionMap.get(q.dependent_question).children.push(q);
+      //   }
+      // });
 
       questions.forEach((q) => {
         if (q.dependent_question) {
-          questionMap.get(q.dependent_question).children.push(q);
+          const parentQuestion = questionMap.get(q.dependent_question); //verify if parentQuestion exists before trying to access its children property
+          if (parentQuestion) {
+            parentQuestion.children.push(q);
+          } else {
+            //warning if the parent question is missing
+            console.warn(
+              `Parent question with ID ${q.dependent_question} not found for question ${q.question_id}.`,
+            );
+          }
         }
       });
+
+      // Group questions into sections
       const groupedSections = {};
       Array.from(questionMap.values()).forEach((question) => {
         const section = question.section || "Uncategorized";
@@ -312,6 +329,13 @@ const PkgDataForm = () => {
       answers: { ...prev.answers, [questionId]: value },
     }));
   };
+  // Monitor changes to `pkgData.answers` to determine if the form is filled
+  useEffect(() => {
+    const hasAnswers = Object.values(pkgData.answers).some(
+      (answer) => answer !== undefined && answer !== "",
+    );
+    setIsFormFilled(hasAnswers);
+  }, [pkgData.answers]);
 
   const isAnswerMatch = (fieldDependency, parentAnswer) => {
     if (!fieldDependency) return true; // No dependency, always visible
@@ -328,8 +352,6 @@ const PkgDataForm = () => {
     const handleChange = (e) =>
       handleInputChange(question.question_id, e.target.value);
 
-    // Render Info Icon only if `instructions` is provided
-
     // Info Icon with Instructions
     const infoIcon = question.instructions ? (
       <InfoOutlinedIcon
@@ -337,6 +359,39 @@ const PkgDataForm = () => {
         titleAccess={question.instructions} // Display on hover
       />
     ) : null;
+    const isOutsideDimension = /outside/i.test(question.question_text);
+    const isInsideDimension = /inside/i.test(question.question_text);
+
+    const synchronizeUnits = (newUnit, groupType) => {
+      const unitFields =
+        groupType === "outside"
+          ? [
+              "Component Length (outside)",
+              "Component Width (outside)",
+              "Component Depth (outside)",
+            ]
+          : [
+              "Component Length (inside)",
+              "Component Width (inside)",
+              "Component Depth (inside)",
+            ];
+
+      setPkgData((prev) => {
+        const updatedAnswers = { ...prev.answers };
+
+        unitFields.forEach((field) => {
+          const question = Object.values(pkgData.sections)
+            .flat()
+            .find((q) => q.question_text === field);
+
+          if (question) {
+            updatedAnswers[`${question.question_id}_unit`] = newUnit;
+          }
+        });
+
+        return { ...prev, answers: updatedAnswers };
+      });
+    };
 
     // eslint-disable-next-line default-case
     switch (question.question_type) {
@@ -421,12 +476,17 @@ const PkgDataForm = () => {
             <select
               className="bg-color-light-shade form-list w-70"
               value={pkgData.answers[`${question.question_id}_unit`] || ""}
-              onChange={(e) =>
-                handleInputChange(
-                  `${question.question_id}_unit`,
-                  e.target.value,
-                )
-              }
+              onChange={(e) => {
+                const newUnit = e.target.value;
+
+                handleInputChange(`${question.question_id}_unit`, newUnit);
+
+                if (isOutsideDimension) {
+                  synchronizeUnits(newUnit, "outside");
+                } else if (isInsideDimension) {
+                  synchronizeUnits(newUnit, "inside");
+                }
+              }}
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -463,12 +523,17 @@ const PkgDataForm = () => {
             <select
               className="bg-color-light-shade form-list w-70"
               value={pkgData.answers[`${question.question_id}_unit`] || ""}
-              onChange={(e) =>
-                handleInputChange(
-                  `${question.question_id}_unit`,
-                  e.target.value,
-                )
-              }
+              onChange={(e) => {
+                const newUnit = e.target.value;
+
+                handleInputChange(`${question.question_id}_unit`, newUnit);
+
+                if (isOutsideDimension) {
+                  synchronizeUnits(newUnit, "outside");
+                } else if (isInsideDimension) {
+                  synchronizeUnits(newUnit, "inside");
+                }
+              }}
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -599,7 +664,7 @@ const PkgDataForm = () => {
         responses: {}, // Initialize responses
       };
 
-      // 📝 Flatten and map all answered questions
+      // Flatten and map all answered questions
       const answeredQuestions = Object.values(pkgData.sections).flatMap(
         (section) =>
           section
@@ -665,6 +730,7 @@ const PkgDataForm = () => {
       <Breadcrumb
         onBackClick={handleBackClick}
         onSaveClick={handleSave}
+        isFormFilled={isFormFilled} // Pass state to Breadcrumb
         pkoId={pkoId || "N/A"} // Pass PKO ID
         description={description || "N/A"} // Pass Description
         componentName={componentName || "Default Component"}
