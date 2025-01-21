@@ -3,6 +3,7 @@ import React from "react";
 const Breadcrumb = ({
   onBackClick,
   onSaveClick,
+  isFormFilled, // Receive the prop
   componentName = "Default Component",
   pkoId = "N/A",
   description = "N/A",
@@ -49,11 +50,21 @@ const Breadcrumb = ({
 
           {/* Save & Close Button */}
           <div className="d-flex align-items-center">
-            <button
+            {/* <button
               className="save-button fs-14 fw-600 border-0 px-4 py-12"
               onClick={onSaveClick}
             >
-              Save & Close
+              Save & Draft
+            </button> */}
+            <button
+              className="save-button fs-14 fw-600 border-0 px-4 py-12"
+              style={{
+                backgroundColor: isFormFilled ? "#d43014" : "#cccccc",
+                color: isFormFilled ? "#ffffff" : "#666666",
+              }}
+              onClick={onSaveClick}
+            >
+              Save & Draft
             </button>
           </div>
         </div>
