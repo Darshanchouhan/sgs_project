@@ -45,8 +45,8 @@ const Pko_Chart = ({ labels, data }) => {
     <div
       style={{
         position: "relative",
-        width: "200px",
-        height: "200px",
+        width: "180px",
+        height: "180px",
         margin: "0 auto",
       }}
     >

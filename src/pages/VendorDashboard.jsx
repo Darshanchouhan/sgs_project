@@ -184,30 +184,30 @@ const VendorDashboard = () => {
         <div className="row">
           {/* Supplier Card */}
           <div className="col-12 col-md-4">
-            <div className="card border-0 shadow-1 p-4 h-100">
-              <div className="card-header py-0 fs-24 fw-600 text-color-black border-0 bg-transparent">
+            <div className="card border-0 shadow-1 px-4 py-3 h-100">
+              <div className="card-header px-0 py-0 fs-24 fw-600 text-color-black border-0 bg-transparent">
                 {vendorData.supplier_name}
               </div>
-              <div className="card-body pb-0 border-0">
+              <div className="card-body px-0 pb-0 border-0">
                 <div className="row mb-3">
-                  <div className="col-4">
+                  <div className="col-5">
                     <span className="fs-14 text-color-labels">
                       CVS Supplier #
                     </span>
                   </div>
-                  <div className="col-8 d-flex align-items-center">
+                  <div className="col-7 d-flex align-items-center">
                     <span className="fs-14 text-color-labels fw-600">
                       {vendorData.cvs_supplier}
                     </span>
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-4">
+                <div className="row mb-2">
+                  <div className="col-5">
                     <span className="fs-14 text-color-labels">
                       Supplier Contact
                     </span>
                   </div>
-                  <div className="col-8 d-flex flex-column align-items-start">
+                  <div className="col-7 d-flex flex-column align-items-start">
                     <span className="fs-14 text-color-labels fw-600">
                       {vendorData.creative_contact_email}
                     </span>
@@ -225,7 +225,7 @@ const VendorDashboard = () => {
                 <div className="d-flex gap-3">
                   {/* Active and Closed PKOs */}
                   <div
-                    className="d-flex flex-column p-3 bg-color-light-gray flex-fill cursor-pointer"
+                    className="d-flex flex-column p-3 bg-color-light-gray flex-fill cursor-pointer rounded-1 border border-color-dark-border"
                     data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasRight"
                     aria-controls="offcanvasRight"
@@ -251,7 +251,7 @@ const VendorDashboard = () => {
                     </p>
                   </div>
                   <div
-                    className="d-flex flex-column p-3 bg-color-light-gray flex-fill cursor-pointer"
+                    className="d-flex flex-column p-3 bg-color-light-gray flex-fill cursor-pointer rounded-1 border border-color-dark-border"
                     data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasRight"
                     aria-controls="offcanvasRight"
@@ -283,8 +283,8 @@ const VendorDashboard = () => {
 
           {/* PKO Status */}
           <div className="col-12 col-md-4">
-            <div className="d-flex gap-3 h-100 p-4 shadow-1">
-              <div className="d-flex flex-column flex-fill border-end">
+            <div className="d-flex gap-3 h-100 px-4 py-3 shadow-1">
+              <div className="d-flex flex-column flex-fill border-end pe-2">
                 <h6 className="text-color-typo-primary fw-600 mb-3">
                   PKO Status
                 </h6>
@@ -294,7 +294,7 @@ const VendorDashboard = () => {
                   alt="Active Indicator"
                 />
                 <div className="d-flex flex-column h-100 align-items-start justify-content-end">
-                  <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap">
+                  <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap rounded-1 border border-color-dark-border">
                     <span className="text-color-labels">
                       Due Date <span className="fs-12">(mm/dd/yyyy)</span>
                     </span>
@@ -355,8 +355,8 @@ const VendorDashboard = () => {
 
           {/* SKU Status */}
           <div className="col-12 col-md-4">
-            <div className="card h-100 border-0 shadow-1 py-4 d-flex flex-column px-3">
-              <div className="card-header py-0 text-color-typo-primary fw-600 border-0 bg-transparent">
+            <div className="card h-100 border-0 shadow-1 px-4 py-3 d-flex flex-column">
+              <div className="card-header px-0 py-0 text-color-typo-primary fw-600 border-0 bg-transparent">
                 SKU Status
               </div>
 

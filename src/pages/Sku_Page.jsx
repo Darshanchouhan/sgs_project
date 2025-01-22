@@ -735,7 +735,7 @@ const Sku_Page = () => {
         <div className="px-28 py-20 border border-color-disabled-lite bg-color-light-gray">
           <div className="row">
             <div className="col-12 d-flex align-items-start">
-              <div className=" sku-details-box col-9">
+              <div className=" sku-details-box col-12">
                 {dynamicFields.map((field, index) => (
                   <div key={index} className="d-flex flex-column mb-30">
                     <p className="sku-details-label">{field.label}</p>
@@ -828,7 +828,8 @@ const Sku_Page = () => {
 
             {/* Sku Components Section */}
             <div className="col-12 col-md-7">
-              <div className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100">
+              <div className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100"
+              style={{ maxHeight: "400px", overflowY: "auto" }}>
                 <div className="d-flex justify-content-between align-items-center">
                   <h6 className="fs-22 fw-600 text-color-black mb-3">
                     SKU Components
@@ -846,13 +847,34 @@ const Sku_Page = () => {
                       {/* Add SKU Components Button */}
                       <button
                         className="btn btn-outline-primary"
-                        onClick={() =>
+                        data-target="addSkuComponentBlock"
+                        onClick={(event) => {
+                          // Prevent the default behavior
+                          event.preventDefault();
+                      
+                          // Get the target section from the data-target attribute
+                          const targetId = event.target.getAttribute("data-target");
+                          
+                          // Find the element by ID and scroll to it
+                          setTimeout(() => {
+                            const targetElement = document.getElementById(targetId);
+                            
+                            if (targetElement) {
+                              // Scroll to the target element with smooth scrolling
+                              targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start', // Align to the top of the section
+                              });
+                            }
+                          }, 100); // Add a small delay (e.g., 100ms) to allow for rendering
+                      
+                          
                           setSkuData((prev) => ({
                             ...prev,
                             showInput: true,
-                            isCancelDisabled: false, // Enable cancel button for subsequent adds
-                          }))
-                        }
+                            isCancelDisabled: false,
+                          }));
+                        }}
                       >
                         + Add SKU Components
                       </button>
@@ -942,7 +964,7 @@ const Sku_Page = () => {
 
                     {/* Add Component Input Section */}
                     {skuData.showInput && (
-                      <div className="d-flex align-items-center gap-3 mt-3">
+                      <div className="d-flex align-items-center gap-3 mt-3" id="addSkuComponentBlock">
                         <input
                           type="text"
                           className="form-control border border-color-typo-secondary rounded-2 h-44 w-280"

@@ -22437,7 +22437,8 @@ input[type="radio"] {
 .sku-details-box {
   display: flex;
   flex-wrap: wrap; /* Allows the content to wrap to the next line */
-  gap: 20px; /* Adds spacing between items */
+  column-gap: 70px; /* Horizontal gap */
+  row-gap: 0px; /* No vertical gap */
 }
 .sku-details-item {
   flex: 1 1 calc(25% - 20px); /* Ensures 4 items per row */
@@ -22695,3 +22696,34 @@ input[type="radio"] {
   background-color: #eb4747;
   border-radius: 50%;
 }
+/* Custom css start (Azahar) */
+.analysisModal .modal-dialog {
+  max-width: 46%;
+}
+.analysisModal .modal-header {
+  padding-top: 4rem;
+  padding-bottom: 2rem;
+}
+.analysisModal .modal-footer {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+.analysisModal .btn-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.75rem;
+}
+.analysisModal .analysisTable th {
+  background-color: var(--bs-color-light-shade);
+}
+.analysisModal .modal-footer .btn {
+  font-size: 0.875rem;
+  line-height: 18px;
+}
+.analysisModal .modal-footer .btn.disabled,
+.analysisModal .modal-footer .btn:disabled {
+  color: var(--bs-color-grey-btn);
+  border-color: var(--bs-color-grey-btn);
+}
+/* Custom css end (Azahar) */
