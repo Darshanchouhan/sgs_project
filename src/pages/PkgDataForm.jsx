@@ -344,8 +344,9 @@ const PkgDataForm = () => {
     const conditions = fieldDependency
       .split(/OR/i)
       .map((dep) => dep.trim().toLowerCase());
-
-    return conditions.includes(normalizedParentAnswer);
+  
+    // Match if any condition matches the parent answer
+    return conditions.some((condition) => normalizedParentAnswer.includes(condition));
   };
 
   const renderField = (question) => {

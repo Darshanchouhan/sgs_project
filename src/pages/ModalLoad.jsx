@@ -94,8 +94,8 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 component-specific forms. Suppliers will need to submit all
                 forms for review before the last date of submission.
               </p>
-              <div className="modal-footer"></div>
             </div>
+            <div className="modal-footer"></div>
           </div>
         </div>
       </div>
