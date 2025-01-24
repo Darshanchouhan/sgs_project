@@ -20,6 +20,7 @@ const VendorDashboard = () => {
   const [loadCount, setLoadCount] = useState(0); // State to track page load count
   const [isModalVisible, setIsModalVisible] = useState(true); // Modal visibility state
   const navigate = useNavigate();
+  const [overallProgress, setOverallProgress] = useState(0); // State for overall progress
 
   // Function to close the modal
   const closeModal = () => {
@@ -55,11 +56,41 @@ const VendorDashboard = () => {
   // Fetch PKO Data Based on Selected PKO ID
   useEffect(() => {
     const fetchPkoData = async () => {
-      if (!selectedPkoId) return;
+      if (!selectedPkoId) {
+        console.log("No PKO ID selected, skipping fetch.");
+        return;
+      }
+
       try {
+        console.log("Fetching data for PKO ID:", selectedPkoId);
         const response = await axiosInstance.get("pkos/");
         const data = response.data;
-        setPkoData(data[selectedPkoId] || null);
+
+        const pkoDetails = data[selectedPkoId] || null;
+
+        if (pkoDetails) {
+          console.log("Fetched PKO Details:", pkoDetails);
+
+          setPkoData(pkoDetails);
+
+          // Calculate the average progress
+          const skus = pkoDetails.skus || [];
+          console.log("SKUs for this PKO:", skus);
+
+          const totalProgress = skus.reduce(
+            (acc, sku) => acc + (sku.sku_progress || 0),
+            0,
+          );
+          console.log("Total Progress of all SKUs:", totalProgress);
+
+          const averageProgress =
+            skus.length > 0 ? totalProgress / skus.length : 0;
+          console.log("Calculated Average Progress:", averageProgress);
+
+          setOverallProgress(averageProgress);
+        } else {
+          console.log("No PKO details found for selected PKO ID.");
+        }
       } catch (error) {
         console.error("Error fetching PKO data:", error);
       }
@@ -340,11 +371,21 @@ const VendorDashboard = () => {
                   Overall Progress
                 </h6>
                 <div className=" d-flex align-items-center h-100">
-                  <ProgressLoader
+                  {/* <ProgressLoader
                     percentage={0}
                     size={130}
                     isVendorPage={true}
-                  />{" "}
+                  />{" "} */}
+                  {console.log(
+                    "Rendering ProgressLoader with percentage:",
+                    Math.round(overallProgress),
+                  )}
+
+                  <ProgressLoader
+                    percentage={Math.round(overallProgress)} // Display calculated average progress
+                    size={130}
+                    isVendorPage={true}
+                  />
                   {/* Default size */}
                 </div>
 
@@ -529,7 +570,7 @@ const VendorDashboard = () => {
                           {status}
                         </span>
                       </td>
-                      <td className="align-middle">
+                      <td className="align-middle text-center">
                         <button
                           className="btn p-0 border-0 shadow-none"
                           onClick={() => handleForwardClick(sku)}
@@ -571,7 +612,7 @@ const VendorDashboard = () => {
               role="tablist"
             >
               <button
-                className="nav-link pb-20 text-color-typo-primary bg-transparent border-0 active"
+                className="nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 active"
                 id="nav-home-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#nav-home"
@@ -583,7 +624,7 @@ const VendorDashboard = () => {
                 Active PKOs
               </button>
               <button
-                className="nav-link pb-20 text-color-typo-primary bg-transparent border-0"
+                className="nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3"
                 id="nav-profile-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#nav-profile"
@@ -754,7 +795,8 @@ const VendorDashboard = () => {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <div className="contact-tbl">
+          <h2 className="fs-24 fw-600 text-color-black mb-0">Contacts</h2>
+          <div className="contact-tbl mt-4">
             <table className="table table-bordered fs-14">
               <thead>
                 <tr>
