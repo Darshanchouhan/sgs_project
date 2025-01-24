@@ -8831,6 +8831,7 @@ fieldset:disabled .btn {
   border-left: var(--bs-offcanvas-border-width) solid
     var(--bs-offcanvas-border-color);
   transform: translateX(100%);
+  background-color: var(--bs-color-light-shade);
 }
 .offcanvas.offcanvas-top {
   top: 0;
@@ -22629,9 +22630,10 @@ input[type="radio"] {
 
 .gallery-item {
   position: relative;
-  width: 150px;
-  height: 150px;
-  border: 1px solid #ccc;
+  width: calc(20% - 32px);
+  height: 180px;
+  border: 1px solid var(--bs-color-light-border);
+  background-color: #fff;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -22725,5 +22727,46 @@ input[type="radio"] {
 .analysisModal .modal-footer .btn:disabled {
   color: var(--bs-color-grey-btn);
   border-color: var(--bs-color-grey-btn);
+}
+.offcanvas.offcanvas-end .nav-tabs .nav-link.active {
+  border-bottom: 3px solid var(--bs-secondary) !important;
+}
+#offcanvasRight-image .noImagesAdded-block {
+  max-width: 35%;
+  margin: 0 auto;
+  height: calc(100vh - 229px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#offcanvasRight-image .gallery-grid {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 32px;
+  row-gap: 32px;
+}
+#offcanvasRight-image .drag-drop-img-box {
+  width: calc(40% - 32px);
+  border-style: dashed !important;
+}
+#offcanvasRight-image .img-container {
+  max-width: 70%;
+  overflow: hidden;
+}
+.offcanvas.offcanvas-end .btn-close {
+  position: absolute;
+  left: -48px;
+  top: 0;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background-color: var(--bs-color-close-icon-box);
+  border-radius: 0;
+  font-size: 26px;
+  opacity: 1;
+--bs-btn-close-bg: url("./assets/images/close-icon.png");
+}
+.offcanvas.offcanvas-end .offcanvas-header {
+  padding: 0;
 }
 /* Custom css end (Azahar) */

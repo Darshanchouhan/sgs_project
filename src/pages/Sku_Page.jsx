@@ -34,6 +34,8 @@ const Sku_Page = () => {
   const [loadingImages, setLoadingImages] = useState(false);
   const [dimensionUnit, setDimensionUnit] = useState("Unit"); // Default unit for dimensions
   const [weightUnit, setWeightUnit] = useState("Unit"); // Default unit for weights
+  const [mandatoryProgress, setMandatoryProgress] = useState(0);
+  const [componentProgressAverage, setComponentProgressAverage] = useState(0); // Average progress
 
   const handleProductImageCountUpdate = (count) => {
     setProductImageCount(count);
@@ -111,6 +113,25 @@ const Sku_Page = () => {
       );
     }
   }, [location.state, pkoData]);
+
+  useEffect(() => {
+    const totalMandatory = questions.filter((q) => q.mandatory).length;
+
+    const answeredMandatory = questions.filter(
+      (q) =>
+        q.mandatory &&
+        skuData.dimensionsAndWeights[q.question_id] !== undefined &&
+        skuData.dimensionsAndWeights[q.question_id] !== "",
+    ).length;
+
+    // Calculate progress as 10% of answered mandatory questions
+    const progress =
+      totalMandatory > 0
+        ? (answeredMandatory / totalMandatory) * 100 // 10% of answered mandatory
+        : 0;
+
+    setMandatoryProgress(progress);
+  }, [questions, skuData.dimensionsAndWeights]);
 
   useEffect(() => {
     // Check if no components exist and reset the state to show the box image
@@ -217,11 +238,67 @@ const Sku_Page = () => {
     return conditions.includes(normalizedParentAnswer);
   };
 
+  useEffect(() => {
+    const fetchComponentDetails = async () => {
+      if (!skuId || !pkoId) {
+        console.warn("SKU ID or PKO ID is missing. Skipping fetch.");
+        return;
+      }
+
+      try {
+        const response = await axiosInstance.get(
+          `/sku/${skuId}/components/?pko_id=${pkoId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (response.status === 200) {
+          const components = response.data; // Array of components
+
+          // Extract `component_progress` values
+          const progressValues = components.map(
+            (component) => component.component_progress || 0,
+          );
+
+          // Calculate the average progress
+          const averageProgress =
+            progressValues.reduce((sum, progress) => sum + progress, 0) /
+            progressValues.length;
+
+          // Update the state with the average
+          setComponentProgressAverage(averageProgress);
+
+          console.log("Average Component Progress:", averageProgress);
+        } else {
+          console.error(
+            "Failed to fetch component details. Status:",
+            response.status,
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching component details:", error);
+      }
+    };
+
+    fetchComponentDetails();
+  }, [skuId, pkoId]);
+
+  //Save the response
   const saveSkuData = async () => {
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
       return;
     }
+    console.log("primarypackagingdetailsprogressvalue", mandatoryProgress);
+    const combinedProgress = Math.round(
+      (Math.round(mandatoryProgress * 10) +
+        parseFloat((componentProgressAverage * 90).toFixed(2))) /
+        100,
+    );
+    console.log("primarypackagingdetailsprogressvalue", combinedProgress);
 
     setIsSubmitting(true);
     try {
@@ -237,6 +314,7 @@ const Sku_Page = () => {
           form_status: comp.formStatus || "Pending",
           responses: comp.responses || {},
         })),
+        sku_progress: combinedProgress,
       };
 
       // console.log("Submitting SKU Data:", payload);
@@ -658,6 +736,7 @@ const Sku_Page = () => {
         >
           <label className="fs-14 text-color-typo-primary mb-2 d-block">
             {question.question_text}
+            {question.mandatory && <span> *</span>}
           </label>
           {renderField(question)}
         </div>
@@ -709,7 +788,7 @@ const Sku_Page = () => {
                 className="save-button ms-3 px-4 py-12 fs-14 fw-600 border-0"
                 onClick={saveSkuData}
               >
-                Save & Validate
+                Validate & Submit
               </button>
             </div>
           </div>
@@ -828,8 +907,10 @@ const Sku_Page = () => {
 
             {/* Sku Components Section */}
             <div className="col-12 col-md-7">
-              <div className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100"
-              style={{ maxHeight: "400px", overflowY: "auto" }}>
+              <div
+                className="card bg-color-light-gray border border-color-light-border rounded-3 p-4 h-100"
+                style={{ maxHeight: "400px", overflowY: "auto" }}
+              >
                 <div className="d-flex justify-content-between align-items-center">
                   <h6 className="fs-22 fw-600 text-color-black mb-3">
                     SKU Components
@@ -851,24 +932,25 @@ const Sku_Page = () => {
                         onClick={(event) => {
                           // Prevent the default behavior
                           event.preventDefault();
-                      
+
                           // Get the target section from the data-target attribute
-                          const targetId = event.target.getAttribute("data-target");
-                          
+                          const targetId =
+                            event.target.getAttribute("data-target");
+
                           // Find the element by ID and scroll to it
                           setTimeout(() => {
-                            const targetElement = document.getElementById(targetId);
-                            
+                            const targetElement =
+                              document.getElementById(targetId);
+
                             if (targetElement) {
                               // Scroll to the target element with smooth scrolling
                               targetElement.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start', // Align to the top of the section
+                                behavior: "smooth",
+                                block: "start", // Align to the top of the section
                               });
                             }
                           }, 100); // Add a small delay (e.g., 100ms) to allow for rendering
-                      
-                          
+
                           setSkuData((prev) => ({
                             ...prev,
                             showInput: true,
@@ -964,7 +1046,10 @@ const Sku_Page = () => {
 
                     {/* Add Component Input Section */}
                     {skuData.showInput && (
-                      <div className="d-flex align-items-center gap-3 mt-3" id="addSkuComponentBlock">
+                      <div
+                        className="d-flex align-items-center gap-3 mt-3"
+                        id="addSkuComponentBlock"
+                      >
                         <input
                           type="text"
                           className="form-control border border-color-typo-secondary rounded-2 h-44 w-280"

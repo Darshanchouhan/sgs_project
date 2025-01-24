@@ -52,7 +52,7 @@ const PkgDataForm = () => {
         responses: {}, // Initialize responses
       };
 
-      //Flatten and map all answered questions
+      // Flatten and map all answered questions
       const answeredQuestions = Object.values(pkgData.sections).flatMap(
         (section) =>
           section
@@ -79,7 +79,7 @@ const PkgDataForm = () => {
             .filter((q) => q !== null),
       );
 
-      //Build the `responses` object dynamically
+      // Build the `responses` object dynamically
       answeredQuestions.forEach((q) => {
         payload.responses[q.question_text] = q.response;
       });
@@ -95,7 +95,11 @@ const PkgDataForm = () => {
       );
 
       if (response.status === 200) {
-        console.log("Autosave successful at", new Date().toLocaleTimeString());
+        console.log(
+          "Autosave successful at",
+          new Date().toLocaleTimeString(),
+          response.data,
+        );
       } else {
         console.warn("Autosave failed with status:", response.status);
       }
@@ -344,9 +348,11 @@ const PkgDataForm = () => {
     const conditions = fieldDependency
       .split(/OR/i)
       .map((dep) => dep.trim().toLowerCase());
-  
+
     // Match if any condition matches the parent answer
-    return conditions.some((condition) => normalizedParentAnswer.includes(condition));
+    return conditions.some((condition) =>
+      normalizedParentAnswer.includes(condition),
+    );
   };
 
   const renderField = (question) => {
@@ -662,6 +668,7 @@ const PkgDataForm = () => {
         form_status: "Pending",
         pko_id: pkoId,
         sku_id: skuId,
+        component_progress: Math.round(progressPercentage),
         responses: {}, // Initialize responses
       };
 
@@ -733,6 +740,7 @@ const PkgDataForm = () => {
         onSaveClick={handleSave}
         isFormFilled={isFormFilled} // Pass state to Breadcrumb
         pkoId={pkoId || "N/A"} // Pass PKO ID
+        skuId={skuId || "N/A"}
         description={description || "N/A"} // Pass Description
         componentName={componentName || "Default Component"}
       />

@@ -28,6 +28,9 @@ $theme-colors: (
   "color-modal-text": #838383,
   "color-padding-label": #f9e0e0,
   "color-dark-border": #F0F0F0,
+  "color-list-item": #848383,
+  "color-drag-drop-box": #FFE6E2,
+  "color-close-icon-box": #33312C,
 );
 
 // padding Config
@@ -51,6 +54,7 @@ $spacers: (
   26: $spacer * 1.625,
   28: $spacer * 1.75,
   30: $spacer * 1.875,
+  32: $spacer * 2,
   40: $spacer * 2.5,
   58: $spacer * 3.625,
   60: $spacer * 3.75,
@@ -186,7 +190,7 @@ $column-gaps: (
 }
 
 // width
-@each $w in (72, 92, 165, 320, 350, 395) {
+@each $w in (32, 72, 92, 165, 320, 350, 395) {
   .w-#{$w} {
     width: unquote($w + "px !important");
   }
