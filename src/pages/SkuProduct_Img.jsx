@@ -72,7 +72,11 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
               className="btn d-flex align-items-center p-0 border-0 fs-16 fw-600 text-secondary back-to-gallery-button"
               onClick={handleBackToGallery}
             >
-              <img src="/assets/images/back-action-icon.svg" className="w-32 me-2" alt="icon" />
+              <img
+                src="/assets/images/back-action-icon.svg"
+                className="w-32 me-2"
+                alt="icon"
+              />
               Back to Packaging Images
             </button>
             <div className="img-container border border-color-light-border rounded-3 text-center bg-white mt-5 mx-auto">
@@ -91,10 +95,22 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
                   Packaging Images
                 </h2>
                 <ul className="fs-16 fw-400 fst-italic text-color-list-item ps-3 mb-0">
-                  <li>Attach at least 1 image of the package or individual packaging components below.</li>
-                  <li>The image does not need to contain final graphics and can be unlabeled.</li>
-                  <li>The package can also be a mockup or a representative package that you produce and does not have to be CVS branded.</li>
-                  <li>All label requests must include an image of the package or packaging components.</li>
+                  <li>
+                    Attach at least 1 image of the package or individual
+                    packaging components below.
+                  </li>
+                  <li>
+                    The image does not need to contain final graphics and can be
+                    unlabeled.
+                  </li>
+                  <li>
+                    The package can also be a mockup or a representative package
+                    that you produce and does not have to be CVS branded.
+                  </li>
+                  <li>
+                    All label requests must include an image of the package or
+                    packaging components.
+                  </li>
                 </ul>
               </div>
               {NoImages ? (
@@ -102,11 +118,15 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
                   <div>
                     <img src="/assets/images/BoxImg.png" alt="box-img" />
                   </div>
-                  <p className="fs-16 fw-600 text-color-labels mt-3 mb-4">No images added yet. Drag & Drop images / Click the below button to upload images.</p>
+                  <p className="fs-16 fw-600 text-color-labels mt-3 mb-4">
+                    No images added yet. Drag & Drop images / Click the below
+                    button to upload images.
+                  </p>
                   <button
                     type="button"
                     className="btn btn-outline-secondary px-4 py-10"
-                    onClick={handleAddImage}>
+                    onClick={handleAddImage}
+                  >
                     + Add Packaging Images
                   </button>
                 </div>
@@ -114,11 +134,15 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
                 <div className="gallery-grid">
                   <div className="drag-drop-img-box d-flex align-items-center justify-content-center bg-color-drag-drop-box border border-secondary text-center p-40">
                     <div>
-                      <p className="fs-14 fw-400 text-color-labels mb-3">Drag & Drop images / Click the below button to upload images.</p>
+                      <p className="fs-14 fw-400 text-color-labels mb-3">
+                        Drag & Drop images / Click the below button to upload
+                        images.
+                      </p>
                       <button
                         type="button"
                         className="btn btn-outline-secondary px-4 py-2"
-                        onClick={handleAddImage}>
+                        onClick={handleAddImage}
+                      >
                         + Add Packaging Images
                       </button>
                     </div>
@@ -148,7 +172,10 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
                           <span>Full View</span>
                         </div>
                         <div className="divider"></div>
-                        <div className="action" onClick={() => handleDelete(img)}>
+                        <div
+                          className="action"
+                          onClick={() => handleDelete(img)}
+                        >
                           <img
                             src="/assets/images/trash-delete-bin.png"
                             alt="Delete"

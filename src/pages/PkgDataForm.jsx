@@ -275,32 +275,43 @@ const PkgDataForm = () => {
       let answeredMandatory = 0;
       //populate the questionMap with initial questions
       questions.forEach((q) => {
-        questionMap.set(q.question_id, { ...q, children: [] });
-        if (q.mandatory) {
-          totalMandatory += 1;
-          if (pkgData.answers[q.question_id] !== undefined) {
-            answeredMandatory += 1;
-          }
+        if (!q.question_id) {
+          console.warn(`Question without an ID found:`, q);
+        } else {
+          questionMap.set(q.question_id, { ...q, children: [] });
         }
       });
-      //Add child questions to their respective parent
+
       // questions.forEach((q) => {
       //   if (q.dependent_question) {
-      //     questionMap.get(q.dependent_question).children.push(q);
+      //     const parentQuestion = questionMap.get(q.dependent_question); //verify if parentQuestion exists before trying to access its children property
+      //     if (parentQuestion) {
+      //       parentQuestion.children.push(q);
+      //     } else {
+      //       //warning if the parent question is missing
+      //       console.warn(
+      //         `Parent question with ID ${q.dependent_question} not found for question ${q.question_id}.`,
+      //       );
+      //     }
       //   }
       // });
 
+      // Add child questions to their respective parents
       questions.forEach((q) => {
         if (q.dependent_question) {
-          const parentQuestion = questionMap.get(q.dependent_question); //verify if parentQuestion exists before trying to access its children property
-          if (parentQuestion) {
-            parentQuestion.children.push(q);
-          } else {
-            //warning if the parent question is missing
-            console.warn(
-              `Parent question with ID ${q.dependent_question} not found for question ${q.question_id}.`,
-            );
-          }
+          const dependentQuestions = Array.isArray(q.dependent_question)
+            ? q.dependent_question
+            : [q.dependent_question];
+
+          dependentQuestions.forEach((parentId) => {
+            if (questionMap.has(parentId)) {
+              questionMap.get(parentId).children.push(q);
+            } else {
+              console.warn(
+                `Parent question with ID ${parentId} not found for question ${q.question_id}.`,
+              );
+            }
+          });
         }
       });
 
@@ -327,13 +338,62 @@ const PkgDataForm = () => {
 
   const handleBackClick = () => navigate("/skus");
 
-  const handleInputChange = (questionId, value) => {
-    setPkgData((prev) => ({
-      ...prev,
-      answers: { ...prev.answers, [questionId]: value },
-    }));
-  };
+  //   const handleInputChange = (questionId, value) => {
+  //     setPkgData((prev) => {
+  //       var updatedAnswers = { ...prev.answers };
+
+  //       // If the Material Type question is being updated
+  //       // if (questionId === "material_type_question_id") {
+  //         // Clear all dependent answers from previous Material Type
+  //         const dependentQuestionIds = Object.values(pkgData.sections)
+  //           .flat()
+  //           .filter((q) => q.dependent_question === questionId)
+  //           .map((q) => q.question_id);
+
+  //         dependentQuestionIds.forEach((depQuestionId) => {
+  //           delete updatedAnswers[depQuestionId]; // Clear the answers
+  //         });
+  //       // }
+  //        // Update the current question's answer
+  //     updatedAnswers[questionId] = value;
+
+  //     return {
+  //       ...prev,
+  //       answers: updatedAnswers,
+  //     };
+  //   });
+  // };
+
   // Monitor changes to `pkgData.answers` to determine if the form is filled
+
+  const handleInputChange = (questionId, value) => {
+    setPkgData((prev) => {
+      const updatedAnswers = { ...prev.answers };
+
+      // Find and clear answers for all dependent questions
+      const dependentQuestionIds = Object.values(pkgData.sections)
+        .flat()
+        .filter((q) =>
+          Array.isArray(q.dependent_question)
+            ? q.dependent_question.includes(questionId)
+            : q.dependent_question === questionId,
+        )
+        .map((q) => q.question_id);
+
+      dependentQuestionIds.forEach((depQuestionId) => {
+        delete updatedAnswers[depQuestionId]; // Clear dependent answers
+      });
+
+      // Update the current question's answer
+      updatedAnswers[questionId] = value;
+
+      return {
+        ...prev,
+        answers: updatedAnswers,
+      };
+    });
+  };
+
   useEffect(() => {
     const hasAnswers = Object.values(pkgData.answers).some(
       (answer) => answer !== undefined && answer !== "",
@@ -341,17 +401,33 @@ const PkgDataForm = () => {
     setIsFormFilled(hasAnswers);
   }, [pkgData.answers]);
 
-  const isAnswerMatch = (fieldDependency, parentAnswer) => {
-    if (!fieldDependency) return true; // No dependency, always visible
+  // const isAnswerMatch = (fieldDependency, parentAnswer) => {
+  //   if (!fieldDependency) return true; // No dependency, always visible
 
-    const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
+  //   const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
+  //   const conditions = fieldDependency
+  //     .split(/OR/i)
+  //     .map((dep) => dep.trim().toLowerCase());
+
+  //   // Match if any condition matches the parent answer
+  //   return conditions.some((condition) =>
+  //     normalizedParentAnswer.includes(condition),
+  //   );
+  // };
+
+  const isAnswerMatch = (fieldDependency, parentAnswers) => {
+    if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
+
+    // Normalize fieldDependency into an array of conditions
     const conditions = fieldDependency
-      .split(/OR/i)
-      .map((dep) => dep.trim().toLowerCase());
+      .split(/OR/i) // Split conditions by "OR"
+      .map((condition) => condition.trim().toLowerCase());
 
-    // Match if any condition matches the parent answer
+    // Check if any condition matches any of the parent answers
     return conditions.some((condition) =>
-      normalizedParentAnswer.includes(condition),
+      parentAnswers.some((parentAnswer) =>
+        (parentAnswer || "").trim().toLowerCase().includes(condition),
+      ),
     );
   };
 
@@ -610,14 +686,21 @@ const PkgDataForm = () => {
 
   const renderQuestions = (questions) => {
     return questions.map((question) => {
-      const parentAnswer = pkgData.answers[question.dependent_question];
+      // Collect answers for all parent questions
+      const parentAnswers = Array.isArray(question.dependent_question)
+        ? question.dependent_question.map(
+            (parentId) => pkgData.answers[parentId] || "",
+          )
+        : [pkgData.answers[question.dependent_question] || ""];
+
+      // Check if the question is visible based on dependencies
       const isDependentVisible = isAnswerMatch(
         question.field_dependency,
-        parentAnswer,
+        parentAnswers,
       );
 
       if (question.dependent_question && !isDependentVisible) {
-        return null;
+        return null; // Skip rendering if conditions aren't met
       }
 
       return (
@@ -628,6 +711,10 @@ const PkgDataForm = () => {
               : question.question_text}
           </label>
           {renderField(question)}
+          {/* Recursively render follow-up questions */}
+          {question.follow_up_questions &&
+            question.follow_up_questions.length > 0 &&
+            renderQuestions(question.follow_up_questions)}
         </div>
       );
     });
@@ -748,17 +835,17 @@ const PkgDataForm = () => {
         saveFunction={autosavePkgData}
         dependencies={[pkgData.answers]}
       />
-      <div className="container-fluid px-5 py-58">
+      <div className="container-fluid px-5 py-2">
         <div className="row">
           <div className="col-12 col-md-3">
-            <div className="p-4 bg-color-light-gray position-sticky top-0">
-              <span className="fs-12 fw-600 text-color-typo-secondary">
+            <div className="componentInfo-block py-4 bg-color-light-gray position-sticky top-0">
+              <span className="fs-12 fw-600 text-color-typo-secondary d-inline-block px-4 mb-4">
                 Complete all sections for this component
               </span>
               {Object.keys(pkgData.sections).map((section) => (
                 <p
                   key={section}
-                  className={`fs-14 fw-600 cursor-pointer ${
+                  className={`fs-14 fw-600 cursor-pointer px-4 mb-4 ${
                     section === pkgData.activeSection ? "text-danger" : ""
                   }`}
                   onClick={() =>
