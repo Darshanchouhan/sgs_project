@@ -813,10 +813,10 @@ const Sku_Page = () => {
         {/* SKU Details */}
         <div className="px-28 py-20 border border-color-disabled-lite bg-color-light-gray">
           <div className="row">
-            <div className="col-12 d-flex align-items-start">
+            <div className="col-12 d-flex align-items-center">
               <div className=" sku-details-box col-12">
                 {dynamicFields.map((field, index) => (
-                  <div key={index} className="d-flex flex-column mb-30">
+                  <div key={index} className="d-flex flex-column">
                     <p className="sku-details-label">{field.label}</p>
                     <h6
                       className={`sku-details-value ${
@@ -912,7 +912,7 @@ const Sku_Page = () => {
                 style={{ maxHeight: "400px", overflowY: "auto" }}
               >
                 <div className="d-flex justify-content-between align-items-center">
-                  <h6 className="fs-22 fw-600 text-color-black mb-3">
+                  <h6 className="fs-22 fw-600 text-color-black mb-0">
                     SKU Components
                   </h6>
                   {/* Add SKU Component Button */}

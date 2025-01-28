@@ -22363,6 +22363,10 @@ input[type="radio"] {
 }
 
 /* Sidebar active section style */
+.componentInfo-block .text-danger {
+  border-left: 2px solid var(--bs-secondary);
+}
+
 .text-danger {
   color: red;
 }
@@ -22438,8 +22442,17 @@ input[type="radio"] {
 .sku-details-box {
   display: flex;
   flex-wrap: wrap; /* Allows the content to wrap to the next line */
-  column-gap: 70px; /* Horizontal gap */
+  column-gap: 25px; /* Horizontal gap */
   row-gap: 0px; /* No vertical gap */
+}
+@media (min-width: 992px) {
+  .sku-details-box {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+}
+.sku-details-box>div:first-child {
+  max-width: 25%;
 }
 .sku-details-item {
   flex: 1 1 calc(25% - 20px); /* Ensures 4 items per row */
@@ -22447,11 +22460,14 @@ input[type="radio"] {
   word-wrap: break-word; /* Ensures long text breaks into the next line */
 }
 /* Default styling for all fields */
+.sku-details-label {
+  font-size: 0.75rem;
+}
 .sku-details-value {
-  font-size: 16px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #000; /* Bold and black text for values */
-  white-space: nowrap; /* Prevents text wrapping by default */
+  white-space: wrap; /* Prevents text wrapping by default */
   overflow: hidden; /* Hides overflow if the text is too long */
   text-overflow: ellipsis; /* Adds ellipsis (...) for long text */
 }
@@ -22764,7 +22780,7 @@ input[type="radio"] {
   border-radius: 0;
   font-size: 26px;
   opacity: 1;
---bs-btn-close-bg: url("./assets/images/close-icon.png");
+--bs-btn-close-bg: url(./assets/images/close-icon.png);
 }
 .offcanvas.offcanvas-end .offcanvas-header {
   padding: 0;

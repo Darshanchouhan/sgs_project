@@ -66,7 +66,7 @@ const Breadcrumb = ({
               }}
               onClick={onSaveClick}
             >
-              Save & Draft
+              Save as Draft
             </button>
 
             <div
