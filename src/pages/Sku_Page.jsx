@@ -43,21 +43,6 @@ const Sku_Page = () => {
     setOverlayVisible(true); // Show the overlay
   };
 
-  // Close instruction when clicking outside
-  const handleClickOutside = (event) => {
-    if (infoRef.current && !infoRef.current.contains(event.target)) {
-      setActiveInfo(null);
-    }
-  };
-
-  // Attach event listener for outside click detection
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
   };
@@ -74,26 +59,27 @@ const Sku_Page = () => {
     const offcanvasElement = document.getElementById("offcanvasRight-image");
     if (offcanvasElement) {
       try {
-        console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
+        // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
         setLoadingImages(true);
 
         const response = await axiosInstance.get(
           `http://localhost:8001/api/skus/${skuId}/images/?pko_id=${pkoId}`,
         );
 
-        console.log("Response from fetch images API:", response.data);
+        // console.log("Response from fetch images API:", response.data);
 
         if (response.data && response.data.images) {
           setImagesFromDB(response.data.images);
-          console.log("Images fetched from DB:", response.data.images);
+          // console.log("Images fetched from DB:", response.data.images);
         } else {
-          console.warn("No images found in the database for this SKU.");
+          // console.warn("No images found in the database for this SKU.");
           setImagesFromDB([]);
         }
-      } catch (error) {
-        console.error("Error fetching images:", error);
-        alert("Failed to fetch images. Please try again.");
       } finally {
+        // catch (error) {
+        //   // console.error("Error fetching images:", error);
+        //   // alert("Failed to fetch images. Please try again.");
+        // }
         setLoadingImages(false);
         const offcanvas = new Offcanvas(offcanvasElement);
         offcanvas.show();
