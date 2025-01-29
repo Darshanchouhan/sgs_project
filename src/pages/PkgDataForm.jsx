@@ -10,6 +10,7 @@ import { PkgDataContext } from "./Pkg_DataContext"; // Import Context
 import Autosave from "./AutoSave";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ProgressLoader from "./ProgressLoader"; // Import ProgressLoader
+import Compo_ImageOverlay from "./Compo_ImageOverlay";
 
 const PkgDataForm = () => {
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
@@ -31,6 +32,40 @@ const PkgDataForm = () => {
     description,
     skuId: passedSkuId,
   } = location.state || {};
+  const [isOverlayVisible, setOverlayVisible] = useState(false);
+  const [overlayImage, setOverlayImage] = useState(null);
+
+  // const handleInfoClick = (questionText) => {
+  //   // Only show overlay for specific questions
+  //   const overlayFields = [
+  //     "Component Length (outside)",
+  //     "Component Width (outside)",
+  //     "Component Depth (outside)"
+  //   ];
+  //   if (overlayFields.includes(questionText)) {
+  //     setOverlayVisible(true);
+  //   }
+  // };
+  const handleInfoClick = (questionText) => {
+    const bottleJarFields = ["T", "E", "H", "S", "I"];
+    const componentFields = [
+      "Component Length (outside)",
+      "Component Width (outside)",
+      "Component Depth (outside)",
+    ];
+
+    if (bottleJarFields.includes(questionText)) {
+      setOverlayImage("/assets/images/component_bottle.png"); // Bottle image
+      setOverlayVisible(true);
+    } else if (componentFields.includes(questionText)) {
+      setOverlayImage("/assets/images/component_dimension.png"); // Component image
+      setOverlayVisible(true);
+    }
+  };
+
+  const handleOverlayClose = () => {
+    setOverlayVisible(false); // Close overlay
+  };
 
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
@@ -401,32 +436,19 @@ const PkgDataForm = () => {
     setIsFormFilled(hasAnswers);
   }, [pkgData.answers]);
 
-  // const isAnswerMatch = (fieldDependency, parentAnswer) => {
-  //   if (!fieldDependency) return true; // No dependency, always visible
-
-  //   const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
-  //   const conditions = fieldDependency
-  //     .split(/OR/i)
-  //     .map((dep) => dep.trim().toLowerCase());
-
-  //   // Match if any condition matches the parent answer
-  //   return conditions.some((condition) =>
-  //     normalizedParentAnswer.includes(condition),
-  //   );
-  // };
-
   const isAnswerMatch = (fieldDependency, parentAnswers) => {
     if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
 
     // Normalize fieldDependency into an array of conditions
     const conditions = fieldDependency
-      .split(/OR/i) // Split conditions by "OR"
+      .split(" OR ") // Split conditions by "OR"
       .map((condition) => condition.trim().toLowerCase());
 
-    // Check if any condition matches any of the parent answers
+    // Check for exact matches only
     return conditions.some((condition) =>
-      parentAnswers.some((parentAnswer) =>
-        (parentAnswer || "").trim().toLowerCase().includes(condition),
+      parentAnswers.some(
+        (parentAnswer) =>
+          (parentAnswer || "").trim().toLowerCase() === condition,
       ),
     );
   };
@@ -440,6 +462,7 @@ const PkgDataForm = () => {
       <InfoOutlinedIcon
         className="info-icon"
         titleAccess={question.instructions} // Display on hover
+        onClick={() => handleInfoClick(question.question_text)}
       />
     ) : null;
     const isOutsideDimension = /outside/i.test(question.question_text);
@@ -578,6 +601,13 @@ const PkgDataForm = () => {
               ))}
             </select>
             <span className="ms-2">{infoIcon}</span>
+            {/* Overlay for specific questions */}
+            {isOverlayVisible && overlayImage && (
+              <Compo_ImageOverlay
+                onClose={() => setOverlayVisible(false)}
+                imagePath={overlayImage}
+              />
+            )}
           </div>
         );
 
@@ -677,6 +707,12 @@ const PkgDataForm = () => {
               }}
             />
             <span className="ms-2">{infoIcon}</span>
+            {isOverlayVisible && overlayImage && (
+              <Compo_ImageOverlay
+                onClose={() => setOverlayVisible(false)}
+                imagePath={overlayImage}
+              />
+            )}
           </div>
         );
       default:
@@ -684,21 +720,55 @@ const PkgDataForm = () => {
     }
   };
 
+  // const renderQuestions = (questions) => {
+  //   return questions.map((question) => {
+  //     // Collect answers for all parent questions
+  //     const parentAnswers = Array.isArray(question.dependent_question)
+  //       ? question.dependent_question.map(
+  //           (parentId) => pkgData.answers[parentId] || "",
+  //         )
+  //       : [pkgData.answers[question.dependent_question] || ""];
+
+  //     // Check if the question is visible based on dependencies
+  //     const isDependentVisible = isAnswerMatch(
+  //       question.field_dependency,
+  //       parentAnswers,
+  //     );
+
+  //     if (question.dependent_question && !isDependentVisible) {
+  //       return null; // Skip rendering if conditions aren't met
+  //     }
+
+  //     return (
+  //       <div className="form-group mt-4" key={question.question_id}>
+  //         <label>
+  //           {question.mandatory
+  //             ? `${question.question_text} *`
+  //             : question.question_text}
+  //         </label>
+  //         {renderField(question)}
+  //         {/* Recursively render follow-up questions */}
+  //         {question.follow_up_questions &&
+  //           question.follow_up_questions.length > 0 &&
+  //           renderQuestions(question.follow_up_questions)}
+  //       </div>
+  //     );
+  //   });
+  // };
   const renderQuestions = (questions) => {
     return questions.map((question) => {
-      // Collect answers for all parent questions
+      // Collect all parent answers
       const parentAnswers = Array.isArray(question.dependent_question)
         ? question.dependent_question.map(
             (parentId) => pkgData.answers[parentId] || "",
           )
         : [pkgData.answers[question.dependent_question] || ""];
 
-      // Check if the question is visible based on dependencies
+      // Check if the question is visible based on dependency
       const isDependentVisible = isAnswerMatch(
         question.field_dependency,
         parentAnswers,
       );
-
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
       }
@@ -711,10 +781,6 @@ const PkgDataForm = () => {
               : question.question_text}
           </label>
           {renderField(question)}
-          {/* Recursively render follow-up questions */}
-          {question.follow_up_questions &&
-            question.follow_up_questions.length > 0 &&
-            renderQuestions(question.follow_up_questions)}
         </div>
       );
     });
@@ -870,7 +936,13 @@ const PkgDataForm = () => {
           <div className="col-12 col-md-9">{renderSections()}</div>
         </div>
       </div>
-
+      {/* Add this block here */}
+      {isOverlayVisible && (
+        <Compo_ImageOverlay
+          imagePath={overlayImage} // Pass the dynamic image path
+          onClose={handleOverlayClose}
+        />
+      )}
       {/* Footer with Previous and Next buttons */}
       <div className="footer d-flex justify-content-between mt-4">
         {/* Previous Button */}

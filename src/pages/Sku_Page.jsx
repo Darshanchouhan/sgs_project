@@ -9,6 +9,7 @@ import Autosave from "./AutoSave";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Offcanvas } from "bootstrap";
 import { VendorContext } from "./VendorContext";
+import Dimen_ImageOverlay from "./Dimen_ImageOverlay"; // Import Overlay Component
 
 const Sku_Page = () => {
   const {
@@ -36,6 +37,34 @@ const Sku_Page = () => {
   const [weightUnit, setWeightUnit] = useState("Unit"); // Default unit for weights
   const [mandatoryProgress, setMandatoryProgress] = useState(0);
   const [componentProgressAverage, setComponentProgressAverage] = useState(0); // Average progress
+  const [isOverlayVisible, setOverlayVisible] = useState(false);
+
+  const handleInstructionClick = () => {
+    setOverlayVisible(true); // Show the overlay
+  };
+
+  // Close instruction when clicking outside
+  const handleClickOutside = (event) => {
+    if (infoRef.current && !infoRef.current.contains(event.target)) {
+      setActiveInfo(null);
+    }
+  };
+
+  // Attach event listener for outside click detection
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleOverlayClose = () => {
+    setOverlayVisible(false); // Hide the overlay
+  };
+
+  useEffect(() => {
+    console.log("isOverlayVisible:", isOverlayVisible); // Debug log for state changes
+  }, [isOverlayVisible]);
 
   const handleProductImageCountUpdate = (count) => {
     setProductImageCount(count);
@@ -538,6 +567,11 @@ const Sku_Page = () => {
       }
     };
 
+    // Check if the question is related to height, width, or depth
+    const showOverlayForDimension = /height|width|depth/i.test(
+      question.question_text,
+    );
+
     switch (question.question_type) {
       case "Varchar":
         return (
@@ -655,11 +689,24 @@ const Sku_Page = () => {
                   ))}
               </select>
             </div>
-            {question.instructions && (
-              <InfoOutlinedIcon
-                className="info-icon"
-                titleAccess={question.instructions}
-              />
+            {/* Instruction/Overlay Icon */}
+            {showOverlayForDimension ? (
+              <>
+                <InfoOutlinedIcon
+                  className="info-icon"
+                  onClick={handleInstructionClick} // Open overlay for dimensions
+                />
+                {isOverlayVisible && (
+                  <Dimen_ImageOverlay onClose={handleOverlayClose} />
+                )}
+              </>
+            ) : (
+              question.instructions && (
+                <InfoOutlinedIcon
+                  className="info-icon"
+                  titleAccess={question.instructions} // Show instructions on hover for other questions
+                />
+              )
             )}
           </div>
         );

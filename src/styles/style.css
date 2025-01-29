@@ -22451,7 +22451,7 @@ input[type="radio"] {
     justify-content: space-between;
   }
 }
-.sku-details-box>div:first-child {
+.sku-details-box > div:first-child {
   max-width: 25%;
 }
 .sku-details-item {
@@ -22780,9 +22780,20 @@ input[type="radio"] {
   border-radius: 0;
   font-size: 26px;
   opacity: 1;
---bs-btn-close-bg: url(./assets/images/close-icon.png);
+  --bs-btn-close-bg: url(./assets/images/close-icon.png);
 }
 .offcanvas.offcanvas-end .offcanvas-header {
   padding: 0;
 }
 /* Custom css end (Azahar) */
+
+.offcanvas {
+  display: block; /* Ensure it's visible */
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 50%; /* Adjust the width */
+  height: 100%;
+  background-color: #fff; /* Light background */
+  z-index: 1050; /* Ensure it's on top */
+}
