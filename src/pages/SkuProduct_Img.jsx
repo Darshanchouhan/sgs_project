@@ -1,16 +1,70 @@
 import React, { useState, useEffect } from "react";
 import "./../styles/style.css";
+import axiosInstance from "../services/axiosInstance";
 
-const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
+const SkuProduct_Img = ({
+  updateProductImageCount,
+  setImagesToUpload,
+  imagesFromDB,
+  skuId,
+  pkoId,
+  handleAddProductImageClick,
+  refreshAddProductImage,
+}) => {
   const [images, setImages] = useState([]); // State for new images only
   const [selectedImage, setSelectedImage] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(""); // Error state
+  // const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
+
+  // Combine fetched images and new images
+  // const combinedImages = [...(imagesFromDB || []), ...images];
+  const combinedImages = [...(imagesFromDB || [])];
+
+  // console.log(combinedImages,"combinedImages")
+
+  // const viewImageUrl = "http://localhost:8001/media/"
+  const viewImageUrl = "https://demo.gramener.com/media/";
 
   // Update the product image count whenever the images array changes
   useEffect(() => {
     if (updateProductImageCount) {
-      updateProductImageCount(images.length);
+      updateProductImageCount(combinedImages.length);
     }
-  }, [images, updateProductImageCount]);
+  }, [combinedImages, updateProductImageCount]);
+
+  // ✅ Use `useEffect` to trigger handleUploadImages after state update
+  useEffect(() => {
+    if (images.length > 0) {
+      handleUploadImages();
+    }
+  }, [images]); // Runs when images state is updated
+
+  // **Moved `handleUploadImages` inside `SkuProduct_Img`**
+  const handleUploadImages = async () => {
+    console.log("upload image called", images, imagesFromDB, combinedImages);
+    if (images.length > 0 && skuId && pkoId) {
+      try {
+        const formData = new FormData();
+        images.forEach((image) => {
+          formData.append("images", image.file); // Append image files
+        });
+        formData.append("pko_id", pkoId);
+
+        await axiosInstance.post(`skus/${skuId}/upload-images/`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        // ✅ Clear images after successful upload
+        setImages([]);
+        setImagesToUpload([]);
+        refreshAddProductImage();
+        alert("Images uploaded successfully!");
+      } catch (error) {
+        console.error("Error uploading images:", error);
+        alert("Failed to upload images. Please try again.");
+      }
+    }
+  };
 
   const handleAddImage = () => {
     const input = document.createElement("input");
@@ -25,29 +79,66 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
         url: URL.createObjectURL(file), // Generate temporary URL for display
       }));
 
-      setImages((prev) => [...prev, ...newImages]); // Add new images to state
-      setImagesToUpload((prev) => [...prev, ...files]); // Update parent with new files
+      // setImages((prev) => [...prev, ...newImages]); // Add new images to state
+      // setImagesToUpload((prev) => [...prev, ...files]); // Update parent with new files
+
+      setImages(newImages); // ✅ Replace the state instead of appending
+      setImagesToUpload(files); // ✅ Replace the upload list
     };
 
     input.click();
   };
 
+  // const handleAddImage = async () => {
+  //   const input = document.createElement("input");
+  //   input.type = "file";
+  //   input.accept = "image/*";
+  //   input.multiple = true;
+
+  //   input.onchange = async (event) => {
+  //     const files = Array.from(event.target.files);
+  //     const newImages = files.map((file) => ({
+  //       file,
+  //       url: URL.createObjectURL(file), // Generate temporary URL for display
+  //     }));
+
+  //     setImages((prev) => [...prev, ...newImages]); // Add new images to state
+  //     setImagesToUpload((prev) => [...prev, ...files]); // Update parent with new files
+
+  //   };
+
+  //   input.click();
+  // };
+
   const handleFullView = (image) => {
     setSelectedImage(image);
   };
 
-  const handleDelete = (imageToDelete) => {
-    setImages((prev) => prev.filter((img) => img.url !== imageToDelete.url));
-    setImagesToUpload((prev) =>
-      prev.filter((file) => file !== imageToDelete.file),
-    ); // Remove from upload list
+  const handleSkuDelete = async (imagePath) => {
+    try {
+      setLoading(true);
+      await axiosInstance.delete(`/skus/${skuId}/upload-images/`, {
+        data: { image: imagePath, pko_id: pkoId, sku_id: skuId },
+      });
+
+      // Remove the image from the combined list
+      // setImages((prev) => prev.filter((img) => img.url !== imagePath));
+      // setImagesToUpload((prev) => prev.filter((file) => file.name !== imagePath));
+      refreshAddProductImage();
+      setError(""); // Clear any previous error
+    } catch (err) {
+      console.error("Error deleting SKU image:", err);
+      setError("Error deleting SKU image. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBackToGallery = () => {
     setSelectedImage(null);
   };
 
-  const NoImages = images.length === 0;
+  // const NoImages = images.length === 0;
 
   return (
     <div
@@ -81,7 +172,7 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
             </button>
             <div className="img-container border border-color-light-border rounded-3 text-center bg-white mt-5 mx-auto">
               <img
-                src={selectedImage.url}
+                src={selectedImage}
                 alt="Full View"
                 className="full-view-image w-100"
               />
@@ -113,7 +204,7 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
                   </li>
                 </ul>
               </div>
-              {NoImages ? (
+              {combinedImages.length === 0 ? (
                 <div className="noImagesAdded-block text-center">
                   <div>
                     <img src="/assets/images/BoxImg.png" alt="box-img" />
@@ -147,45 +238,57 @@ const SkuProduct_Img = ({ updateProductImageCount, setImagesToUpload }) => {
                       </button>
                     </div>
                   </div>
-                  {images.map((img, i) => (
-                    <div
-                      key={i}
-                      className="gallery-item"
-                      onMouseEnter={(e) => {
-                        e.currentTarget.classList.add("hovered");
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.classList.remove("hovered");
-                      }}
-                    >
-                      <img src={img.url} alt="Uploaded" />
-                      <div className="image-actions">
+                  {combinedImages &&
+                    combinedImages?.map((img, i) => {
+                      // console.log(img.url,"image")
+                      return (
                         <div
-                          className="action"
-                          onClick={() => handleFullView(img)}
+                          key={i}
+                          className="gallery-item"
+                          onMouseEnter={(e) => {
+                            e.currentTarget.classList.add("hovered");
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.classList.remove("hovered");
+                          }}
                         >
                           <img
-                            src="/assets/images/maximize-full-screen.png"
-                            alt="Full View"
-                            className="action-icon"
+                            src={
+                              `${viewImageUrl}${img.image}` ||
+                              `${viewImageUrl}${img.thumbnail}`
+                            }
+                            alt="Uploaded"
                           />
-                          <span>Full View</span>
+                          <div className="image-actions">
+                            <div
+                              className="action"
+                              onClick={() =>
+                                handleFullView(`${viewImageUrl}${img.image}`)
+                              }
+                            >
+                              <img
+                                src="/assets/images/maximize-full-screen.png"
+                                alt="Full View"
+                                className="action-icon"
+                              />
+                              <span>Full View</span>
+                            </div>
+                            <div className="divider"></div>
+                            <div
+                              className="action"
+                              onClick={() => handleSkuDelete(img.image)}
+                            >
+                              <img
+                                src="/assets/images/trash-delete-bin.png"
+                                alt="Delete"
+                                className="action-icon"
+                              />
+                              <span>Delete</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="divider"></div>
-                        <div
-                          className="action"
-                          onClick={() => handleDelete(img)}
-                        >
-                          <img
-                            src="/assets/images/trash-delete-bin.png"
-                            alt="Delete"
-                            className="action-icon"
-                          />
-                          <span>Delete</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               )}
             </div>

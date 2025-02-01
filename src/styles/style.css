@@ -22270,7 +22270,7 @@ input:focus {
 }
 
 label {
-  font-size: 14px;
+  font-size: 12px;
   margin-bottom: 8px;
   color: black;
 }
@@ -22301,7 +22301,7 @@ textarea {
   margin-top: 0;
 }
 .form-list {
-  background-image: url(../../public/assets/images/chevron-down.svg) !important;
+  background-image: url(/assets/images/chevron-down.svg) !important;
   background-size: 20px 20px;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -22384,7 +22384,6 @@ input[type="radio"] {
 .footer {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
 }
 
 .footer-button {
@@ -22632,8 +22631,7 @@ input[type="radio"] {
   -webkit-appearance: none; /* Remove default arrow in WebKit browsers (Safari) */
   -moz-appearance: none; /* Remove default arrow in Firefox */
   appearance: none;
-  background: url(/public/assets/images/component-down.svg) no-repeat right 16px
-    center;
+  background: url(/assets/images/component-down.svg) no-repeat right 16px center;
   background-size: 24px 24px;
 }
 /* Media Query */
@@ -22785,6 +22783,12 @@ input[type="radio"] {
 .offcanvas.offcanvas-end .offcanvas-header {
   padding: 0;
 }
+.noComponentsAdded-block {
+  max-width: 80%;
+}
+.form-section input::placeholder {
+  font-size: 13px;
+}
 /* Custom css end (Azahar) */
 
 .offcanvas {
@@ -22796,4 +22800,11 @@ input[type="radio"] {
   height: 100%;
   background-color: #fff; /* Light background */
   z-index: 1050; /* Ensure it's on top */
+}
+
+.color-active-bg {
+  background-color: #e0f9e2;
+}
+.w-114 {
+  width: 114px !important;
 }

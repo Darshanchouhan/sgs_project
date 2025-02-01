@@ -54,7 +54,8 @@ const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
             textAlign: "center",
           }}
         >
-          {percentage}% <br /> completed
+          <span className="text-secondary fs-24 fw-700">{percentage}%</span>{" "}
+          <br /> completed
         </div>
       )}
     </div>

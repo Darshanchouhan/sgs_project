@@ -42,7 +42,13 @@ const VendorDashboard = () => {
         const response = await axiosInstance.get(`vendors/${cvsSupplier}`);
         const data = response.data;
         setVendorData(data[cvsSupplier]); // Assuming vendor ID is "30542"
-        setSelectedPkoId(data[cvsSupplier]?.pkos[0]?.pko_id || "");
+
+        // Check for previously selected PKO ID in localStorage
+        const storedPkoId = localStorage.getItem("selectedPkoId");
+        const defaultPkoId =
+          storedPkoId || data[cvsSupplier]?.pkos[0]?.pko_id || "";
+
+        setSelectedPkoId(defaultPkoId);
       } catch (error) {
         console.error("Error fetching vendor data:", error);
       } finally {
@@ -103,6 +109,8 @@ const VendorDashboard = () => {
   const handlePkoChange = (e) => {
     const selectedId = e.target.value;
     setSelectedPkoId(selectedId);
+    // Persist the selected PKO ID to localStorage
+    localStorage.setItem("selectedPkoId", selectedId);
 
     // Find the selected PKO from vendorData.pkos
     const selectedPko = vendorData.pkos.find(
@@ -232,7 +240,7 @@ const VendorDashboard = () => {
                     </span>
                   </div>
                 </div>
-                <div className="row mb-2">
+                <div className="row mb-2 h-42">
                   <div className="col-5">
                     <span className="fs-14 text-color-labels">
                       Supplier Contact
@@ -244,12 +252,12 @@ const VendorDashboard = () => {
                     </span>
                     <button
                       type="button"
-                      className="bg-transparent p-0 border-0 shadow-none fw-700 text-color-draft view-all"
+                      className="bg-transparent p-0 border-0 shadow-none fw-700 text-color-draft view-all fs-14"
                       data-bs-toggle="offcanvas"
                       data-bs-target="#offcanvasRight-contact"
                       aria-controls="offcanvasRight-contact"
                     >
-                      view all
+                      View All
                     </button>
                   </div>
                 </div>
@@ -319,11 +327,26 @@ const VendorDashboard = () => {
                 <h6 className="text-color-typo-primary fw-600 mb-3">
                   PKO Status
                 </h6>
-                <img
-                  src="/assets/images/active-Indicator.svg"
-                  width="114px"
-                  alt="Active Indicator"
-                />
+                <span
+                  className={`fw-600 px-12 py-2 text-nowrap d-flex align-items-center w-114
+        ${
+          new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+            ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
+            : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
+        }`}
+                >
+                  <span
+                    className={`circle me-2 
+      ${
+        new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+          ? "bg-color-completed" // Green circle for Active
+          : "" // Gray circle for Closed
+      }`}
+                  ></span>
+                  {new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+                    ? "Active"
+                    : "Closed"}
+                </span>
                 <div className="d-flex flex-column h-100 align-items-start justify-content-end">
                   <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap rounded-1 border border-color-dark-border">
                     <span className="text-color-labels">

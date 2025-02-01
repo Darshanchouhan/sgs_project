@@ -31,6 +31,7 @@ $theme-colors: (
   "color-list-item": #848383,
   "color-drag-drop-box": #ffe6e2,
   "color-close-icon-box": #33312c,
+  "color-active-bg": #e0f9e2,
 );
 
 // padding Config
@@ -59,6 +60,7 @@ $spacers: (
   58: $spacer * 3.625,
   60: $spacer * 3.75,
   70: $spacer * 4.375,
+  100: $spacer * 6.25,
   115: $spacer * 7.188,
   154: $spacer * 9.625,
 );
@@ -183,7 +185,7 @@ $column-gaps: (
 }
 
 // height
-@each $h in (20, 44, 51, 52, 72) {
+@each $h in (20, 26, 42, 44, 51, 52, 72) {
   .h-#{$h} {
     height: unquote($h + "px !important");
   }
