@@ -457,14 +457,6 @@ const PkgDataForm = () => {
     const handleChange = (e) =>
       handleInputChange(question.question_id, e.target.value);
 
-    // Info Icon with Instructions
-    const infoIcon = question.instructions ? (
-      <InfoOutlinedIcon
-        className="info-icon"
-        titleAccess={question.instructions} // Display on hover
-        onClick={() => handleInfoClick(question.question_text)}
-      />
-    ) : null;
     const isOutsideDimension = /outside/i.test(question.question_text);
     const isInsideDimension = /inside/i.test(question.question_text);
 
@@ -506,13 +498,12 @@ const PkgDataForm = () => {
           <div className="input-group align-items-center">
             <input
               maxLength="100"
-              className="h-42  w-320 "
+              className="h-42  w-100"
               type="text"
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
             />
-            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -532,7 +523,6 @@ const PkgDataForm = () => {
                 {option}
               </label>
             ))}
-            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -540,7 +530,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center select-arrow-pos">
             <select
-              className="w-320 me-2"
+              className="w-100"
               value={pkgData.answers[question.question_id] || ""}
               onChange={handleChange}
             >
@@ -553,23 +543,30 @@ const PkgDataForm = () => {
                   </option>
                 ))}
             </select>
-            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
       case "Float + Dropdown":
         return (
           <div className="input-group align-items-center">
+            {/* Input for the float value */}
             <input
-              className="h-42  w-130 "
-              type="number"
-              step="1"
+              className="h-42 w-75"
+              type="text" // Use text to allow decimal inputs
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow only numbers, decimal points, and empty input
+                if (/^\d*\.?\d*$/.test(value)) {
+                  handleInputChange(question.question_id, value);
+                }
+              }}
               onKeyDown={(e) => {
+                // Allow digits, one dot, and navigation keys
                 if (
-                  !/^\d$/.test(e.key) &&
+                  !/^\d$/.test(e.key) && // Allow digits
+                  e.key !== "." && // Allow one dot
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
@@ -577,16 +574,23 @@ const PkgDataForm = () => {
                 ) {
                   e.preventDefault();
                 }
+                // Prevent more than one dot
+                if (e.key === "." && e.target.value.includes(".")) {
+                  e.preventDefault();
+                }
               }}
             />
+
+            {/* Dropdown for the unit selection */}
             <select
-              className="bg-color-light-shade form-list w-70"
+              className="bg-color-light-shade form-list w-25"
               value={pkgData.answers[`${question.question_id}_unit`] || ""}
               onChange={(e) => {
                 const newUnit = e.target.value;
 
                 handleInputChange(`${question.question_id}_unit`, newUnit);
 
+                // Synchronize units for dimensions if necessary
                 if (isOutsideDimension) {
                   synchronizeUnits(newUnit, "outside");
                 } else if (isInsideDimension) {
@@ -600,7 +604,7 @@ const PkgDataForm = () => {
                 </option>
               ))}
             </select>
-            <span className="ms-2">{infoIcon}</span>
+
             {/* Overlay for specific questions */}
             {isOverlayVisible && overlayImage && (
               <Compo_ImageOverlay
@@ -615,7 +619,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 w-130 "
+              className="h-42 w-75"
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
@@ -634,7 +638,7 @@ const PkgDataForm = () => {
               }}
             />
             <select
-              className="bg-color-light-shade form-list w-70"
+              className="bg-color-light-shade form-list w-25"
               value={pkgData.answers[`${question.question_id}_unit`] || ""}
               onChange={(e) => {
                 const newUnit = e.target.value;
@@ -654,7 +658,6 @@ const PkgDataForm = () => {
                 </option>
               ))}
             </select>
-            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -662,7 +665,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42  w-130 "
+              className="h-42  w-100"
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}
@@ -680,7 +683,6 @@ const PkgDataForm = () => {
                 }
               }}
             />
-            <span className="ms-2">{infoIcon}</span>
           </div>
         );
 
@@ -688,15 +690,22 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42  w-130 "
-              type="number"
-              step="1"
+              className="h-42 w-100"
+              type="text" // Use text to allow decimal inputs
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow only numbers, decimal points, and empty input
+                if (/^\d*\.?\d*$/.test(value)) {
+                  handleInputChange(question.question_id, value);
+                }
+              }}
               onKeyDown={(e) => {
+                // Allow digits, one dot, and navigation keys
                 if (
-                  !/^\d$/.test(e.key) &&
+                  !/^\d$/.test(e.key) && // Allow digits
+                  e.key !== "." && // Allow one dot
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
@@ -704,9 +713,12 @@ const PkgDataForm = () => {
                 ) {
                   e.preventDefault();
                 }
+                // Prevent more than one dot
+                if (e.key === "." && e.target.value.includes(".")) {
+                  e.preventDefault();
+                }
               }}
             />
-            <span className="ms-2">{infoIcon}</span>
             {isOverlayVisible && overlayImage && (
               <Compo_ImageOverlay
                 onClose={() => setOverlayVisible(false)}
@@ -715,6 +727,7 @@ const PkgDataForm = () => {
             )}
           </div>
         );
+
       default:
         return null;
     }
@@ -773,14 +786,37 @@ const PkgDataForm = () => {
         return null; // Skip rendering if conditions aren't met
       }
 
+      // Info Icon with Instructions
+      const infoIcon = question.instructions ? (
+        <InfoOutlinedIcon
+          className="info-icon"
+          titleAccess={question.instructions} // Display on hover
+          onClick={() => handleInfoClick(question.question_text)}
+        />
+      ) : null;
+
       return (
-        <div className="form-group mt-4" key={question.question_id}>
-          <label>
-            {question.mandatory
-              ? `${question.question_text} *`
-              : question.question_text}
-          </label>
-          {renderField(question)}
+        <div className="col-12 col-md-6">
+          <div className="form-group mt-4" key={question.question_id}>
+            <div className="d-flex justify-content-between align-items-center mb-2 h-26">
+              <label className="mb-0">
+                {question.mandatory ? (
+                  <>
+                    {question.question_text}{" "}
+                    <span className="text-secondary">*</span>
+                  </>
+                ) : (
+                  question.question_text
+                )}
+              </label>
+              <span className="ms-2">{infoIcon}</span>
+            </div>
+            {renderField(question)}
+            {/* Recursively render follow-up questions */}
+            {question.follow_up_questions &&
+              question.follow_up_questions.length > 0 &&
+              renderQuestions(question.follow_up_questions)}
+          </div>
         </div>
       );
     });
@@ -802,7 +838,9 @@ const PkgDataForm = () => {
             <h6 className="text-color-typo-secondary fw-600 form-heading d-flex align-items-center text-nowrap mb-3">
               {section}
             </h6>
-            <div className="form-fields">{renderQuestions(questions)}</div>
+            <div className="form-fields d-block">
+              <div className="row">{renderQuestions(questions)}</div>
+            </div>
           </div>
         )
       );
@@ -901,7 +939,7 @@ const PkgDataForm = () => {
         saveFunction={autosavePkgData}
         dependencies={[pkgData.answers]}
       />
-      <div className="container-fluid px-5 py-2">
+      <div className="container-fluid px-5 pt-2 pb-100">
         <div className="row">
           <div className="col-12 col-md-3">
             <div className="componentInfo-block py-4 bg-color-light-gray position-sticky top-0">
@@ -944,7 +982,7 @@ const PkgDataForm = () => {
         />
       )}
       {/* Footer with Previous and Next buttons */}
-      <div className="footer d-flex justify-content-between mt-4">
+      <div className="footer d-flex justify-content-between mt-4 bg-color-light-gray px-4 py-10 fixed-bottom w-100">
         {/* Previous Button */}
         <button
           onClick={() => {

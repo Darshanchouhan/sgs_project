@@ -63,23 +63,19 @@ const Sku_Page = () => {
         setLoadingImages(true);
 
         const response = await axiosInstance.get(
-          `http://localhost:8001/api/skus/${skuId}/images/?pko_id=${pkoId}`,
+          `skus/${skuId}/images/?pko_id=${pkoId}`,
         );
-
-        // console.log("Response from fetch images API:", response.data);
 
         if (response.data && response.data.images) {
           setImagesFromDB(response.data.images);
-          // console.log("Images fetched from DB:", response.data.images);
+          console.log("Images fetched from DB:", response.data.images);
         } else {
-          // console.warn("No images found in the database for this SKU.");
+          console.warn("No images found in the database for this SKU.");
           setImagesFromDB([]);
         }
+      } catch (error) {
+        console.error("Error fetching images:", error);
       } finally {
-        // catch (error) {
-        //   // console.error("Error fetching images:", error);
-        //   // alert("Failed to fetch images. Please try again.");
-        // }
         setLoadingImages(false);
         const offcanvas = new Offcanvas(offcanvasElement);
         offcanvas.show();
@@ -87,28 +83,52 @@ const Sku_Page = () => {
     }
   };
 
-  const handleUploadImages = async () => {
-    if (imagesToUpload.length > 0 && skuId && pkoId) {
-      try {
-        const formData = new FormData();
-        imagesToUpload.forEach((image) => {
-          formData.append("images", image);
-        });
-        formData.append("pko_id", pkoId);
+  const refreshAddProductImage = async () => {
+    try {
+      // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
 
-        await axiosInstance.post(
-          `http://localhost:8001/api/skus/${skuId}/upload-images/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } },
-        );
+      const response = await axiosInstance.get(
+        `skus/${skuId}/images/?pko_id=${pkoId}`,
+      );
 
-        alert("Images uploaded successfully!");
-      } catch (error) {
-        console.error("Error uploading images:", error);
-        alert("Failed to upload images. Please try again.");
+      if (response.data && response.data.images) {
+        setImagesFromDB(response.data.images);
+        console.log("Images fetched from DB:", response.data.images);
+      } else {
+        // console.warn("No images found in the database for this SKU.");
+        setImagesFromDB([]);
       }
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    } finally {
+      // setLoadingImages(false);
+      // const offcanvas = new Offcanvas(offcanvasElement);
+      // offcanvas.show();
     }
   };
+
+  // const handleUploadImages = async () => {
+  //   // if (imagesToUpload.length > 0 && skuId && pkoId) {
+  //     try {
+  //       const formData = new FormData();
+  //       imagesToUpload.forEach((image) => {
+  //         formData.append("images", image);
+  //       });
+  //       formData.append("pko_id", pkoId);
+
+  //       await axiosInstance.post(
+  //         `skus/${skuId}/upload-images/`,
+  //         formData,
+  //         { headers: { "Content-Type": "multipart/form-data" } },
+  //       );
+  //       handleAddProductImageClick();
+  //       alert("Images uploaded successfully!");
+  //     } catch (error) {
+  //       console.error("Error uploading images:", error);
+  //       alert("Failed to upload images. Please try again.");
+  //     }
+  // // }
+  // };
 
   useEffect(() => {
     if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
@@ -341,9 +361,9 @@ const Sku_Page = () => {
 
       updateSkuStatus(skuId, "Draft");
       // Upload Images after saving SKU data
-      await handleUploadImages();
+      // await handleUploadImages();
 
-      navigate("/vendordashboard");
+      // navigate("/vendordashboard");
     } catch (error) {
       console.error("Error saving SKU data:", error);
       alert("Failed to save SKU data. Please try again.");
@@ -817,8 +837,12 @@ const Sku_Page = () => {
                 Submission Last Date: {submissionLastDate}
               </p>
 
+              <button className="save-button text-white bg-secondary ms-4 me-12 fs-14 fw-600 border-0 px-4 py-12">
+                Save as Draft
+              </button>
+
               <button
-                className="save-button ms-3 px-4 py-12 fs-14 fw-600 border-0"
+                className="save-button px-4 py-12 fs-14 fw-600 border-0"
                 onClick={saveSkuData}
               >
                 Validate & Submit
@@ -835,11 +859,27 @@ const Sku_Page = () => {
             <h6 className="fs-18 text-color-black mb-0">
               PKO Project ID: {pkoId}
             </h6>
-            <img
-              src="/assets/images/active-Indicator.svg"
-              alt="Active Indicator"
-              className="ms-12"
-            />
+
+            <span
+              className={`fw-600 px-12 py-2 text-nowrap d-flex align-items-center w-114
+        ${
+          new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+            ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
+            : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
+        }`}
+            >
+              <span
+                className={`circle me-2 
+      ${
+        new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+          ? "bg-color-completed" // Green circle for Active
+          : "" // Gray circle for Closed
+      }`}
+              ></span>
+              {new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+                ? "Active"
+                : "Closed"}
+            </span>
           </div>
         </div>
 
@@ -888,10 +928,13 @@ const Sku_Page = () => {
           </div>
         </div>
         <SkuProduct_Img
+          skuId={skuId} // Pass skuId
+          pkoId={pkoId}
           updateProductImageCount={handleProductImageCountUpdate}
           setImagesToUpload={setImagesToUpload}
           imagesFromDB={imagesFromDB}
           loadingImages={loadingImages}
+          refreshAddProductImage={refreshAddProductImage}
         />
 
         {/* Details Section */}
@@ -958,6 +1001,11 @@ const Sku_Page = () => {
                       >
                         Add/View Images
                       </button>
+                      <SkuProduct_Img
+                        updateProductImageCount={() => {}}
+                        setImagesToUpload={setImagesToUpload}
+                        imagesFromDB={imagesFromDB}
+                      />
                       {/* Add SKU Components Button */}
                       <button
                         className="btn btn-outline-primary"
@@ -998,7 +1046,7 @@ const Sku_Page = () => {
                 </div>
                 {/* Case 1: No Components Exist */}
                 {skuData.components.length === 0 && !skuData.showTable ? (
-                  <div className="text-center">
+                  <div className="noComponentsAdded-block text-center m-auto">
                     <img
                       src="/assets/images/BoxImg.png"
                       alt="Box"
@@ -1032,21 +1080,25 @@ const Sku_Page = () => {
                       <thead>
                         <tr>
                           <th scope="col">Component Name</th>
-                          <th scope="col">Form Status</th>
-                          <th scope="col">Actions</th>
+                          <th className="text-center" scope="col">
+                            Form Status
+                          </th>
+                          <th className="text-center" scope="col">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
-                            <td>{component.name}</td>
-                            <td>
+                            <td className="align-middle">{component.name}</td>
+                            <td className="text-center align-middle">
                               <span className="d-inline-flex align-items-center bg-color-padding-label py-2 px-12 rounded-pill text-secondary fw-600">
                                 <span className="circle me-2"></span>
-                                {component.form_status}
+                                {component.form_status || "Pending"}
                               </span>
                             </td>
-                            <td>
+                            <td className="text-center align-middle">
                               {/* <span>
                                 {0}{" "}
                                 <img
