@@ -839,7 +839,7 @@ const PkgDataForm = () => {
               {section}
             </h6>
             <div className="form-fields d-block">
-              <div className="row">{renderQuestions(questions)}</div>
+              <div className="row flex-column">{renderQuestions(questions)}</div>
             </div>
           </div>
         )
