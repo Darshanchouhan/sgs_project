@@ -22808,3 +22808,14 @@ input[type="radio"] {
 .w-114 {
   width: 114px !important;
 }
+
+/* Custom Tooltip Styles */
+.custom-tooltip {
+  --bs-tooltip-bg: var(--bs-color-list-item); /* Set custom background color */
+  --bs-tooltip-color: var(--bs-white); /* Set custom text color */
+  opacity: 1 !important; /* Ensure the tooltip is fully visible */
+}
+
+.custom-tooltip .tooltip-inner {
+  text-align: left !important;
+}

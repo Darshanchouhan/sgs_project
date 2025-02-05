@@ -210,8 +210,8 @@ const SkuProduct_Img = ({
                     <img src="/assets/images/BoxImg.png" alt="box-img" />
                   </div>
                   <p className="fs-16 fw-600 text-color-labels mt-3 mb-4">
-                    No images added yet. Drag & Drop images / Click the below
-                    button to upload images.
+                    No images added yet. Click the below button to upload
+                    images.
                   </p>
                   <button
                     type="button"
@@ -226,8 +226,7 @@ const SkuProduct_Img = ({
                   <div className="drag-drop-img-box d-flex align-items-center justify-content-center bg-color-drag-drop-box border border-secondary text-center p-40">
                     <div>
                       <p className="fs-14 fw-400 text-color-labels mb-3">
-                        Drag & Drop images / Click the below button to upload
-                        images.
+                        Click the below button to upload images.
                       </p>
                       <button
                         type="button"
