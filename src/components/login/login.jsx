@@ -16,7 +16,7 @@ const Login = ({
             className={`${styles.loginBg} ${"rounded-start-3 position-relative"}`}
           >
             <div
-              className={`${styles.loginFloatSection} ${"px-70 py-30 col-7"}`}
+              className={`${styles.loginFloatSection} ${"px-70 py-30"}`}
             >
               <p className="fs-48 text-white mb-0 px-12 font-mulish fw-700">
                 AI for Sustainable <br /> Packaging Platform
@@ -25,7 +25,7 @@ const Login = ({
           </div>
         </div>
         <div className="col-12 col-md-5 px-0">
-          <div className="d-flex flex-column align-items-center justify-content-center bg-color-light-gray h-100 rounded-end-3 font-poppins">
+          <div className="d-flex flex-column align-items-center justify-content-center bg-color-light-gray h-100 rounded-end-3 font-poppins py-40">
             <div className="d-flex flex-column">
               <img
                 src="/assets/images/cvs-logo.svg"
@@ -39,7 +39,7 @@ const Login = ({
               {/* Login Form */}
               <form
                 onSubmit={handleSubmit}
-                className="d-flex flex-column mb-40"
+                className="d-flex flex-column"
               >
                 {/* Email input */}
                 <div className="d-flex flex-column mb-12">

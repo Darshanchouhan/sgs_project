@@ -36,9 +36,9 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
   return (
     isVisible && (
       <div className="modal-overlay">
-        <div className="modal-dialog px-60 modal-dialog-scrollable">
+        <div className="modal-dialog modal-dialog-scrollable p-0 rounded-0">
           <div className="modal-content">
-            <div className="modal-header d-flex justify-content-end">
+            <div className="modal-header px-40 pt-32 pb-0 d-flex justify-content-end">
               <button
                 className="continue-btn bg-secondary"
                 onClick={closeModal}
@@ -50,7 +50,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
               </button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body px-60 py-0 mt-5 mb-3">
               <h1 className="title text-secondary mb-12 fs-32">
                 Sustainable Packaging Platform
               </h1>

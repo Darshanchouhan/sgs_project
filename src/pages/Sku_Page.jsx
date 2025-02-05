@@ -603,8 +603,8 @@ const Sku_Page = () => {
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question.placeholder || "Enter Value"}
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
-              onChange={(e) => handleChange(e)} // Update state directly
-            />
+              onChange={(e) => handleInputChange(question.question_id, e.target.value)}   
+                  />
             {question.instructions && (
               <Tooltip
                 id={question.question_id}
@@ -659,8 +659,30 @@ const Sku_Page = () => {
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
                 value={skuData.dimensionsAndWeights[question.question_id] || ""}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only numbers, decimal points, and empty input
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    handleInputChange(question.question_id, value);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // Allow digits, one dot, and navigation keys
+                  if (
+                    !/^\d$/.test(e.key) && // Allow digits
+                    e.key !== "." && // Allow one dot
+                    e.key !== "Backspace" &&
+                    e.key !== "Delete" &&
+                    e.key !== "ArrowLeft" &&
+                    e.key !== "ArrowRight"
+                  ) {
+                    e.preventDefault();
+                  }
+                  // Prevent more than one dot
+                  if (e.key === "." && e.target.value.includes(".")) {
+                    e.preventDefault();
+                  }
+                }}
               />
 
               {/* Unit Dropdown */}
