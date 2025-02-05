@@ -11,6 +11,7 @@ import Autosave from "./AutoSave";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ProgressLoader from "./ProgressLoader"; // Import ProgressLoader
 import Compo_ImageOverlay from "./Compo_ImageOverlay";
+import Tooltip from "./Tooltip"; // Import Tooltip component
 
 const PkgDataForm = () => {
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
@@ -34,18 +35,13 @@ const PkgDataForm = () => {
   } = location.state || {};
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [overlayImage, setOverlayImage] = useState(null);
+  const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
 
-  // const handleInfoClick = (questionText) => {
-  //   // Only show overlay for specific questions
-  //   const overlayFields = [
-  //     "Component Length (outside)",
-  //     "Component Width (outside)",
-  //     "Component Depth (outside)"
-  //   ];
-  //   if (overlayFields.includes(questionText)) {
-  //     setOverlayVisible(true);
-  //   }
-  // };
+  const checkImagePath = (path) => {
+    const pattern = /^\/assets\/images\/[\w-]+\.(png|jpg|jpeg|gif|bmp)$/;
+    return pattern.test(path);
+  };
+
   const handleInfoClick = (questionText) => {
     const bottleJarFields = ["T", "E", "H", "S", "I"];
     const componentFields = [
@@ -894,12 +890,6 @@ const PkgDataForm = () => {
                 }
               }}
             />
-            {isOverlayVisible && overlayImage && (
-              <Compo_ImageOverlay
-                onClose={() => setOverlayVisible(false)}
-                imagePath={overlayImage}
-              />
-            )}
           </div>
         );
 
@@ -957,24 +947,27 @@ const PkgDataForm = () => {
         question.field_dependency,
         parentAnswers,
       );
-      // if( isDependentVisible && question.mandatory){
-      //   totalMandatory++;
-      // }
-      // else{
-      //   totalMandatory--;
-      // }
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
       }
 
       // Info Icon with Instructions
-      const infoIcon = question.instructions ? (
+      const infoIcon = checkImagePath(question.instructions) ? (
         <InfoOutlinedIcon
           className="info-icon"
           titleAccess={question.instructions} // Display on hover
           onClick={() => handleInfoClick(question.question_text)}
         />
-      ) : null;
+      ) : (
+        question.instructions && (
+          <Tooltip
+            id={question.question_id}
+            instructions={question.instructions}
+            activeTooltipId={activeTooltipId}
+            setActiveTooltipId={setActiveTooltipId}
+          />
+        )
+      );
 
       return (
         <div className="col-12 col-md-6">
@@ -1178,13 +1171,6 @@ const PkgDataForm = () => {
           <div className="col-12 col-md-9">{renderSections()}</div>
         </div>
       </div>
-      {/* Add this block here */}
-      {isOverlayVisible && (
-        <Compo_ImageOverlay
-          imagePath={overlayImage} // Pass the dynamic image path
-          onClose={handleOverlayClose}
-        />
-      )}
       {/* Footer with Previous and Next buttons */}
       <div className="footer d-flex justify-content-between mt-4 bg-color-light-gray px-4 py-10 fixed-bottom w-100">
         {/* Previous Button */}
