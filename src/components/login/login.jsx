@@ -15,9 +15,7 @@ const Login = ({
           <div
             className={`${styles.loginBg} ${"rounded-start-3 position-relative"}`}
           >
-            <div
-              className={`${styles.loginFloatSection} ${"px-70 py-30"}`}
-            >
+            <div className={`${styles.loginFloatSection} ${"px-70 py-30"}`}>
               <p className="fs-48 text-white mb-0 px-12 font-mulish fw-700">
                 AI for Sustainable <br /> Packaging Platform
               </p>
@@ -37,10 +35,7 @@ const Login = ({
                 Welcome back !
               </p>
               {/* Login Form */}
-              <form
-                onSubmit={handleSubmit}
-                className="d-flex flex-column"
-              >
+              <form onSubmit={handleSubmit} className="d-flex flex-column">
                 {/* Email input */}
                 <div className="d-flex flex-column mb-12">
                   <label className="fs-14 ls-4 text-color-dark mb-2">

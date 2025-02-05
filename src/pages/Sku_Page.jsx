@@ -603,8 +603,10 @@ const Sku_Page = () => {
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question.placeholder || "Enter Value"}
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
-              onChange={(e) => handleInputChange(question.question_id, e.target.value)}   
-                  />
+              onChange={(e) =>
+                handleInputChange(question.question_id, e.target.value)
+              }
+            />
             {question.instructions && (
               <Tooltip
                 id={question.question_id}
