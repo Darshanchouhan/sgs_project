@@ -101,12 +101,14 @@ const PkgDataForm = () => {
               // Handle different question types
               if (question.question_type.includes("Dropdown") && unit) {
                 return {
+                  question_id: question.question_id,
                   question_text: question.question_text,
                   response: `${answer}${unit}`.trim(),
                 };
               }
 
               return {
+                question_id: question.question_id,
                 question_text: question.question_text,
                 response: answer,
               };
@@ -116,7 +118,7 @@ const PkgDataForm = () => {
 
       // Build the `responses` object dynamically
       answeredQuestions.forEach((q) => {
-        payload.responses[q.question_text] = q.response;
+        payload.responses[q.question_text + "||" + q.question_id] = q.response;
       });
 
       console.log("Autosave Payload:", JSON.stringify(payload, null, 2));
@@ -143,42 +145,139 @@ const PkgDataForm = () => {
     }
   };
 
+  // useEffect(() => {
+  //   const calculatePkgFormProgress = () => {
+  //     // Count total mandatory questions
+  //     const totalMandatory = Object.values(pkgData.sections).reduce(
+  //       (total, section) => total + section.filter((q) => q.mandatory).length,
+  //       0,
+  //     );
+
+  //     // Count answered mandatory questions
+  //     const answeredMandatory = Object.values(pkgData.sections).reduce(
+  //       (total, section) =>
+  //         total +
+  //         section.filter(
+  //           (q) =>
+  //             q.mandatory &&
+  //             pkgData.answers[q.question_id] !== undefined &&
+  //             pkgData.answers[q.question_id] !== "",
+  //         ).length,
+  //       0,
+  //     );
+
+  //     // Update the state with mandatory question counts
+  //     setPkgData((prev) => ({
+  //       ...prev,
+  //       totalMandatoryCount: totalMandatory,
+  //       mandatoryAnsweredCount: answeredMandatory,
+  //       pkgFormProgress:
+  //         totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
+  //     }));
+
+  //     console.log("Total Mandatory:", totalMandatory);
+  //     console.log("Answered Mandatory:", answeredMandatory);
+  //     console.log(
+  //       "Progress Percentage:",
+  //       totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
+  //     );
+  //   };
+
+  //   calculatePkgFormProgress();
+  // }, [pkgData.answers, pkgData.sections, setPkgData]);
+
+  // useEffect(() => {
+  //   const calculatePkgFormProgress = () => {
+  //     let totalMandatory = 0;
+  //     let answeredMandatory = 0;
+
+  //     // Iterate over all questions and their dependencies
+  //     Object.values(pkgData.sections).flat().forEach((question) => {
+  //       const isVisible = !question.dependent_question || isAnswerMatch(
+  //         question.field_dependency,
+  //         Array.isArray(question.dependent_question)
+  //           ? question.dependent_question.map((qId) => pkgData.answers[qId])
+  //           : [pkgData.answers[question.dependent_question]]
+  //       );
+
+  //       if (isVisible && question.mandatory) {
+  //         totalMandatory++;
+  //         if (
+  //           pkgData.answers[question.question_id] !== undefined &&
+  //           pkgData.answers[question.question_id] !== ""
+  //         ) {
+  //           answeredMandatory++;
+  //         }
+  //       }
+  //     });
+
+  //     setPkgData((prev) => ({
+  //       ...prev,
+  //       totalMandatoryCount: totalMandatory,
+  //       mandatoryAnsweredCount: answeredMandatory,
+  //       pkgFormProgress: totalMandatory
+  //         ? (answeredMandatory / totalMandatory) * 100
+  //         : 0,
+  //     }));
+  //   };
+
+  //   calculatePkgFormProgress();
+  // }, [pkgData.answers, pkgData.sections]);
+
+  // Dynamically recalculate progress whenever answers or visibility changes
   useEffect(() => {
     const calculatePkgFormProgress = () => {
-      // Count total mandatory questions
-      const totalMandatory = Object.values(pkgData.sections).reduce(
-        (total, section) => total + section.filter((q) => q.mandatory).length,
-        0,
-      );
+      let totalMandatory = 0;
+      let answeredMandatory = 0;
 
-      // Count answered mandatory questions
-      const answeredMandatory = Object.values(pkgData.sections).reduce(
-        (total, section) =>
-          total +
-          section.filter(
-            (q) =>
-              q.mandatory &&
-              pkgData.answers[q.question_id] !== undefined &&
-              pkgData.answers[q.question_id] !== "",
-          ).length,
-        0,
-      );
+      Object.values(pkgData.sections)
+        .flat()
+        .forEach((question) => {
+          const isVisible =
+            !question.dependent_question ||
+            isAnswerMatch(
+              question.field_dependency,
+              Array.isArray(question.dependent_question)
+                ? question.dependent_question.map((qId) => pkgData.answers[qId])
+                : [pkgData.answers[question.dependent_question]],
+            );
 
-      // Update the state with mandatory question counts
+          if (isVisible && question.mandatory) {
+            console.log(
+              "question visible",
+              question.question_id,
+              question.question_text,
+            );
+            totalMandatory++;
+            if (
+              pkgData.answers[question.question_id] !== undefined &&
+              pkgData.answers[question.question_id] !== ""
+            ) {
+              answeredMandatory++;
+              console.log(
+                "question anser available",
+                question.questionId,
+                question.question_text,
+                pkgData.answers[question.question_id],
+              );
+            }
+          }
+        });
+      console.log(
+        "answer and question progress logic 3",
+        answeredMandatory,
+        totalMandatory,
+        pkgData.answers,
+      );
+      const progressPercentage =
+        totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0;
+
       setPkgData((prev) => ({
         ...prev,
         totalMandatoryCount: totalMandatory,
         mandatoryAnsweredCount: answeredMandatory,
-        pkgFormProgress:
-          totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
+        pkgFormProgress: progressPercentage,
       }));
-
-      console.log("Total Mandatory:", totalMandatory);
-      console.log("Answered Mandatory:", answeredMandatory);
-      console.log(
-        "Progress Percentage:",
-        totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
-      );
     };
 
     calculatePkgFormProgress();
@@ -210,7 +309,11 @@ const PkgDataForm = () => {
           ([questionText, response]) => {
             const question = Object.values(pkgData.sections)
               .flat()
-              .find((q) => q.question_text === questionText);
+              .find(
+                (q) =>
+                  q.question_text === questionText.split("||")[0] &&
+                  q.question_id == questionText.split("||")[1],
+              );
 
             if (question) {
               answers[question.question_id] = response;
@@ -349,7 +452,11 @@ const PkgDataForm = () => {
           });
         }
       });
-
+      console.log(
+        "calcuate progess anser and total question",
+        answeredMandatory,
+        totalMandatory,
+      );
       // Group questions into sections
       const groupedSections = {};
       Array.from(questionMap.values()).forEach((question) => {
@@ -401,6 +508,34 @@ const PkgDataForm = () => {
 
   // Monitor changes to `pkgData.answers` to determine if the form is filled
 
+  // const handleInputChange = (questionId, value) => {
+  //   setPkgData((prev) => {
+  //     const updatedAnswers = { ...prev.answers };
+
+  //     // Find and clear answers for all dependent questions
+  //     const dependentQuestionIds = Object.values(pkgData.sections)
+  //       .flat()
+  //       .filter((q) =>
+  //         Array.isArray(q.dependent_question)
+  //           ? q.dependent_question.includes(questionId)
+  //           : q.dependent_question === questionId,
+  //       )
+  //       .map((q) => q.question_id);
+
+  //     dependentQuestionIds.forEach((depQuestionId) => {
+  //       delete updatedAnswers[depQuestionId]; // Clear dependent answers
+  //     });
+
+  //     // Update the current question's answer
+  //     updatedAnswers[questionId] = value;
+
+  //     return {
+  //       ...prev,
+  //       answers: updatedAnswers,
+  //     };
+  //   });
+  // };
+
   const handleInputChange = (questionId, value) => {
     setPkgData((prev) => {
       const updatedAnswers = { ...prev.answers };
@@ -422,9 +557,49 @@ const PkgDataForm = () => {
       // Update the current question's answer
       updatedAnswers[questionId] = value;
 
+      // Dynamically calculate visible mandatory counts
+      let totalMandatory = 0;
+      let answeredMandatory = 0;
+
+      Object.values(pkgData.sections)
+        .flat()
+        .forEach((question) => {
+          // Check if the question is visible
+          const isVisible =
+            !question.dependent_question ||
+            isAnswerMatch(
+              question.field_dependency,
+              Array.isArray(question.dependent_question)
+                ? question.dependent_question.map((qId) => updatedAnswers[qId])
+                : [updatedAnswers[question.dependent_question]],
+            );
+
+          if (isVisible && question.mandatory) {
+            totalMandatory++;
+            if (
+              updatedAnswers[question.question_id] !== undefined &&
+              updatedAnswers[question.question_id] !== ""
+            ) {
+              answeredMandatory++;
+            }
+          }
+        });
+
+      // Calculate progress percentage
+      const progressPercentage =
+        totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0;
+      console.log(
+        "answered question",
+        answeredMandatory,
+        totalMandatory,
+        updatedAnswers,
+      );
       return {
         ...prev,
         answers: updatedAnswers,
+        totalMandatoryCount: totalMandatory,
+        mandatoryAnsweredCount: answeredMandatory,
+        pkgFormProgress: progressPercentage,
       };
     });
   };
@@ -782,6 +957,12 @@ const PkgDataForm = () => {
         question.field_dependency,
         parentAnswers,
       );
+      // if( isDependentVisible && question.mandatory){
+      //   totalMandatory++;
+      // }
+      // else{
+      //   totalMandatory--;
+      // }
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
       }
@@ -813,9 +994,9 @@ const PkgDataForm = () => {
             </div>
             {renderField(question)}
             {/* Recursively render follow-up questions */}
-            {question.follow_up_questions &&
+            {/* {question.follow_up_questions &&
               question.follow_up_questions.length > 0 &&
-              renderQuestions(question.follow_up_questions)}
+              renderQuestions(question.follow_up_questions)} */}
           </div>
         </div>
       );
@@ -839,7 +1020,9 @@ const PkgDataForm = () => {
               {section}
             </h6>
             <div className="form-fields d-block">
-              <div className="row flex-column">{renderQuestions(questions)}</div>
+              <div className="row flex-column">
+                {renderQuestions(questions)}
+              </div>
             </div>
           </div>
         )
@@ -854,9 +1037,10 @@ const PkgDataForm = () => {
     }
 
     try {
+      const isCompleted = pkgData.pkgFormProgress === 100;
       const payload = {
         name: skuData.componentName,
-        form_status: "Pending",
+        form_status: isCompleted ? "Completed" : "Pending", // ✅ Set "Completed" if 100%
         pko_id: pkoId,
         sku_id: skuId,
         component_progress: Math.round(progressPercentage),
@@ -877,12 +1061,14 @@ const PkgDataForm = () => {
               // Handle different question types
               if (question.question_type.includes("Dropdown") && unit) {
                 return {
+                  question_id: question.question_id,
                   question_text: question.question_text,
                   response: `${answer}${unit}`.trim(),
                 };
               }
 
               return {
+                question_id: question.question_id,
                 question_text: question.question_text,
                 response: answer,
               };
@@ -892,7 +1078,7 @@ const PkgDataForm = () => {
 
       // Build the `responses` object dynamically
       answeredQuestions.forEach((q) => {
-        payload.responses[q.question_text] = q.response;
+        payload.responses[q.question_text + "||" + q.question_id] = q.response;
       });
 
       console.log("Save Payload:", JSON.stringify(payload, null, 2));
@@ -908,6 +1094,16 @@ const PkgDataForm = () => {
       if (response.status === 200) {
         console.log("Save Response:", response.data);
         alert("Component data saved successfully!");
+
+        // Update state for form_status dynamically
+        setSkuData((prev) => ({
+          ...prev,
+          components: prev.components.map((comp) =>
+            comp.id === skuData.componentId
+              ? { ...comp, form_status: isCompleted ? "Completed" : "Pending" }
+              : comp,
+          ),
+        }));
       } else {
         console.warn("Unexpected response status:", response.status);
         alert("Failed to save component data. Please try again.");
@@ -961,12 +1157,20 @@ const PkgDataForm = () => {
               ))}
 
               <div className="progress-loader-container pkgdataform-loader mt-4 d-flex align-items-center">
-                <ProgressLoader
+                {/* <ProgressLoader
                   percentage={Math.round(progressPercentage)}
                   size={24}
                 />
                 <span className="progress-percentage-text ms-2">
                   {Math.round(progressPercentage)}% completed
+                </span> */}
+
+                <ProgressLoader
+                  percentage={Math.round(pkgData.pkgFormProgress)}
+                  size={24}
+                />
+                <span className="progress-percentage-text ms-2">
+                  {Math.round(pkgData.pkgFormProgress)}% completed
                 </span>
               </div>
             </div>

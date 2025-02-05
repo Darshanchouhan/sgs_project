@@ -31,6 +31,9 @@ const VendorDashboard = () => {
     // Retrieve the current load count from localStorage (or sessionStorage)
     const currentCount = parseInt(localStorage.getItem("loadCount")) || 0;
     setLoadCount(currentCount);
+    if (currentCount > 0) {
+      setIsModalVisible(false);
+    }
 
     const fetchData = async () => {
       try {
@@ -570,43 +573,52 @@ const VendorDashboard = () => {
             </thead>
             <tbody>
               {pkoData?.skus && pkoData.skus.length > 0 ? (
-                pkoData.skus.map((sku) => {
-                  const status =
-                    skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Fetch updated status
-                  return (
-                    <tr key={sku.sku_id}>
-                      <td className="align-middle">{sku.sku_id}</td>
-                      <td className="align-middle">{sku.description}</td>
-                      <td className="align-middle">{sku.category || "N/A"}</td>
-                      <td className="align-middle">{sku.brand}</td>
-                      <td className="align-middle">{sku.upc}</td>
-                      <td className="align-middle">{sku.size}</td>
-
-                      <td className="align-middle">
-                        <span
-                          className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
-                            status === "Draft"
-                              ? "bg-color-draft text-white"
-                              : "bg-color-light-border text-color-typo-secondary"
-                          }`}
-                        >
-                          {status}
-                        </span>
-                      </td>
-                      <td className="align-middle text-center">
-                        <button
-                          className="btn p-0 border-0 shadow-none"
-                          onClick={() => handleForwardClick(sku)}
-                        >
-                          <img
-                            src="/assets/images/forward-arrow-img.png"
-                            alt="Forward"
-                          />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
+                pkoData.skus
+                  .filter((sku) => {
+                    // Filter based on selectedSkuStatus
+                    if (selectedSkuStatus === "All") return true;
+                    const status =
+                      skuStatuses[sku.sku_id] || sku.status || "Not Started";
+                    return status === selectedSkuStatus;
+                  })
+                  .map((sku) => {
+                    const status =
+                      skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Fetch updated status
+                    return (
+                      <tr key={sku.sku_id}>
+                        <td className="align-middle">{sku.sku_id}</td>
+                        <td className="align-middle">{sku.description}</td>
+                        <td className="align-middle">
+                          {sku.category || "N/A"}
+                        </td>
+                        <td className="align-middle">{sku.brand}</td>
+                        <td className="align-middle">{sku.upc}</td>
+                        <td className="align-middle">{sku.size}</td>
+                        <td className="align-middle">
+                          <span
+                            className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
+                              status === "Draft"
+                                ? "bg-color-draft text-white"
+                                : "bg-color-light-border text-color-typo-secondary"
+                            }`}
+                          >
+                            {status}
+                          </span>
+                        </td>
+                        <td className="align-middle text-center">
+                          <button
+                            className="btn p-0 border-0 shadow-none"
+                            onClick={() => handleForwardClick(sku)}
+                          >
+                            <img
+                              src="/assets/images/forward-arrow-img.png"
+                              alt="Forward"
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
               ) : (
                 <tr>
                   <td colSpan="9" className="text-center">

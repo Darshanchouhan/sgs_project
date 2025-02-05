@@ -19,8 +19,19 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
     }
   }, [isVisible, count, closeModal]);
 
-  // Don't render the modal if count is greater than 0
-  if (count > 0) return null;
+  // Add "overflow-hidden" class to body when modal is visible, remove when not visible
+  useEffect(() => {
+    if (isVisible) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    // Cleanup the class when the component unmounts or visibility changes
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [isVisible]);
 
   return (
     isVisible && (

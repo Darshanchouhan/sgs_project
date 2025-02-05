@@ -50,12 +50,11 @@ const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
             transform: "translate(-50%, -50%)",
             fontSize: "14px",
             fontWeight: "600",
-            color: "#333",
+            color: "#676767",
             textAlign: "center",
           }}
         >
-          <span className="text-secondary fs-24 fw-700">{percentage}%</span>{" "}
-          <br /> completed
+          <span className="fs-24 fw-700">{percentage}%</span> <br /> completed
         </div>
       )}
     </div>

@@ -6,6 +6,7 @@ import { SkuContext } from "./SkuContext"; // Import Context
 import SkuProduct_Img from "./SkuProduct_Img";
 import { useLocation, useNavigate } from "react-router-dom";
 import Autosave from "./AutoSave";
+import Tooltip from "./Tooltip"; // Import Tooltip component
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Offcanvas } from "bootstrap";
 import { VendorContext } from "./VendorContext";
@@ -38,6 +39,7 @@ const Sku_Page = () => {
   const [mandatoryProgress, setMandatoryProgress] = useState(0);
   const [componentProgressAverage, setComponentProgressAverage] = useState(0); // Average progress
   const [isOverlayVisible, setOverlayVisible] = useState(false);
+  const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
 
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
@@ -53,6 +55,12 @@ const Sku_Page = () => {
 
   const handleProductImageCountUpdate = (count) => {
     setProductImageCount(count);
+  };
+
+  const handleValidateAndSubmit = () => {
+    alert(
+      "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission.",
+    );
   };
 
   const handleAddProductImageClick = async () => {
@@ -100,10 +108,6 @@ const Sku_Page = () => {
       }
     } catch (error) {
       console.error("Error fetching images:", error);
-    } finally {
-      // setLoadingImages(false);
-      // const offcanvas = new Offcanvas(offcanvasElement);
-      // offcanvas.show();
     }
   };
 
@@ -553,11 +557,23 @@ const Sku_Page = () => {
   ];
 
   const renderField = (question) => {
-    const handleChange = (e) =>
-      handleInputChange(question.question_id, e.target.value);
+    const handleChange = (e) => {
+      let value = e.target.value.trim();
+
+      if (question.question_type === "Integer") {
+        if (/^\d*$/.test(value)) {
+          handleInputChange(question.question_id, value);
+        }
+      } else if (question.question_type === "Float + Dropdown") {
+        if (/^\d*\.?\d*$/.test(value)) {
+          handleInputChange(question.question_id, value);
+        }
+      } else {
+        handleInputChange(question.question_id, value);
+      }
+    };
 
     const handleKeyDown = (e) => {
-      // Allow navigation keys and numbers only
       const allowedKeys = [
         "Backspace",
         "ArrowLeft",
@@ -566,8 +582,8 @@ const Sku_Page = () => {
         "Tab",
       ];
       if (
-        !/^[0-9]$/.test(e.key) && // Allow only digits
-        !allowedKeys.includes(e.key) // Allow navigation keys
+        e.key === "-" ||
+        (!allowedKeys.includes(e.key) && !/^\d$/.test(e.key))
       ) {
         e.preventDefault();
       }
@@ -590,9 +606,11 @@ const Sku_Page = () => {
               onChange={(e) => handleChange(e)} // Update state directly
             />
             {question.instructions && (
-              <InfoOutlinedIcon
-                className="info-icon"
-                titleAccess={question.instructions}
+              <Tooltip
+                id={question.question_id}
+                instructions={question.instructions}
+                activeTooltipId={activeTooltipId}
+                setActiveTooltipId={setActiveTooltipId}
               />
             )}
           </div>
@@ -605,19 +623,22 @@ const Sku_Page = () => {
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question.placeholder || "Enter Value"}
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Validate input to allow only digits
-                if (/^\d*$/.test(value)) {
-                  handleChange(e); // Update state only if valid
-                }
-              }}
+              // onChange={(e) => {
+              //   const value = e.target.value;
+              //   // Validate input to allow only digits
+              //   if (/^\d*$/.test(value)) {
+              //     handleChange(e); // Update state only if valid
+              //   }
+              // }}
+              onChange={handleChange}
               onKeyDown={handleKeyDown} // Restrict invalid key presses
             />
             {question.instructions && (
-              <InfoOutlinedIcon
-                className="info-icon"
-                titleAccess={question.instructions}
+              <Tooltip
+                id={question.question_id}
+                instructions={question.instructions}
+                activeTooltipId={activeTooltipId}
+                setActiveTooltipId={setActiveTooltipId}
               />
             )}
           </div>
@@ -638,9 +659,8 @@ const Sku_Page = () => {
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
                 value={skuData.dimensionsAndWeights[question.question_id] || ""}
-                onChange={(e) =>
-                  handleInputChange(question.question_id, e.target.value)
-                }
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
               />
 
               {/* Unit Dropdown */}
@@ -708,9 +728,11 @@ const Sku_Page = () => {
               </>
             ) : (
               question.instructions && (
-                <InfoOutlinedIcon
-                  className="info-icon"
-                  titleAccess={question.instructions} // Show instructions on hover for other questions
+                <Tooltip
+                  id={question.question_id}
+                  instructions={question.instructions}
+                  activeTooltipId={activeTooltipId}
+                  setActiveTooltipId={setActiveTooltipId}
                 />
               )
             )}
@@ -736,9 +758,11 @@ const Sku_Page = () => {
               ))}
             </select>
             {question.instructions && (
-              <InfoOutlinedIcon
-                className="info-icon"
-                titleAccess={question.instructions}
+              <Tooltip
+                id={question.question_id}
+                instructions={question.instructions}
+                activeTooltipId={activeTooltipId}
+                setActiveTooltipId={setActiveTooltipId}
               />
             )}
           </div>
@@ -837,13 +861,16 @@ const Sku_Page = () => {
                 Submission Last Date: {submissionLastDate}
               </p>
 
-              <button className="save-button text-white bg-secondary ms-4 me-12 fs-14 fw-600 border-0 px-4 py-12">
+              <button
+                className="save-button text-white bg-secondary ms-4 me-12 fs-14 fw-600 border-0 px-4 py-12"
+                onClick={saveSkuData}
+              >
                 Save as Draft
               </button>
 
               <button
                 className="save-button px-4 py-12 fs-14 fw-600 border-0"
-                onClick={saveSkuData}
+                onClick={handleValidateAndSubmit}
               >
                 Validate & Submit
               </button>
@@ -1092,9 +1119,27 @@ const Sku_Page = () => {
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
                             <td className="align-middle">{component.name}</td>
-                            <td className="text-center align-middle">
+                            {/* <td className="text-center align-middle">
                               <span className="d-inline-flex align-items-center bg-color-padding-label py-2 px-12 rounded-pill text-secondary fw-600">
                                 <span className="circle me-2"></span>
+                                {component.form_status || "Pending"}
+                              </span>
+                            </td> */}
+                            <td className="text-center align-middle">
+                              <span
+                                className={`d-inline-flex align-items-center py-2 px-12 rounded-pill fw-600 ${
+                                  component.form_status === "Completed"
+                                    ? "color-active-bg text-color-completed" // ApplyCompleted class
+                                    : "bg-color-padding-label text-secondary" // Default class for Pending
+                                }`}
+                              >
+                                <span
+                                  className={`circle me-2 ${
+                                    component.form_status === "Completed"
+                                      ? "bg-color-completed"
+                                      : ""
+                                  }`}
+                                ></span>
                                 {component.form_status || "Pending"}
                               </span>
                             </td>
