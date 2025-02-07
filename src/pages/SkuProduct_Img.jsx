@@ -24,7 +24,7 @@ const SkuProduct_Img = ({
   // console.log(combinedImages,"combinedImages")
 
   // const viewImageUrl = "http://localhost:8001/media/"
-  const viewImageUrl = "https://demo.gramener.com/media/";
+  const viewImageUrl = "https://sgs.gramener.com/media/";
 
   // Update the product image count whenever the images array changes
   useEffect(() => {
