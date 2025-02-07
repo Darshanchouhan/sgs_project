@@ -298,14 +298,17 @@ const Sku_Page = () => {
           const components = response.data; // Array of components
 
           // Extract `component_progress` values
-          const progressValues = components.map(
-            (component) => component.component_progress || 0,
-          );
+          const progressValues =
+            components.length > 0
+              ? components.map((component) => component.component_progress || 0)
+              : 0;
 
           // Calculate the average progress
           const averageProgress =
-            progressValues.reduce((sum, progress) => sum + progress, 0) /
-            progressValues.length;
+            progressValues != 0
+              ? progressValues.reduce((sum, progress) => sum + progress, 0) /
+                progressValues.length
+              : 0;
 
           // Update the state with the average
           setComponentProgressAverage(averageProgress);
@@ -331,13 +334,11 @@ const Sku_Page = () => {
       console.error("SKU ID or PKO ID is missing");
       return;
     }
-    console.log("primarypackagingdetailsprogressvalue", mandatoryProgress);
     const combinedProgress = Math.round(
       (Math.round(mandatoryProgress * 10) +
         parseFloat((componentProgressAverage * 90).toFixed(2))) /
         100,
     );
-    console.log("primarypackagingdetailsprogressvalue", combinedProgress);
 
     setIsSubmitting(true);
     try {
