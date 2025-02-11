@@ -9,7 +9,7 @@ const Login = ({
   loading,
 }) => {
   return (
-    <div className="container-fluid p-40 vh-100">
+    <div className="container-fluid p-40 h-100">
       <div className="row h-100">
         <div className="col-12 col-md-7 px-0">
           <div
@@ -27,7 +27,7 @@ const Login = ({
             <div className="d-flex flex-column">
               <img
                 src="/assets/images/cvs-logo.svg"
-                className="pb-115"
+                className="cvs-logo-login pb-115"
                 alt="cvs-logo"
               />
               <h4 className="fs-44 fw-500 text-secondary ls-4 mb-1">Login</h4>

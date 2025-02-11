@@ -356,9 +356,6 @@ const Sku_Page = () => {
         })),
         sku_progress: combinedProgress,
       };
-
-      // console.log("Submitting SKU Data:", payload);
-
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
@@ -396,7 +393,6 @@ const Sku_Page = () => {
           responses: comp.responses || {},
         })),
       };
-
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
@@ -406,7 +402,6 @@ const Sku_Page = () => {
     }
   };
 
-  // Handle Input Change (Primary Packaging Details)
   const handleInputChange = (field, value) => {
     setSkuData((prev) => ({
       ...prev,
@@ -704,6 +699,7 @@ const Sku_Page = () => {
                       ...prev,
                       dimensionsAndWeights: {
                         ...prev.dimensionsAndWeights,
+
                         height_unit: newUnit,
                         width_unit: newUnit,
                         depth_unit: newUnit,
