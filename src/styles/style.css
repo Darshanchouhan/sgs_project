@@ -22239,6 +22239,10 @@ input:focus {
   border-bottom-right-radius: 90px;
 }
 
+.cvs-logo-login {
+  max-width: 84%;
+}
+
 .gap-70 {
   gap: 4.375rem;
 }

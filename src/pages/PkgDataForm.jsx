@@ -12,6 +12,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ProgressLoader from "./ProgressLoader"; // Import ProgressLoader
 import Compo_ImageOverlay from "./Compo_ImageOverlay";
 import Tooltip from "./Tooltip"; // Import Tooltip component
+import ValidationModal from "./Validation";
 
 const PkgDataForm = () => {
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
@@ -36,6 +37,47 @@ const PkgDataForm = () => {
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [overlayImage, setOverlayImage] = useState(null);
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [nextSection, setNextSection] = useState(null); // To track the next section
+  const [unansweredQuestions, setUnansweredQuestions] = useState([]);
+  const [isSaveAsDraft, setIsSaveAsDraft] = useState(false);
+  const [isPreviousValidation, setIsPreviousValidation] = useState(false);
+
+  const handleNextClick = () => {
+    setIsSaveAsDraft(false);
+    setIsPreviousValidation(false);
+    const sectionKeys = Object.keys(pkgData.sections);
+    const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+
+    // Get the latest unanswered questions for the current section
+    const validationResults = validateCurrentSection();
+    setUnansweredQuestions(validationResults); // Update state with validation results
+
+    if (validationResults.length > 0) {
+      setShowValidationModal(true); // Show the validation modal only if there are errors
+    } else if (currentIndex < sectionKeys.length - 1) {
+      // If no unanswered questions, proceed to the next section
+      const nextSectionKey = sectionKeys[currentIndex + 1];
+      setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey }));
+      sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
+  const handlePreviousClick = () => {
+    setIsPreviousValidation(true); // Indicate this is a Previous operation
+    setIsSaveAsDraft(false); // Reset Save as Draft flag
+    const validationResults = validateCurrentSection(); // Validate current section
+    setUnansweredQuestions(validationResults); // Update unanswered questions state
+
+    if (validationResults.length > 0) {
+      setShowValidationModal(true); // Show the validation modal
+    } else {
+      proceedToPreviousSection(); // Proceed directly if no validation issues
+    }
+  };
 
   const checkImagePath = (path) => {
     const pattern = /^\/assets\/images\/[\w-]+\.(png|jpg|jpeg|gif|bmp)$/;
@@ -59,9 +101,238 @@ const PkgDataForm = () => {
     }
   };
 
-  const handleOverlayClose = () => {
-    setOverlayVisible(false); // Close overlay
+  const handleProceedToNextSection = () => {
+    const sectionKeys = Object.keys(pkgData.sections); // Get all section keys
+    const currentIndex = sectionKeys.indexOf(pkgData.activeSection); // Get the index of the current section
+
+    if (currentIndex < sectionKeys.length - 1) {
+      const nextSectionKey = sectionKeys[currentIndex + 1]; // Determine the next section key
+      setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey })); // Update the active section
+
+      // Scroll to the next section
+      sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      setShowValidationModal(false); // Close the modal
+    }
   };
+
+  const proceedToPreviousSection = () => {
+    const sectionKeys = Object.keys(pkgData.sections);
+    const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+
+    if (currentIndex > 0) {
+      const previousSection = sectionKeys[currentIndex - 1];
+      setPkgData((prev) => ({
+        ...prev,
+        activeSection: previousSection,
+      }));
+      sectionRefs.current[previousSection]?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      setShowValidationModal(false); // Close modal after navigation
+    }
+  };
+
+  const onSaveDraft = () => {
+    // Call the existing handleSave function to save the data to the database
+    handleSave();
+    setShowValidationModal(false); // Close the modal
+    setIsSaveAsDraft(false); // Reset the Save as Draft flag
+  };
+
+  const handleSaveDraft = () => {
+    setIsSaveAsDraft(true); // Show Save as Draft button
+    setIsPreviousValidation(false); // Reset Previous validation flag
+    const validationResults = validateAllSections(); // Validate all sections
+    setUnansweredQuestions(validationResults); // Update unanswered questions state
+    setShowValidationModal(true); // Show validation modal
+  };
+
+  const validateAllSections = () => {
+    const unansweredQuestions = [];
+
+    Object.values(pkgData.sections)
+      .flat()
+      .forEach((question) => {
+        const isAnswered =
+          pkgData.answers[question.question_id] !== undefined &&
+          pkgData.answers[question.question_id] !== "";
+
+        // Add all mandatory unanswered questions
+        if (question.mandatory && !isAnswered) {
+          unansweredQuestions.push({
+            fieldName: question.question_text,
+            issue: "Please provide response for all mandatory fields.",
+          });
+        }
+      });
+
+    return unansweredQuestions;
+  };
+
+  const handleBackToCurrentSection = () => {
+    setShowValidationModal(false); // Close the modal
+    setIsSaveAsDraft(false); // Reset Save as Draft flag
+    setIsPreviousValidation(false); // Reset Previous validation flag
+  };
+
+  const validateCurrentSection = () => {
+    const unansweredQuestions = [];
+
+    // Get the selected "Component Type"
+    const componentTypeQuestion = Object.values(pkgData.sections)
+      .flat()
+      .find((q) => q.question_text === "Component Type");
+
+    const componentTypeQuestionId = componentTypeQuestion?.question_id;
+    const selectedComponentType = pkgData.answers[componentTypeQuestionId];
+
+    console.log("Selected Component Type:", selectedComponentType);
+
+    // Get all active questions
+    const activeSectionQuestions =
+      pkgData.sections[pkgData.activeSection] || [];
+
+    activeSectionQuestions.forEach((question) => {
+      const isAnswered =
+        pkgData.answers[question.question_id] !== undefined &&
+        pkgData.answers[question.question_id] !== "";
+
+      // Check if the question is visible
+      const isVisible =
+        !question.dependent_question ||
+        isAnswerMatch(
+          question.field_dependency,
+          Array.isArray(question.dependent_question)
+            ? question.dependent_question.map((qId) => pkgData.answers[qId])
+            : [pkgData.answers[question.dependent_question]],
+        );
+
+      if (isVisible) {
+        if (question.mandatory && !isAnswered) {
+          unansweredQuestions.push({
+            fieldName: question.question_text,
+            issue: "Please provide response for all the mandatory fields",
+          });
+        }
+
+        // **Validation for all fields with "validationdependency": "Y"**
+        if (
+          question.validationdependency === "Y" &&
+          question.validation_dropdown
+        ) {
+          let selectedUnit = pkgData.answers[`${question.question_id}_unit`];
+
+          const enteredValue = parseFloat(
+            pkgData.answers[question.question_id],
+          );
+
+          console.log("Checking validation for:", question.question_text);
+          console.log(
+            "Entered Value:",
+            enteredValue,
+            "Selected Unit:",
+            selectedUnit,
+            "package data naswer:",
+            pkgData.answers,
+          );
+
+          // Assign Default Unit if Missing
+          if (!selectedUnit && question.dropdown_options?.length > 0) {
+            selectedUnit = question.dropdown_options[0]; // Set the first unit as default
+            // setPkgData((prev) => ({
+            //   ...prev,
+            //   answers: {
+            //     ...prev.answers,
+            //     [`${question.question_id}_unit`]: selectedUnit, // Save to answers
+            //   },
+            // }));
+            // console.log(
+            //   `Auto-selected default unit "${selectedUnit}" for ${question.question_text}`
+            // );
+          }
+
+          if (selectedComponentType && selectedUnit && !isNaN(enteredValue)) {
+            const validationRules = question.validation_dropdown.filter(
+              (rule) =>
+                rule.name?.toLowerCase() ===
+                  selectedComponentType?.toLowerCase() &&
+                rule.unit?.toLowerCase() === selectedUnit?.toLowerCase(),
+            );
+            console.log(
+              "validation rules",
+              selectedUnit,
+              validationRules,
+              question.dropdown_options[0],
+            );
+            if (validationRules.length > 0) {
+              console.log(
+                "Validation Rules Found for:",
+                question.question_text,
+                validationRules[0],
+              );
+
+              const rule = validationRules[0];
+              let issue = null;
+
+              if (
+                rule.min_weight !== undefined &&
+                rule.max_weight !== undefined &&
+                (enteredValue < rule.min_weight ||
+                  enteredValue > rule.max_weight)
+              ) {
+                issue = `Weight should be between ${rule.min_weight} and ${rule.max_weight} ${selectedUnit}`;
+              } else if (
+                rule.min_length !== undefined &&
+                rule.max_length !== undefined &&
+                (enteredValue < rule.min_length ||
+                  enteredValue > rule.max_length)
+              ) {
+                issue = `Length should be between ${rule.min_length} and ${rule.max_length} ${selectedUnit}`;
+              } else if (
+                rule.min_width !== undefined &&
+                rule.max_width !== undefined &&
+                (enteredValue < rule.min_width || enteredValue > rule.max_width)
+              ) {
+                issue = `Width should be between ${rule.min_width} and ${rule.max_width} ${selectedUnit}`;
+              } else if (
+                rule.min_depth !== undefined &&
+                rule.max_depth !== undefined &&
+                (enteredValue < rule.min_depth || enteredValue > rule.max_depth)
+              ) {
+                issue = `Depth should be between ${rule.min_depth} and ${rule.max_depth} ${selectedUnit}`;
+              }
+
+              if (issue) {
+                unansweredQuestions.push({
+                  fieldName: question.question_text,
+                  issue: `${question.question_text} ${issue}`,
+                });
+              }
+            } else {
+              console.log(
+                "No matching validation rule found for",
+                question.question_text,
+              );
+            }
+          }
+        }
+      }
+    });
+
+    console.log("Final Validation Issues:", unansweredQuestions);
+    return unansweredQuestions;
+  };
+
+  useEffect(() => {
+    if (showValidationModal) {
+      setUnansweredQuestions(validateCurrentSection()); // Update modal dynamically
+    }
+  }, [pkgData.answers, showValidationModal]);
 
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
@@ -140,85 +411,6 @@ const PkgDataForm = () => {
       console.error("Autosave failed:", error.message);
     }
   };
-
-  // useEffect(() => {
-  //   const calculatePkgFormProgress = () => {
-  //     // Count total mandatory questions
-  //     const totalMandatory = Object.values(pkgData.sections).reduce(
-  //       (total, section) => total + section.filter((q) => q.mandatory).length,
-  //       0,
-  //     );
-
-  //     // Count answered mandatory questions
-  //     const answeredMandatory = Object.values(pkgData.sections).reduce(
-  //       (total, section) =>
-  //         total +
-  //         section.filter(
-  //           (q) =>
-  //             q.mandatory &&
-  //             pkgData.answers[q.question_id] !== undefined &&
-  //             pkgData.answers[q.question_id] !== "",
-  //         ).length,
-  //       0,
-  //     );
-
-  //     // Update the state with mandatory question counts
-  //     setPkgData((prev) => ({
-  //       ...prev,
-  //       totalMandatoryCount: totalMandatory,
-  //       mandatoryAnsweredCount: answeredMandatory,
-  //       pkgFormProgress:
-  //         totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
-  //     }));
-
-  //     console.log("Total Mandatory:", totalMandatory);
-  //     console.log("Answered Mandatory:", answeredMandatory);
-  //     console.log(
-  //       "Progress Percentage:",
-  //       totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0,
-  //     );
-  //   };
-
-  //   calculatePkgFormProgress();
-  // }, [pkgData.answers, pkgData.sections, setPkgData]);
-
-  // useEffect(() => {
-  //   const calculatePkgFormProgress = () => {
-  //     let totalMandatory = 0;
-  //     let answeredMandatory = 0;
-
-  //     // Iterate over all questions and their dependencies
-  //     Object.values(pkgData.sections).flat().forEach((question) => {
-  //       const isVisible = !question.dependent_question || isAnswerMatch(
-  //         question.field_dependency,
-  //         Array.isArray(question.dependent_question)
-  //           ? question.dependent_question.map((qId) => pkgData.answers[qId])
-  //           : [pkgData.answers[question.dependent_question]]
-  //       );
-
-  //       if (isVisible && question.mandatory) {
-  //         totalMandatory++;
-  //         if (
-  //           pkgData.answers[question.question_id] !== undefined &&
-  //           pkgData.answers[question.question_id] !== ""
-  //         ) {
-  //           answeredMandatory++;
-  //         }
-  //       }
-  //     });
-
-  //     setPkgData((prev) => ({
-  //       ...prev,
-  //       totalMandatoryCount: totalMandatory,
-  //       mandatoryAnsweredCount: answeredMandatory,
-  //       pkgFormProgress: totalMandatory
-  //         ? (answeredMandatory / totalMandatory) * 100
-  //         : 0,
-  //     }));
-  //   };
-
-  //   calculatePkgFormProgress();
-  // }, [pkgData.answers, pkgData.sections]);
 
   // Dynamically recalculate progress whenever answers or visibility changes
   useEffect(() => {
@@ -475,62 +667,6 @@ const PkgDataForm = () => {
   }, [pkgData.answers, setPkgData]);
 
   const handleBackClick = () => navigate("/skus");
-
-  //   const handleInputChange = (questionId, value) => {
-  //     setPkgData((prev) => {
-  //       var updatedAnswers = { ...prev.answers };
-
-  //       // If the Material Type question is being updated
-  //       // if (questionId === "material_type_question_id") {
-  //         // Clear all dependent answers from previous Material Type
-  //         const dependentQuestionIds = Object.values(pkgData.sections)
-  //           .flat()
-  //           .filter((q) => q.dependent_question === questionId)
-  //           .map((q) => q.question_id);
-
-  //         dependentQuestionIds.forEach((depQuestionId) => {
-  //           delete updatedAnswers[depQuestionId]; // Clear the answers
-  //         });
-  //       // }
-  //        // Update the current question's answer
-  //     updatedAnswers[questionId] = value;
-
-  //     return {
-  //       ...prev,
-  //       answers: updatedAnswers,
-  //     };
-  //   });
-  // };
-
-  // Monitor changes to `pkgData.answers` to determine if the form is filled
-
-  // const handleInputChange = (questionId, value) => {
-  //   setPkgData((prev) => {
-  //     const updatedAnswers = { ...prev.answers };
-
-  //     // Find and clear answers for all dependent questions
-  //     const dependentQuestionIds = Object.values(pkgData.sections)
-  //       .flat()
-  //       .filter((q) =>
-  //         Array.isArray(q.dependent_question)
-  //           ? q.dependent_question.includes(questionId)
-  //           : q.dependent_question === questionId,
-  //       )
-  //       .map((q) => q.question_id);
-
-  //     dependentQuestionIds.forEach((depQuestionId) => {
-  //       delete updatedAnswers[depQuestionId]; // Clear dependent answers
-  //     });
-
-  //     // Update the current question's answer
-  //     updatedAnswers[questionId] = value;
-
-  //     return {
-  //       ...prev,
-  //       answers: updatedAnswers,
-  //     };
-  //   });
-  // };
 
   const handleInputChange = (questionId, value) => {
     setPkgData((prev) => {
@@ -1117,7 +1253,7 @@ const PkgDataForm = () => {
       <Header></Header>
       <Breadcrumb
         onBackClick={handleBackClick}
-        onSaveClick={handleSave}
+        onSaveClick={handleSaveDraft}
         isFormFilled={isFormFilled} // Pass state to Breadcrumb
         pkoId={pkoId || "N/A"} // Pass PKO ID
         skuId={skuId || "N/A"}
@@ -1171,25 +1307,23 @@ const PkgDataForm = () => {
           <div className="col-12 col-md-9">{renderSections()}</div>
         </div>
       </div>
+      {/* ValidationModal */}
+      {showValidationModal && (
+        <ValidationModal
+          unansweredQuestions={unansweredQuestions} // Pass the unanswered questions
+          onBack={handleBackToCurrentSection}
+          onProceed={handleProceedToNextSection}
+          onSaveDraft={onSaveDraft} // Save as Draft functionality
+          showSaveAsDraftButton={isSaveAsDraft} // Pass flag for Save as Draft
+          onPrevious={proceedToPreviousSection}
+          isPreviousValidation={isPreviousValidation}
+        />
+      )}
       {/* Footer with Previous and Next buttons */}
       <div className="footer d-flex justify-content-between mt-4 bg-color-light-gray px-4 py-10 fixed-bottom w-100">
         {/* Previous Button */}
         <button
-          onClick={() => {
-            const sectionKeys = Object.keys(pkgData.sections);
-            const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
-            if (currentIndex > 0) {
-              const previousSection = sectionKeys[currentIndex - 1];
-              setPkgData((prev) => ({
-                ...prev,
-                activeSection: previousSection,
-              }));
-              sectionRefs.current[previousSection]?.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }
-          }}
+          onClick={handlePreviousClick}
           className={`btn btn-outline-secondary ${
             Object.keys(pkgData.sections).indexOf(pkgData.activeSection) === 0
               ? "invisible"
@@ -1201,18 +1335,19 @@ const PkgDataForm = () => {
 
         {/* Next Button */}
         <button
-          onClick={() => {
-            const sectionKeys = Object.keys(pkgData.sections);
-            const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
-            if (currentIndex < sectionKeys.length - 1) {
-              const nextSection = sectionKeys[currentIndex + 1];
-              setPkgData((prev) => ({ ...prev, activeSection: nextSection }));
-              sectionRefs.current[nextSection]?.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }
-          }}
+          // onClick={() => {
+          //   const sectionKeys = Object.keys(pkgData.sections);
+          //   const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+          //   if (currentIndex < sectionKeys.length - 1) {
+          //     const nextSection = sectionKeys[currentIndex + 1];
+          //     setPkgData((prev) => ({ ...prev, activeSection: nextSection }));
+          //     sectionRefs.current[nextSection]?.current?.scrollIntoView({
+          //       behavior: "smooth",
+          //       block: "start",
+          //     });
+          //   }
+          // }}
+          onClick={handleNextClick}
           className={`btn btn-primary ${
             Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
             Object.keys(pkgData.sections).length - 1
