@@ -10,6 +10,7 @@ import Tooltip from "./Tooltip"; // Import Tooltip component
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Offcanvas } from "bootstrap";
 import { VendorContext } from "./VendorContext";
+import SkuValidation from "./SkuValidation";
 import Dimen_ImageOverlay from "./Dimen_ImageOverlay"; // Import Overlay Component
 
 const Sku_Page = () => {
@@ -26,6 +27,7 @@ const Sku_Page = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
+  const [questionsComponent, setQuestionsComponent] = useState([]); // Store questions from API
   const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
   const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
@@ -40,6 +42,11 @@ const Sku_Page = () => {
   const [componentProgressAverage, setComponentProgressAverage] = useState(0); // Average progress
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
+  const [validationIssues, setValidationIssues] = useState([]); // Store validation errors
+  const [showValidationModal, setShowValidationModal] = useState(false); // Modal visibility
+  const [componentValidationIssues, setComponentValidationIssues] = useState(
+    [],
+  );
 
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
@@ -47,6 +54,254 @@ const Sku_Page = () => {
 
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
+  };
+
+  const fetchAndValidateComponentData = async () => {
+    let issues = [];
+
+    if (!skuId || !pkoId) {
+      console.warn(
+        "SKU ID or PKO ID is missing. Cannot fetch component details.",
+      );
+      return issues;
+    }
+
+    try {
+      console.log(
+        "Fetching components for SKU ID:",
+        skuId,
+        "and PKO ID:",
+        pkoId,
+      );
+
+      const response = await axiosInstance.get(
+        `/sku/${skuId}/components/?pko_id=${pkoId}`,
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      if (response.status === 200) {
+        const components = response.data || [];
+        console.log("Fetched Components:", components);
+
+        for (let component of components) {
+          console.log("Fetching details for component:", component.id);
+
+          // const componentResponse = await axiosInstance.get(
+          //     `/sku/${skuId}/components/${component.id}?pko_id=${pkoId}`,
+          //     { headers: { "Content-Type": "application/json" } }
+          // );
+
+          const componentResponse = component["responses"];
+          // Apply validation rules from PkgDataForm
+          const componentIssues = validateComponentResponses(
+            component,
+            componentResponse,
+          );
+          console.log(
+            "Component Issues for",
+            component.name,
+            ":",
+            componentIssues,
+          );
+
+          if (componentIssues.length > 0) {
+            issues = [...issues, ...componentIssues];
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching component details:", error);
+    }
+
+    console.log("Final Component Validation Issues:", issues);
+    return issues;
+  };
+
+  const isAnswerMatchForComponent = (fieldDependency, parentAnswers) => {
+    if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
+
+    // Normalize fieldDependency into an array of conditions
+    const conditions = fieldDependency
+      .split(" OR ") // Split conditions by "OR"
+      .map((condition) => condition.trim().toLowerCase());
+
+    // Check for exact matches only
+    return conditions.some((condition) =>
+      parentAnswers.some(
+        (parentAnswer) =>
+          (parentAnswer || "").trim().toLowerCase() === condition,
+      ),
+    );
+  };
+
+  const validateComponentResponses = (component, responses) => {
+    let issues = [];
+
+    questionsComponent.forEach((question) => {
+      const response =
+        responses[`${question.question_text}||${question.question_id}`];
+      // const matchingKey = Object.keys(responses).find((key) => key.endsWith(`||${question.question_id}`));
+
+      // Check if the question is visible
+      const isVisible =
+        !question.dependent_question ||
+        isAnswerMatchForComponent(
+          question.field_dependency,
+          Array.isArray(question.dependent_question)
+            ? question.dependent_question.map((qId) =>
+                Object.keys(responses).find((key) => key.endsWith(`||${qId}`)),
+              )
+            : [
+                Object.keys(responses).find((key) =>
+                  key.endsWith(`||${question.dependent_question}`),
+                ),
+              ],
+        );
+
+      // **Check Mandatory Fields**
+      if (
+        isVisible &&
+        question.mandatory &&
+        (!response || response.trim() === "")
+      ) {
+        issues.push({
+          where: "Component Form",
+          component: component.name,
+          issue: `Please provide response for all mandatory fields - ${question.question_text}`,
+        });
+      }
+
+      // **Validate numerical ranges (if applicable)**
+      const valueMatch = response?.match(/^(\d+(\.\d+)?)([a-zA-Z]+)?$/);
+      if (valueMatch) {
+        const value = parseFloat(valueMatch[1]);
+        const unit = valueMatch[3] || "";
+
+        const validationRules = question.validation_dropdown?.find(
+          (rule) => rule.unit?.toLowerCase() === unit?.toLowerCase(),
+        );
+
+        if (validationRules) {
+          const rule = validationRules;
+          let issue = null;
+
+          if (
+            rule.min_weight !== undefined &&
+            rule.max_weight !== undefined &&
+            (value < rule.min_weight || value > rule.max_weight)
+          ) {
+            issue = `${question.question_text} should be between ${rule.min_weight} and ${rule.max_weight} ${unit}`;
+          } else if (
+            rule.min_length !== undefined &&
+            rule.max_length !== undefined &&
+            (value < rule.min_length || value > rule.max_length)
+          ) {
+            issue = `${question.question_text} should be between ${rule.min_length} and ${rule.max_length} ${unit}`;
+          } else if (
+            rule.min_width !== undefined &&
+            rule.max_width !== undefined &&
+            (value < rule.min_width || value > rule.max_width)
+          ) {
+            issue = `${question.question_text} should be between ${rule.min_width} and ${rule.max_width} ${unit}`;
+          } else if (
+            rule.min_depth !== undefined &&
+            rule.max_depth !== undefined &&
+            (value < rule.min_depth || value > rule.max_depth)
+          ) {
+            issue = `${question.question_text} should be between ${rule.min_depth} and ${rule.max_depth} ${unit}`;
+          }
+
+          if (issue) {
+            issues.push({
+              where: "Component Form",
+              component: component.name,
+              issue: issue,
+            });
+          }
+        }
+      }
+    });
+    console.log(issues);
+    return issues;
+  };
+
+  // Function to validate everything before submission
+  const handleValidateAndSubmit = async () => {
+    try {
+      const skuIssues = validateSkuData();
+      const componentIssues = await fetchAndValidateComponentData();
+
+      setValidationIssues(skuIssues);
+      setComponentValidationIssues(componentIssues);
+      console.log("SKU Issues:", skuIssues);
+      console.log("Component Issues:", componentIssues);
+
+      // Check if at least one component is added
+      if (skuData.components.length === 0) {
+        alert(
+          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission",
+        );
+        return;
+      }
+
+      // Check if any component is still in Pending status
+      const hasPendingComponent = skuData.components.some(
+        (component) => component.form_status !== "Completed",
+      );
+
+      if (hasPendingComponent) {
+        alert(
+          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission",
+        );
+        return;
+      }
+
+      // If there are validation issues, show the validation modal
+      if (skuIssues.length > 0 || componentIssues.length > 0) {
+        setShowValidationModal(true);
+        console.log("Showing validation modal");
+      } else {
+        proceedToSubmission();
+      }
+    } catch (error) {
+      console.error("Error validating components:", error);
+      alert("An error occurred while validating components. Please try again.");
+    }
+  };
+
+  // const handleValidateAndSubmit = () => {
+  //   const skuIssues = validateSkuData();
+  //   const componentIssues = validateComponentData();
+
+  //   setValidationIssues(skuIssues);
+  //   setComponentValidationIssues(componentIssues);
+
+  //   if (skuIssues.length > 0 || componentIssues.length > 0) {
+  //     setShowValidationModal(true);
+  //   } else {
+  //     proceedToSubmission();
+  //   }
+  // };
+
+  // Validate SKU Form fields
+  const validateSkuData = () => {
+    let issues = [];
+
+    questions.forEach((question) => {
+      if (
+        question.mandatory &&
+        (!skuData.dimensionsAndWeights[question.question_id] ||
+          skuData.dimensionsAndWeights[question.question_id] === "")
+      ) {
+        issues.push({
+          issue: `Please provide a response for the following mandatory field-'${question.question_text}'.`,
+        });
+      }
+    });
+
+    return issues;
   };
 
   useEffect(() => {
@@ -57,11 +312,52 @@ const Sku_Page = () => {
     setProductImageCount(count);
   };
 
-  const handleValidateAndSubmit = () => {
-    alert(
-      "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission.",
-    );
+  // const handleValidateAndSubmit = () => {
+  //   const issues = validateSkuData();
+
+  //   if (issues.length > 0) {
+  //     setValidationIssues(issues); // Store issues in state
+  //     setShowValidationModal(true); // Show modal
+  //   } else {
+  //     // Proceed with submission
+  //     proceedToSubmission(); // Function to submit SKU
+
+  //   }
+  // };
+
+  const proceedToSubmission = async () => {
+    try {
+      await saveSkuData(false); // Call save function first
+      // Update SKU Status in Database**
+      await axiosInstance.put(`/skus/${skuId}/update_status/`, {
+        pko_id: pkoId,
+        status: "Completed",
+      });
+
+      // Update Local State**
+      updateSkuStatus(skuId, "Completed"); // Update VendorContext state
+
+      setPkoData((prevPkoData) => ({
+        ...prevPkoData,
+        skus: prevPkoData.skus.map((sku) =>
+          sku.sku_id === skuId ? { ...sku, status: "Completed" } : sku,
+        ),
+      }));
+
+      alert("Form submitted successfully!"); // Show success message
+      setShowValidationModal(false); // Close modal after submission
+      navigate("/vendordashboard"); // Redirect if needed
+    } catch (error) {
+      console.error("Error during submission:", error);
+      alert("An error occurred while submitting. Please try again.");
+    }
   };
+
+  // const handleValidateAndSubmit = () => {
+  //   alert(
+  //     "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission.",
+  //   );
+  // };
 
   const handleAddProductImageClick = async () => {
     const offcanvasElement = document.getElementById("offcanvasRight-image");
@@ -257,6 +553,7 @@ const Sku_Page = () => {
         const response = await axiosInstance.get("questionnaire/");
         const data = response.data;
         setQuestions(data.primary_packaging_questions || []);
+        setQuestionsComponent(data.components[0].component_questions || []);
       } catch (error) {
         console.error("Error fetching questionnaire data:", error);
       }
@@ -329,7 +626,7 @@ const Sku_Page = () => {
   }, [skuId, pkoId]);
 
   //Save the response
-  const saveSkuData = async () => {
+  const saveSkuData = async (isDraft = true) => {
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
       return;
@@ -351,7 +648,7 @@ const Sku_Page = () => {
           id: comp.id || null,
           sku: skuId,
           name: comp.name || `Component_${index + 1}`,
-          form_status: comp.formStatus || "Pending",
+          form_status: comp.form_status || "Pending",
           responses: comp.responses || {},
         })),
         sku_progress: combinedProgress,
@@ -359,9 +656,11 @@ const Sku_Page = () => {
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
-      alert("SKU data saved successfully in Draft mode!");
-
-      updateSkuStatus(skuId, "Draft");
+      // Show alert only when saving as a draft, not during submission
+      if (isDraft) {
+        alert("SKU data saved successfully in Draft mode!");
+      }
+      updateSkuStatus(skuId, isDraft ? "Draft" : "Completed");
       // Upload Images after saving SKU data
       // await handleUploadImages();
 
@@ -492,33 +791,16 @@ const Sku_Page = () => {
       if (response.status === 200) {
         const components = response.data; // Expecting an array of component objects
 
-        console.log("Fetched Components:", components);
-
-        const selectedComponent = components[index];
-        if (selectedComponent) {
-          // Fetch component details for responses
-          const componentResponse = await axiosInstance.get(
-            `/sku/${skuId}/components/${selectedComponent.id}?pko_id=${pkoId}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
-
-          const componentData = componentResponse.data;
-          console.log(
-            "Fetched Component Details with Responses:",
-            componentData,
-          );
+        if (components[index]) {
+          const componentData = components[index];
 
           // Navigate to PkgDataForm with all necessary data
           navigate("/component", {
             state: {
               skuId, // Pass SKU ID
-              componentId: selectedComponent.id,
-              componentName: selectedComponent.name,
-              formStatus: selectedComponent.form_status,
+              componentId: componentData.id,
+              componentName: componentData.name,
+              formStatus: componentData.form_status,
               responses: componentData.responses || {}, // Pass fetched responses
               pkoId: pkoData?.pko_id || "N/A",
               description:
@@ -896,6 +1178,15 @@ const Sku_Page = () => {
                 Validate & Submit
               </button>
             </div>
+            <SkuValidation
+              validationIssues={validationIssues}
+              componentValidationIssues={componentValidationIssues} // Component form issues
+              components={skuData.components} // List of added components
+              show={showValidationModal}
+              onClose={() => setShowValidationModal(false)}
+              onProceed={proceedToSubmission} // This function submits the SKU
+              imagesFromDB={imagesFromDB}
+            />
           </div>
         </div>
       </div>

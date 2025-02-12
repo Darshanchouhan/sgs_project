@@ -597,9 +597,11 @@ const VendorDashboard = () => {
                         <td className="align-middle">
                           <span
                             className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
-                              status === "Draft"
-                                ? "bg-color-draft text-white"
-                                : "bg-color-light-border text-color-typo-secondary"
+                              status === "Completed"
+                                ? "bg-color-completed text-white"
+                                : status === "Draft"
+                                  ? "bg-color-draft text-white"
+                                  : "bg-color-light-border text-color-typo-secondary"
                             }`}
                           >
                             {status}

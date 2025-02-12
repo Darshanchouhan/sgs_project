@@ -137,42 +137,40 @@ const PkgDataForm = () => {
     }
   };
 
-  const onSaveDraft = () => {
-    // Call the existing handleSave function to save the data to the database
-    handleSave();
-    setShowValidationModal(false); // Close the modal
-    setIsSaveAsDraft(false); // Reset the Save as Draft flag
-  };
+  // const onSaveDraft = () => {
+  //   // Call the existing handleSave function to save the data to the database
+  //   handleSave();
+  //   setShowValidationModal(false); // Close the modal
+  //   setIsSaveAsDraft(false); // Reset the Save as Draft flag
+  // };
 
   const handleSaveDraft = () => {
     setIsSaveAsDraft(true); // Show Save as Draft button
     setIsPreviousValidation(false); // Reset Previous validation flag
-    const validationResults = validateAllSections(); // Validate all sections
-    setUnansweredQuestions(validationResults); // Update unanswered questions state
-    setShowValidationModal(true); // Show validation modal
+    handleSave(); // Directly save without validation
   };
 
-  const validateAllSections = () => {
-    const unansweredQuestions = [];
+  // const validateAllSections = () => {
+  //   const unansweredQuestions = [];
 
-    Object.values(pkgData.sections)
-      .flat()
-      .forEach((question) => {
-        const isAnswered =
-          pkgData.answers[question.question_id] !== undefined &&
-          pkgData.answers[question.question_id] !== "";
+  //   Object.values(pkgData.sections)
+  //     .flat()
+  //     .forEach((question) => {
+  //       const isAnswered =
+  //         pkgData.answers[question.question_id] !== undefined &&
+  //         pkgData.answers[question.question_id] !== "";
 
-        // Add all mandatory unanswered questions
-        if (question.mandatory && !isAnswered) {
-          unansweredQuestions.push({
-            fieldName: question.question_text,
-            issue: "Please provide response for all mandatory fields.",
-          });
-        }
-      });
+  //       // Add all mandatory unanswered questions
+  //       if (question.mandatory && !isAnswered) {
+  //         unansweredQuestions.push({
+  //           fieldName: question.question_text,
+  //           issue: "Please provide response for all mandatory fields.",
+  //         });
+  //       }
+  //     });
 
-    return unansweredQuestions;
-  };
+  //   return unansweredQuestions;
+  // };
 
   const handleBackToCurrentSection = () => {
     setShowValidationModal(false); // Close the modal
@@ -503,8 +501,30 @@ const PkgDataForm = () => {
                   q.question_id == questionText.split("||")[1],
               );
 
+            // if (question) {
+            //   answers[question.question_id] = response;
+            // }
             if (question) {
-              answers[question.question_id] = response;
+              // Extract numeric value and unit if present
+              if (
+                question.question_type === "Integer + Dropdown" ||
+                question.question_type === "Float + Dropdown"
+              ) {
+                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
+                const match = response.match(regex);
+
+                if (match) {
+                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
+                  const unit = match[3]; // Extract unit part
+
+                  answers[question.question_id] = value;
+                  answers[`${question.question_id}_unit`] = unit;
+                } else {
+                  answers[question.question_id] = response;
+                }
+              } else {
+                answers[question.question_id] = response;
+              }
             }
           },
         );
@@ -671,6 +691,24 @@ const PkgDataForm = () => {
   const handleInputChange = (questionId, value) => {
     setPkgData((prev) => {
       const updatedAnswers = { ...prev.answers };
+
+      // Find the current question
+      const question = Object.values(pkgData.sections)
+        .flat()
+        .find((q) => q.question_id === questionId);
+
+      // Check if the field is a "Float + Dropdown" or "Integer + Dropdown"
+      if (
+        (question?.question_type === "Float + Dropdown" ||
+          question?.question_type === "Integer + Dropdown") &&
+        !updatedAnswers[`${questionId}_unit`]
+      ) {
+        // Ensure a default unit is selected if not already set
+        updatedAnswers[`${questionId}_unit`] = question.dropdown_options[0];
+      }
+
+      // Update the current question's answer
+      updatedAnswers[questionId] = value;
 
       // Find and clear answers for all dependent questions
       const dependentQuestionIds = Object.values(pkgData.sections)
@@ -891,10 +929,12 @@ const PkgDataForm = () => {
             {/* Dropdown for the unit selection */}
             <select
               className="bg-color-light-shade form-list w-25"
-              value={pkgData.answers[`${question.question_id}_unit`] || ""}
+              value={
+                pkgData.answers[`${question.question_id}_unit`] ||
+                question.dropdown_options[0] // Ensure default unit selection
+              }
               onChange={(e) => {
                 const newUnit = e.target.value;
-
                 handleInputChange(`${question.question_id}_unit`, newUnit);
 
                 // Synchronize units for dimensions if necessary
@@ -1313,8 +1353,8 @@ const PkgDataForm = () => {
           unansweredQuestions={unansweredQuestions} // Pass the unanswered questions
           onBack={handleBackToCurrentSection}
           onProceed={handleProceedToNextSection}
-          onSaveDraft={onSaveDraft} // Save as Draft functionality
-          showSaveAsDraftButton={isSaveAsDraft} // Pass flag for Save as Draft
+          // onSaveDraft={onSaveDraft} // Save as Draft functionality
+          // showSaveAsDraftButton={isSaveAsDraft} // Pass flag for Save as Draft
           onPrevious={proceedToPreviousSection}
           isPreviousValidation={isPreviousValidation}
         />
