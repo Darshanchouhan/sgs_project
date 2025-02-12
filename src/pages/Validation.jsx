@@ -4,19 +4,19 @@ const ValidationModal = ({
   unansweredQuestions = [],
   onBack,
   onProceed,
-  onSaveDraft,
+  // onSaveDraft,
   onPrevious,
-  showSaveAsDraftButton,
+  // showSaveAsDraftButton,
   isPreviousValidation,
 }) => {
   return (
     <div
-      className="modal fade show d-block"
+      className="modal fade show d-block analysisModal"
       tabIndex="-1"
       aria-labelledby="validationModalLabel"
       aria-hidden="true"
     >
-      <div className="modal-dialog p-0">
+      <div className="modal-dialog p-0 modal-dialog-scrollable">
         <div className="modal-content">
           <div className="modal-header flex-column align-items-center border-0 px-40">
             <h1
@@ -28,12 +28,12 @@ const ValidationModal = ({
             <p className="fs-14 fw-400 text-color-labels mb-0">
               Please resolve the following issues.
             </p>
-            <button
+            {/* <button
               type="button"
               className="btn-close"
               aria-label="Close"
               onClick={onBack}
-            ></button>
+            ></button> */}
           </div>
           <div className="modal-body px-40 py-0">
             <table className="table table-bordered analysisTable fs-14 fw-400 text-color-typo-primary mb-0">
@@ -78,14 +78,6 @@ const ValidationModal = ({
                 onClick={onPrevious}
               >
                 Proceed to Previous Section
-              </button>
-            ) : showSaveAsDraftButton ? (
-              <button
-                type="button"
-                className="btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
-                onClick={onSaveDraft}
-              >
-                Save as Draft
               </button>
             ) : (
               <button
