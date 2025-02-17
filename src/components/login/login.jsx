@@ -29,20 +29,22 @@ const Login = ({
 
   return (
     <div className="container-fluid h-100">
-      {loading && (
+      {/* {loading && (
         <div
           className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center`}
         >
           <img src="/assets/images/loader.svg" alt="Loading..." />
         </div>
-      )}
+      )} */}
 
       <div className="row vh-100">
         <div className="col-12 col-md-7 px-0">
-          <div
-            className={`${styles.loginBg} position-relative`}
-          >
-            <h4 className="fs-36 fw-600 text-white mb-0">Smart Data<br /> for Packaging<br /> Compliance.</h4>
+          <div className={`${styles.loginBg} position-relative`}>
+            <h4 className="fs-36 fw-600 text-white mb-0">
+              Smart Data
+              <br /> for Packaging
+              <br /> Compliance.
+            </h4>
           </div>
         </div>
         <div className="col-12 col-md-5 px-0">
@@ -55,9 +57,7 @@ const Login = ({
               />
               {!showForgotPassword && (
                 <>
-                  <h4 className="fs-44 fw-600 text-secondary mb-3">
-                  Sign In
-                  </h4>
+                  <h4 className="fs-44 fw-600 text-secondary mb-3">Sign In</h4>
                 </>
               )}
 
@@ -118,13 +118,13 @@ const Login = ({
                   <button
                     type="submit"
                     className="fw-600 rounded-1 bg-secondary fs-18 py-2 w-350 border-0 shadow-none text-center text-white text-uppercase ls-20"
-                    disabled={loading}
                   >
-                    {loading ? (
+                    Login
+                    {/* {loading ? (
                       <img src="/assets/images/loader.svg" alt="Loading..." />
                     ) : (
                       "Login"
-                    )}
+                    )} */}
                   </button>
                 </form>
               ) : (

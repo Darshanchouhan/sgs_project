@@ -32,7 +32,12 @@ const Header = () => {
           <img
             src="/assets/images/cvs-logo.svg"
             alt="Logo"
-            style={{ height: "28px", marginRight: "24px", paddingRight: "24px", borderRight: "1px solid #c2c2c2" }}
+            style={{
+              height: "28px",
+              marginRight: "24px",
+              paddingRight: "24px",
+              borderRight: "1px solid #c2c2c2",
+            }}
           />
           Smart Packaging Data
         </Link>
