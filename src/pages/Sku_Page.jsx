@@ -47,7 +47,8 @@ const Sku_Page = () => {
   const [componentValidationIssues, setComponentValidationIssues] = useState(
     [],
   );
-
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isBackClick, setIsBackClick] = useState(false);
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
   };
@@ -271,20 +272,6 @@ const Sku_Page = () => {
     }
   };
 
-  // const handleValidateAndSubmit = () => {
-  //   const skuIssues = validateSkuData();
-  //   const componentIssues = validateComponentData();
-
-  //   setValidationIssues(skuIssues);
-  //   setComponentValidationIssues(componentIssues);
-
-  //   if (skuIssues.length > 0 || componentIssues.length > 0) {
-  //     setShowValidationModal(true);
-  //   } else {
-  //     proceedToSubmission();
-  //   }
-  // };
-
   // Validate SKU Form fields
   const validateSkuData = () => {
     let issues = [];
@@ -303,6 +290,49 @@ const Sku_Page = () => {
 
     return issues;
   };
+
+  useEffect(() => {
+    if (location.state && location.state.responses) {
+      const answers = {};
+
+      Object.entries(location.state.responses).forEach(
+        ([questionText, response]) => {
+          // Find the matching question based on text and ID
+          const question = questions.find(
+            (q) =>
+              questionText.startsWith(q.question_text) &&
+              questionText.endsWith(`||${q.question_id}`),
+          );
+
+          if (question) {
+            // If the field contains both value and unit, split them
+            if (
+              question.question_type.includes("Dropdown") ||
+              question.question_type.includes("Float")
+            ) {
+              const match = response.match(/^(\d+(\.\d+)?)([a-zA-Z]+)$/);
+              if (match) {
+                answers[question.question_id] = parseFloat(match[1]); // Extract value
+                answers[`${question.question_id}_unit`] = match[3]; // Extract unit
+              } else {
+                answers[question.question_id] = response;
+              }
+            } else {
+              answers[question.question_id] = response;
+            }
+          }
+        },
+      );
+
+      // Update SKU state with formatted answers
+      setSkuData((prev) => ({
+        ...prev,
+        dimensionsAndWeights: answers,
+      }));
+
+      console.log("Populated answers from DB:", answers);
+    }
+  }, [location.state, questions, setSkuData]);
 
   useEffect(() => {
     console.log("isOverlayVisible:", isOverlayVisible); // Debug log for state changes
@@ -327,6 +357,7 @@ const Sku_Page = () => {
 
   const proceedToSubmission = async () => {
     try {
+      setHasSubmitted(true); // Set submission flag
       await saveSkuData(false); // Call save function first
       // Update SKU Status in Database**
       await axiosInstance.put(`/skus/${skuId}/update_status/`, {
@@ -348,16 +379,11 @@ const Sku_Page = () => {
       setShowValidationModal(false); // Close modal after submission
       navigate("/vendordashboard"); // Redirect if needed
     } catch (error) {
+      setHasSubmitted(false); // Reset submission flag on error
       console.error("Error during submission:", error);
       alert("An error occurred while submitting. Please try again.");
     }
   };
-
-  // const handleValidateAndSubmit = () => {
-  //   alert(
-  //     "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission.",
-  //   );
-  // };
 
   const handleAddProductImageClick = async () => {
     const offcanvasElement = document.getElementById("offcanvasRight-image");
@@ -406,29 +432,6 @@ const Sku_Page = () => {
       console.error("Error fetching images:", error);
     }
   };
-
-  // const handleUploadImages = async () => {
-  //   // if (imagesToUpload.length > 0 && skuId && pkoId) {
-  //     try {
-  //       const formData = new FormData();
-  //       imagesToUpload.forEach((image) => {
-  //         formData.append("images", image);
-  //       });
-  //       formData.append("pko_id", pkoId);
-
-  //       await axiosInstance.post(
-  //         `skus/${skuId}/upload-images/`,
-  //         formData,
-  //         { headers: { "Content-Type": "multipart/form-data" } },
-  //       );
-  //       handleAddProductImageClick();
-  //       alert("Images uploaded successfully!");
-  //     } catch (error) {
-  //       console.error("Error uploading images:", error);
-  //       alert("Failed to upload images. Please try again.");
-  //     }
-  // // }
-  // };
 
   useEffect(() => {
     if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
@@ -506,11 +509,7 @@ const Sku_Page = () => {
   useEffect(() => {
     const fetchSkuDetails = async () => {
       if (!skuId || !pkoId) {
-        console.warn(
-          "SKU ID or PKO ID is missing. Skipping fetch.",
-          skuId,
-          pkoId,
-        );
+        console.warn("SKU ID or PKO ID is missing. Skipping fetch.");
         return;
       }
 
@@ -520,24 +519,56 @@ const Sku_Page = () => {
         );
         const data = response.data;
 
-        // console.log("Fetched SKU Details:", data);
+        console.log("Fetched SKU Details:", data);
 
-        // Update SKU and PKO details
-        setSkuDetails(data);
-        setSkuData((prev) => ({
-          ...prev,
-          dimensionsAndWeights: data.primary_packaging_details || {},
-          components: data.components || [],
-          description: data.description || "",
-        }));
-        // Set shared state for units
-        const { height_unit, width_unit, depth_unit, netWeight_unit } =
-          data.primary_packaging_details || {};
-        if (height_unit || width_unit || depth_unit) {
-          setDimensionUnit(height_unit || width_unit || depth_unit || "Unit");
+        // Prevent overwriting status if already submitted
+        if (hasSubmitted && data.status === "Draft") {
+          console.log(
+            "Skipping status update since form is already submitted.",
+          );
+          return;
         }
-        if (netWeight_unit) {
-          setWeightUnit(netWeight_unit);
+
+        if (data.primary_packaging_details) {
+          const answers = {};
+
+          Object.entries(data.primary_packaging_details).forEach(
+            ([questionText, response]) => {
+              // Find the matching question using text and ID
+              const question = questions.find(
+                (q) =>
+                  questionText.startsWith(q.question_text) &&
+                  questionText.endsWith(`||${q.question_id}`),
+              );
+
+              if (question) {
+                // If the field contains both value and unit, extract them
+                if (
+                  question.question_type.includes("Dropdown") ||
+                  question.question_type.includes("Float")
+                ) {
+                  const match = response.match(/^(\d+(\.\d+)?)([a-zA-Z]+)$/);
+                  if (match) {
+                    answers[question.question_id] = parseFloat(match[1]); // Extract value
+                    answers[`${question.question_id}_unit`] = match[3]; // Extract unit
+                  } else {
+                    answers[question.question_id] = response;
+                  }
+                } else {
+                  answers[question.question_id] = response;
+                }
+              }
+            },
+          );
+
+          // Set the SKU data properly
+          setSkuData((prev) => ({
+            ...prev,
+            dimensionsAndWeights: answers,
+            components: data.components || [],
+          }));
+
+          console.log("Populated answers from DB:", answers);
         }
       } catch (error) {
         console.error("Error fetching SKU details:", error);
@@ -545,8 +576,9 @@ const Sku_Page = () => {
     };
 
     fetchSkuDetails();
-  }, [skuId, pkoId, setSkuDetails, setSkuData]);
+  }, [skuId, pkoId, questions, setSkuData]);
 
+  //
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -625,10 +657,14 @@ const Sku_Page = () => {
     fetchComponentDetails();
   }, [skuId, pkoId]);
 
-  //Save the response
-  const saveSkuData = async (isDraft = true) => {
+  //Save the Response
+  const saveSkuData = async (isDraft = true, showAlert = true) => {
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
+      return;
+    }
+    // Don't save as draft if already submitted
+    if (isDraft && hasSubmitted) {
       return;
     }
     const combinedProgress = Math.round(
@@ -643,7 +679,7 @@ const Sku_Page = () => {
         pko_id: pkoId,
         sku_id: skuId,
         description: skuDetails?.description || "",
-        primary_packaging_details: { ...skuData.dimensionsAndWeights },
+        primary_packaging_details: {},
         components: skuData.components.map((comp, index) => ({
           id: comp.id || null,
           sku: skuId,
@@ -652,12 +688,40 @@ const Sku_Page = () => {
           responses: comp.responses || {},
         })),
         sku_progress: combinedProgress,
+        status: isDraft ? "Draft" : "Completed", // Include status in payload
       };
+
+      questions.forEach((question) => {
+        const answer = skuData.dimensionsAndWeights[question.question_id];
+        let unit = "";
+        // Explicitly check for related units
+        if (/height|width|depth/i.test(question.question_text)) {
+          unit =
+            skuData.dimensionsAndWeights["height_unit"] ||
+            skuData.dimensionsAndWeights["width_unit"] ||
+            skuData.dimensionsAndWeights["depth_unit"];
+        } else if (/weight/i.test(question.question_text)) {
+          unit =
+            skuData.dimensionsAndWeights["netWeight_unit"] ||
+            skuData.dimensionsAndWeights["tareWeight_unit"] ||
+            skuData.dimensionsAndWeights["grossWeight_unit"];
+        } else {
+          unit =
+            skuData.dimensionsAndWeights[`${question.question_id}_unit`] || "";
+        }
+
+        if (answer !== undefined && answer !== "") {
+          payload.primary_packaging_details[
+            `${question.question_text}||${question.question_id}`
+          ] = `${answer}${unit}`.trim();
+        }
+      });
+
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
       // Show alert only when saving as a draft, not during submission
-      if (isDraft) {
+      if (isDraft && showAlert) {
         alert("SKU data saved successfully in Draft mode!");
       }
       updateSkuStatus(skuId, isDraft ? "Draft" : "Completed");
@@ -675,30 +739,11 @@ const Sku_Page = () => {
 
   // Autosave function (No alerts, no user navigation)
   const autosaveSkuData = async () => {
-    if (!skuId) {
-      console.error("SKU ID is missing");
+    if (hasSubmitted) {
+      // Skip autosave if the form has been submitted
       return;
     }
-
-    try {
-      const payload = {
-        sku_id: skuId,
-        description: skuDetails?.description || "",
-        primary_packaging_details: { ...skuData.dimensionsAndWeights },
-        components: skuData.components.map((comp, index) => ({
-          id: comp.id || null,
-          name: comp.name || `Component_${index + 1}`,
-          form_status: comp.formStatus || "Pending",
-          responses: comp.responses || {},
-        })),
-      };
-      await axiosInstance.put(`/skus/${skuId}/`, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-      console.log("Autosave successful at", new Date().toLocaleTimeString());
-    } catch (error) {
-      console.error("Autosave failed:", error);
-    }
+    await saveSkuData(true);
   };
 
   const handleInputChange = (field, value) => {
@@ -712,7 +757,8 @@ const Sku_Page = () => {
   };
 
   // Define the back action
-  const handleBackClick = () => {
+  const handleBackClick = async () => {
+    // await saveSkuData(true, false);
     navigate("/vendordashboard"); // Navigate to Vendor Dashboard
   };
 
@@ -928,6 +974,60 @@ const Sku_Page = () => {
         const isDimension = /height|width|depth/i.test(question.question_text); // Check for dimension-related questions
         const isWeight = /weight/i.test(question.question_text); // Check for weight-related questions
 
+        const synchronizeUnits = (newUnit, groupType) => {
+          const unitFields =
+            groupType === "dimension"
+              ? ["height", "width", "depth"]
+              : ["netWeight", "tareWeight", "grossWeight"];
+
+          setSkuData((prev) => {
+            const updatedDimensionsAndWeights = {
+              ...prev.dimensionsAndWeights,
+            };
+
+            unitFields.forEach((field) => {
+              // Normalize field: Convert to lowercase and replace camelCase with spaces
+              const normalizedField = field
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                .toLowerCase();
+
+              // Find the question where normalized field matches normalized question_text
+              const question = questions.find((q) => {
+                // Normalize the question text: Convert to lowercase and remove spaces
+                const normalizedQuestionText = q.question_text
+                  .toLowerCase()
+                  .replace(/\s+/g, " ")
+                  .trim();
+                return normalizedQuestionText.includes(normalizedField);
+              });
+
+              if (question) {
+                updatedDimensionsAndWeights[`${question.question_id}_unit`] =
+                  newUnit;
+              }
+            });
+
+            return {
+              ...prev,
+              dimensionsAndWeights: updatedDimensionsAndWeights,
+            };
+          });
+        };
+
+        if (
+          !skuData.dimensionsAndWeights[`${question.question_id}_unit`] &&
+          question.dropdown_options.length > 0
+        ) {
+          const defaultUnit = question.dropdown_options[0];
+          setSkuData((prev) => ({
+            ...prev,
+            dimensionsAndWeights: {
+              ...prev.dimensionsAndWeights,
+              [`${question.question_id}_unit`]: defaultUnit,
+            },
+          }));
+        }
+
         return (
           <div className="d-flex align-items-center gap-2">
             <div className="d-flex align-items-center border border-color-typo-secondary rounded-2">
@@ -969,25 +1069,28 @@ const Sku_Page = () => {
               <select
                 className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-12 w-72 fw-400"
                 value={
-                  isDimension ? dimensionUnit : isWeight ? weightUnit : "Unit"
-                } // Use shared state
+                  skuData.dimensionsAndWeights[
+                    `${question.question_id}_unit`
+                  ] || question.dropdown_options[0] // Ensure default unit selection
+                }
                 onChange={(e) => {
                   const newUnit = e.target.value;
 
                   if (isDimension) {
+                    synchronizeUnits(newUnit, "dimension"); // Synchronize dimension units
                     setDimensionUnit(newUnit); // Update dimension unit
                     // Update all dimension-related questions
                     setSkuData((prev) => ({
                       ...prev,
                       dimensionsAndWeights: {
                         ...prev.dimensionsAndWeights,
-
                         height_unit: newUnit,
                         width_unit: newUnit,
                         depth_unit: newUnit,
                       },
                     }));
                   } else if (isWeight) {
+                    synchronizeUnits(newUnit, "weight"); // Synchronize weight units
                     setWeightUnit(newUnit); // Update weight unit
                     // Update all weight-related questions
                     setSkuData((prev) => ({
@@ -1000,22 +1103,16 @@ const Sku_Page = () => {
                       },
                     }));
                   }
+
                   // Update the specific question's unit
                   handleInputChange(`${question.question_id}_unit`, newUnit);
                 }}
               >
-                <option value="Unit">Unit</option>
-                {question.dropdown_options
-                  ?.filter(
-                    (option) =>
-                      option.trim().toLowerCase() !== "unit" &&
-                      option.trim() !== "",
-                  )
-                  .map((option, index) => (
-                    <option key={index} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                {question.dropdown_options.map((option, index) => (
+                  <option key={index} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Instruction/Overlay Icon */}

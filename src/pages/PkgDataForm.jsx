@@ -335,79 +335,9 @@ const PkgDataForm = () => {
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
   const isFirstLoad = useRef(true);
+
   const autosavePkgData = async () => {
-    if (!skuId || !skuData.componentId || !skuData.componentName || !pkoId) {
-      console.warn(
-        "Missing SKU ID, Component ID, Component Name, or PKO ID. Autosave skipped.",
-      );
-      return;
-    }
-
-    try {
-      const payload = {
-        name: skuData.componentName,
-        form_status: "Pending", // Autosave keeps it as Pending
-        pko_id: pkoId,
-        sku_id: skuId,
-        responses: {}, // Initialize responses
-      };
-
-      // Flatten and map all answered questions
-      const answeredQuestions = Object.values(pkgData.sections).flatMap(
-        (section) =>
-          section
-            .map((question) => {
-              const answer = pkgData.answers[question.question_id];
-              const unit =
-                pkgData.answers[`${question.question_id}_unit`] || null;
-
-              if (answer === undefined || answer === "") return null;
-
-              // Handle different question types
-              if (question.question_type.includes("Dropdown") && unit) {
-                return {
-                  question_id: question.question_id,
-                  question_text: question.question_text,
-                  response: `${answer}${unit}`.trim(),
-                };
-              }
-
-              return {
-                question_id: question.question_id,
-                question_text: question.question_text,
-                response: answer,
-              };
-            })
-            .filter((q) => q !== null),
-      );
-
-      // Build the `responses` object dynamically
-      answeredQuestions.forEach((q) => {
-        payload.responses[q.question_text + "||" + q.question_id] = q.response;
-      });
-
-      console.log("Autosave Payload:", JSON.stringify(payload, null, 2));
-
-      const response = await axiosInstance.put(
-        `/sku/${skuId}/components/${skuData.componentId}/`,
-        payload,
-        {
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-
-      if (response.status === 200) {
-        console.log(
-          "Autosave successful at",
-          new Date().toLocaleTimeString(),
-          response.data,
-        );
-      } else {
-        console.warn("Autosave failed with status:", response.status);
-      }
-    } catch (error) {
-      console.error("Autosave failed:", error.message);
-    }
+    await handleSave(false); // Call handleSave with showAlert = false
   };
 
   // Dynamically recalculate progress whenever answers or visibility changes
@@ -487,57 +417,55 @@ const PkgDataForm = () => {
         ...prev,
         answers: {}, // Clear previous answers
       }));
+    }
+  }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
 
-      // Populate answers from responses if available
-      if (location.state.responses) {
-        const answers = {};
-        Object.entries(location.state.responses).forEach(
-          ([questionText, response]) => {
-            const question = Object.values(pkgData.sections)
-              .flat()
-              .find(
-                (q) =>
-                  q.question_text === questionText.split("||")[0] &&
-                  q.question_id == questionText.split("||")[1],
-              );
+  useEffect(() => {
+    if (pkgData.sections && location.state?.responses) {
+      const answers = {};
+      Object.entries(location.state.responses).forEach(
+        ([questionText, response]) => {
+          const question = Object.values(pkgData.sections)
+            .flat()
+            .find(
+              (q) =>
+                q.question_text === questionText.split("||")[0] &&
+                q.question_id == questionText.split("||")[1],
+            );
 
-            // if (question) {
-            //   answers[question.question_id] = response;
-            // }
-            if (question) {
-              // Extract numeric value and unit if present
-              if (
-                question.question_type === "Integer + Dropdown" ||
-                question.question_type === "Float + Dropdown"
-              ) {
-                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
-                const match = response.match(regex);
+          if (question) {
+            // Extract numeric value and unit if present
+            if (
+              question.question_type === "Integer + Dropdown" ||
+              question.question_type === "Float + Dropdown"
+            ) {
+              const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
+              const match = response.match(regex);
 
-                if (match) {
-                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
-                  const unit = match[3]; // Extract unit part
+              if (match) {
+                const value = parseFloat(match[1]); // Extract numeric part (integer or float)
+                const unit = match[3]; // Extract unit part
 
-                  answers[question.question_id] = value;
-                  answers[`${question.question_id}_unit`] = unit;
-                } else {
-                  answers[question.question_id] = response;
-                }
+                answers[question.question_id] = value;
+                answers[`${question.question_id}_unit`] = unit;
               } else {
                 answers[question.question_id] = response;
               }
+            } else {
+              answers[question.question_id] = response;
             }
-          },
-        );
+          }
+        },
+      );
 
-        console.log("Populated answers for component:", answers);
+      console.log("Populated answers for component:", answers);
 
-        setPkgData((prev) => ({
-          ...prev,
-          answers,
-        }));
-      }
+      setPkgData((prev) => ({
+        ...prev,
+        answers,
+      }));
     }
-  }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
+  }, [pkgData.sections, location.state?.responses, setPkgData]);
 
   useEffect(() => {
     // Ensure both pkgData.sections and location.state.responses are available
@@ -627,21 +555,6 @@ const PkgDataForm = () => {
           questionMap.set(q.question_id, { ...q, children: [] });
         }
       });
-
-      // questions.forEach((q) => {
-      //   if (q.dependent_question) {
-      //     const parentQuestion = questionMap.get(q.dependent_question); //verify if parentQuestion exists before trying to access its children property
-      //     if (parentQuestion) {
-      //       parentQuestion.children.push(q);
-      //     } else {
-      //       //warning if the parent question is missing
-      //       console.warn(
-      //         `Parent question with ID ${q.dependent_question} not found for question ${q.question_id}.`,
-      //       );
-      //     }
-      //   }
-      // });
-
       // Add child questions to their respective parents
       questions.forEach((q) => {
         if (q.dependent_question) {
@@ -684,9 +597,12 @@ const PkgDataForm = () => {
     };
 
     fetchData();
-  }, [pkgData.answers, setPkgData]);
+  }, []);
 
-  const handleBackClick = () => navigate("/skus");
+  const handleBackClick = async () => {
+    // await handleSave(false); // Call save function with false flag to skip alert
+    navigate("/skus"); // Navigate back after saving
+  };
 
   const handleInputChange = (questionId, value) => {
     setPkgData((prev) => {
@@ -1198,10 +1114,10 @@ const PkgDataForm = () => {
       );
     });
   };
-  const handleSave = async () => {
+  const handleSave = async (showAlert = true) => {
     if (!skuId || !skuData.componentId || !skuData.componentName || !pkoId) {
       console.error("Missing SKU ID, Component ID, Component Name, or PKO ID.");
-      alert("Cannot save data. Missing necessary information.");
+      if (showAlert) alert("Cannot save data. Missing necessary information.");
       return;
     }
 
@@ -1209,7 +1125,7 @@ const PkgDataForm = () => {
       const isCompleted = pkgData.pkgFormProgress === 100;
       const payload = {
         name: skuData.componentName,
-        form_status: isCompleted ? "Completed" : "Pending", // ✅ Set "Completed" if 100%
+        form_status: isCompleted ? "Completed" : "Pending", // Set "Completed" if 100%
         pko_id: pkoId,
         sku_id: skuId,
         component_progress: Math.round(progressPercentage),
@@ -1262,7 +1178,7 @@ const PkgDataForm = () => {
 
       if (response.status === 200) {
         console.log("Save Response:", response.data);
-        alert("Component data saved successfully!");
+        if (showAlert) alert("Component data saved successfully!");
 
         // Update state for form_status dynamically
         setSkuData((prev) => ({
@@ -1275,11 +1191,13 @@ const PkgDataForm = () => {
         }));
       } else {
         console.warn("Unexpected response status:", response.status);
-        alert("Failed to save component data. Please try again.");
+        if (showAlert)
+          alert("Failed to save component data. Please try again.");
       }
     } catch (error) {
       console.error("Error saving component data:", error);
-      alert("An error occurred while saving the component data.");
+      if (showAlert)
+        alert("An error occurred while saving the component data.");
     }
   };
 

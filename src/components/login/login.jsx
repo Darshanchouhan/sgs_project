@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import styles from "./login.module.css";
 
 const Login = ({
@@ -8,14 +9,40 @@ const Login = ({
   error,
   loading,
 }) => {
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [isLinkSent, setIsLinkSent] = useState(false); // State to track if the link is sent
+
+  const toggleForgotPassword = () => {
+    setShowForgotPassword((prev) => !prev);
+    setIsLinkSent(false); // Reset the success message if toggling back to login form
+  };
+
+  const handleSendLink = () => {
+    // Here you can call your API to send the reset link
+    setIsLinkSent(true); // Set the link sent status to true
+  };
+
+  const emailInputClass = error ? styles["error-border"] : "border-opacity-70";
+  const passwordInputClass = error
+    ? styles["error-border"]
+    : "border-opacity-70";
+
   return (
-    <div className="container-fluid p-40 h-100">
+    <div className="container-fluid p-40 vh-100">
+      {loading && (
+        <div
+          className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center`}
+        >
+          <img src="/assets/images/loader.svg" alt="Loading..." />
+        </div>
+      )}
+
       <div className="row h-100">
         <div className="col-12 col-md-7 px-0">
           <div
-            className={`${styles.loginBg} ${"rounded-start-3 position-relative"}`}
+            className={`${styles.loginBg} rounded-start-3 position-relative`}
           >
-            <div className={`${styles.loginFloatSection} ${"px-70 py-30"}`}>
+            <div className={`${styles.loginFloatSection} px-70 py-30 col-7`}>
               <p className="fs-48 text-white mb-0 px-12 font-mulish fw-700">
                 AI for Sustainable <br /> Packaging Platform
               </p>
@@ -24,64 +51,159 @@ const Login = ({
         </div>
         <div className="col-12 col-md-5 px-0">
           <div className="d-flex flex-column align-items-center justify-content-center bg-color-light-gray h-100 rounded-end-3 font-poppins py-40">
-            <div className="d-flex flex-column">
+            <div className="entire-login-block d-flex flex-column">
               <img
                 src="/assets/images/cvs-logo.svg"
                 className="cvs-logo-login pb-115"
                 alt="cvs-logo"
               />
-              <h4 className="fs-44 fw-500 text-secondary ls-4 mb-1">Login</h4>
-              <p className="fs-20 fw-300 font-poppins text-color-dark mb-40 opacity-70">
-                Welcome back !
-              </p>
-              {/* Login Form */}
-              <form onSubmit={handleSubmit} className="d-flex flex-column">
-                {/* Email input */}
-                <div className="d-flex flex-column mb-12">
-                  <label className="fs-14 ls-4 text-color-dark mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="h-40 text-color-dark rounded-2 border border-opacity-70 px-20 py-12 w-350"
-                    placeholder="vendors@asap.com"
-                    value={email}
-                    onChange={handleInputChange("email")}
-                    required
-                  />
-                </div>
+              {!showForgotPassword && (
+                <>
+                  <h4 className="fs-44 fw-500 text-secondary ls-4 mb-1">
+                    Login
+                  </h4>
+                  <p className="fs-20 fw-300 font-poppins text-color-dark mb-40 opacity-70">
+                    Welcome back!
+                  </p>
+                </>
+              )}
 
-                {/* Password input */}
-                <div className="d-flex flex-column mb-12">
-                  <label className="fs-14 ls-4 text-color-dark mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    className="h-40 text-color-dark rounded-2 border border-opacity-70 px-20 py-12 w-350"
-                    placeholder="Enter Password"
-                    value={password}
-                    onChange={handleInputChange("password")}
-                    required
-                  />
-                </div>
-
-                {/* Forgot password */}
-                <p className="fs-16 ls-4 text-color-dark opacity-80">
-                  forgot password?{" "}
-                  <a href="#" className="text-secondary opacity-100">
-                    reset it
-                  </a>
-                </p>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
+              {!showForgotPassword && error && (
+                <div
+                  className="d-flex align-items-center mb-40 fs-16"
+                  style={{ color: "#D42D1F" }}
                 >
-                  Login
-                </button>
-              </form>
+                  <img
+                    src="/assets/images/login-error-alert.svg"
+                    alt="Error"
+                    style={{ paddingRight: "8px" }}
+                  />
+                  <p className="mb-0">{error}</p>
+                </div>
+              )}
+
+              {!showForgotPassword ? (
+                <form onSubmit={handleSubmit} className="d-flex flex-column">
+                  <div className="d-flex flex-column mb-12">
+                    <label className="fs-14 ls-4 text-color-dark mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ${emailInputClass}`}
+                      placeholder="vendors@asap.com"
+                      value={email}
+                      onChange={handleInputChange("email")}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="d-flex flex-column mb-12">
+                    <label className="fs-14 ls-4 text-color-dark mb-2">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ${passwordInputClass}`}
+                      placeholder="Enter Password"
+                      value={password}
+                      onChange={handleInputChange("password")}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <p className="fs-16 ls-4 text-color-dark opacity-80 d-none">
+                    forgot password?{" "}
+                    <a
+                      href="#"
+                      className="text-secondary opacity-100"
+                      onClick={toggleForgotPassword}
+                    >
+                      reset it
+                    </a>
+                  </p>
+                  <button
+                    type="submit"
+                    className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <img src="/assets/images/loader.svg" alt="Loading..." />
+                    ) : (
+                      "Login"
+                    )}
+                  </button>
+                </form>
+              ) : (
+                <div className="d-flex flex-column">
+                  <h4 className="fs-44 fw-500 text-secondary ls-4 mb-1">
+                    Forgot Password?
+                  </h4>
+                  {!isLinkSent ? (
+                    <>
+                      <p className="fs-20 fw-300 font-poppins text-color-dark mb-40 opacity-70">
+                        We will be sending Reset Password link to the registered
+                        email
+                      </p>
+
+                      <form className="d-flex flex-column">
+                        <div className="d-flex flex-column mb-12">
+                          <label className="fs-14 ls-4 text-color-dark mb-2">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            className="h-40 text-color-dark rounded-2 px-20 py-12 w-350"
+                            placeholder="vendors@asap.com"
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
+                          onClick={handleSendLink}
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <img
+                              src="/assets/images/loader.svg"
+                              alt="Loading..."
+                            />
+                          ) : (
+                            "Send Link"
+                          )}
+                        </button>
+                      </form>
+
+                      <p className="fs-16 ls-4 text-color-dark opacity-80 my-4">
+                        Remember password?{" "}
+                        <a
+                          href="#"
+                          className="text-secondary opacity-100"
+                          onClick={toggleForgotPassword}
+                        >
+                          Login
+                        </a>
+                      </p>
+                    </>
+                  ) : (
+                    <div className="text-start">
+                      <p className="fs-20 text-success mb-5">
+                        Link sent successfully! Please check your email and
+                        click the link to reset your password.
+                      </p>
+                      <button
+                        className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
+                        onClick={toggleForgotPassword}
+                      >
+                        Back to Login
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -13,10 +13,10 @@ export const fetchLoginTokens = async (username, password) => {
     localStorage.setItem("authToken", response.data.access); // Access token
     localStorage.setItem("refereshToken", response.data.token); // Refresh token
 
-    return response.data; // Return both tokens
+    return response; // Return both tokens
   } catch (error) {
-    console.error("Login failed:", error.response?.data || error);
-    throw error;
+    // console.error("Login failed:", error.response?.data || error);
+    throw new Error(error);
   }
 };
 
