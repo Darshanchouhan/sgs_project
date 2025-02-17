@@ -37,17 +37,18 @@ const LoginPage = () => {
 
     try {
       // Call the loginUser function from the useAuthentication hook
-      await loginUser(email, password);
-      setLoading(false);
+      const response = await loginUser(email, password);
 
-      // Fetch user profile after login
-      await fetchUserProfile(); // Fetch user profile after successful login
+      // If login is successful, proceed to fetch user profile and navigate
+      if (response && response.status == 200) {
+        // Fetch user profile after successful login
+        await fetchUserProfile(); // Fetch user profile
 
-      // Redirect or handle success, like showing a dashboard page, etc.
-      navigate("/vendordashboard");
-    } catch (err) {
-      setError("Invalid username or password");
-      console.error("Authentication error:", err);
+        // Redirect or handle success
+        navigate("/vendordashboard");
+      }
+    } catch (error) {
+      setError("Email / Password is incorrect");
     } finally {
       setLoading(false); // Hide loading indicator
     }

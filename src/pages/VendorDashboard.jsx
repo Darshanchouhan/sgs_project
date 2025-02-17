@@ -124,14 +124,27 @@ const VendorDashboard = () => {
     }
   };
 
-  //handle forward click
   // Handle forward click for SKU
   const handleForwardClick = async (sku) => {
     try {
-      console.log("Sending PUT request with:", {
-        pko_id: selectedPkoId,
-        status: "Draft",
-      });
+      const currentStatus =
+        skuStatuses[sku.sku_id] || sku.status || "Not Started";
+
+      if (currentStatus === "Completed") {
+        console.log("SKU is already completed. No status change needed.");
+        // Navigate directly to the SKU page without changing status
+        navigate("/skus", {
+          state: {
+            skuId: sku.sku_id,
+            skuDetails: sku,
+            pkoData: pkoData || null,
+            duedate: pkoData?.duedate || null,
+          },
+        });
+        return;
+      }
+
+      console.log("Sending PUT request with status: Draft");
 
       const response = await axiosInstance.put(
         `/skus/${sku.sku_id}/update_status/`,
@@ -153,7 +166,6 @@ const VendorDashboard = () => {
           return { ...prevPkoData, skus: updatedSkus };
         });
 
-        // Navigate to SKU Page with necessary state
         navigate("/skus", {
           state: {
             skuId: sku.sku_id,
@@ -175,11 +187,64 @@ const VendorDashboard = () => {
     }
   };
 
+  // const handleForwardClick = async (sku) => {
+  //   try {
+  //     console.log("Sending PUT request with:", {
+  //       pko_id: selectedPkoId,
+  //       status: "Draft",
+  //     });
+
+  //     const response = await axiosInstance.put(
+  //       `/skus/${sku.sku_id}/update_status/`,
+  //       {
+  //         pko_id: selectedPkoId,
+  //         status: "Draft",
+  //       },
+  //     );
+
+  //     if (response.status === 200) {
+  //       console.log("SKU status updated successfully:", response.data);
+
+  //       updateSkuStatus(sku.sku_id, "Draft");
+
+  //       setPkoData((prevPkoData) => {
+  //         const updatedSkus = prevPkoData.skus.map((item) =>
+  //           item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item,
+  //         );
+  //         return { ...prevPkoData, skus: updatedSkus };
+  //       });
+
+  //       // Navigate to SKU Page with necessary state
+  //       navigate("/skus", {
+  //         state: {
+  //           skuId: sku.sku_id,
+  //           skuDetails: sku,
+  //           pkoData: pkoData || null,
+  //           duedate: pkoData?.duedate || null,
+  //         },
+  //       });
+  //     } else {
+  //       console.warn(
+  //         "Failed to update SKU status. Status code:",
+  //         response.status,
+  //       );
+  //       alert("Failed to update SKU status. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during forward action for SKU:", error);
+  //     alert(`Failed to update SKU status: ${error.message}`);
+  //   }
+  // };
+
   console.log("Navigating with PKO Data:", pkoData);
 
   //loading state
   if (loading) {
-    return <div className="text-center py-5">Loading...</div>;
+    return (
+      <div className="loaderOverlay d-flex align-items-center justify-content-center">
+        <img src="/assets/images/loader.svg" alt="Loading..." />
+      </div>
+    );
   }
   //no data state
   if (!vendorData) {
@@ -580,6 +645,10 @@ const VendorDashboard = () => {
                     const status =
                       skuStatuses[sku.sku_id] || sku.status || "Not Started";
                     return status === selectedSkuStatus;
+                  })
+                  .sort((a, b) => {
+                    // Optional: Sort by SKU ID or any other property to maintain a consistent order
+                    return a.sku_id.localeCompare(b.sku_id); // Sort by SKU ID (string comparison)
                   })
                   .map((sku) => {
                     const status =

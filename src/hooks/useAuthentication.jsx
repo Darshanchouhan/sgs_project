@@ -13,23 +13,24 @@ const useAuthentication = () => {
   // Function to login and store token
   const loginUser = async (username, password) => {
     try {
-      const tokens = await fetchLoginTokens(username, password);
+      const response = await fetchLoginTokens(username, password);
 
-      // Dispatch Redux action to update global authentication state
-      dispatch(
-        login({
-          token: tokens.access,
-          refershToken: tokens.token, // Assuming user data is returned
-        }),
-      );
+      if (response && response.status == 200) {
+        // Dispatch Redux action to update global authentication state
+        dispatch(
+          login({
+            token: response.data.access,
+            refershToken: response.data.token, // Assuming user data is returned
+          }),
+        );
 
-      // Set token in axios default headers for future requests
-      axios.defaults.headers["Authorization"] = `Bearer ${tokens.access}`;
-      return tokens; // Return the tokens
-    } catch (err) {
-      setError(err.message || "Invalid username or password");
-      console.error("Authentication error:", err.response);
-      throw new Error(err.message || "Invalid username or password");
+        // Set token in axios default headers for future requests
+        axios.defaults.headers["Authorization"] =
+          `Bearer ${response.data.access}`;
+      }
+      return response; // Return the tokens
+    } catch (error) {
+      throw new Error(error);
     }
   };
 
