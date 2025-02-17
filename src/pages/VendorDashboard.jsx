@@ -239,11 +239,7 @@ const VendorDashboard = () => {
 
   //loading state
   if (loading) {
-    return (
-      <div className="loaderOverlay d-flex align-items-center justify-content-center">
-        <img src="/assets/images/loader.svg" alt="Loading..." />
-      </div>
-    );
+    return <div className="text-center py-5">Loading...</div>;
   }
   //no data state
   if (!vendorData) {
@@ -612,7 +608,7 @@ const VendorDashboard = () => {
                 <th className="h-52 align-middle">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="fw-500">
               {pkoData?.skus && pkoData.skus.length > 0 ? (
                 pkoData.skus
                   .filter((sku) => {

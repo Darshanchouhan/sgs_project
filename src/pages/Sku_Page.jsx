@@ -87,13 +87,8 @@ const Sku_Page = () => {
 
         for (let component of components) {
           console.log("Fetching details for component:", component.id);
-
-          // const componentResponse = await axiosInstance.get(
-          //     `/sku/${skuId}/components/${component.id}?pko_id=${pkoId}`,
-          //     { headers: { "Content-Type": "application/json" } }
-          // );
-
           const componentResponse = component["responses"];
+
           // Apply validation rules from PkgDataForm
           const componentIssues = validateComponentResponses(
             component,
@@ -138,6 +133,15 @@ const Sku_Page = () => {
 
   const validateComponentResponses = (component, responses) => {
     let issues = [];
+    const componentTypeQuestion = Object.values(questionsComponent)
+      .flat()
+      .find((q) => q.question_text === "Component Type");
+
+    // const componentTypeQuestionId = componentTypeQuestion?.question_id;
+    const selectedComponentType =
+      responses[
+        `${componentTypeQuestion.question_text}||${componentTypeQuestion.question_id}`
+      ];
 
     questionsComponent.forEach((question) => {
       const response =
@@ -175,12 +179,14 @@ const Sku_Page = () => {
 
       // **Validate numerical ranges (if applicable)**
       const valueMatch = response?.match(/^(\d+(\.\d+)?)([a-zA-Z]+)?$/);
-      if (valueMatch) {
+      if (valueMatch && selectedComponentType) {
         const value = parseFloat(valueMatch[1]);
         const unit = valueMatch[3] || "";
 
         const validationRules = question.validation_dropdown?.find(
-          (rule) => rule.unit?.toLowerCase() === unit?.toLowerCase(),
+          (rule) =>
+            rule.name?.toLowerCase() === selectedComponentType?.toLowerCase() &&
+            rule.unit?.toLowerCase() === unit?.toLowerCase(),
         );
 
         if (validationRules) {
@@ -340,19 +346,6 @@ const Sku_Page = () => {
   const handleProductImageCountUpdate = (count) => {
     setProductImageCount(count);
   };
-
-  // const handleValidateAndSubmit = () => {
-  //   const issues = validateSkuData();
-
-  //   if (issues.length > 0) {
-  //     setValidationIssues(issues); // Store issues in state
-  //     setShowValidationModal(true); // Show modal
-  //   } else {
-  //     // Proceed with submission
-  //     proceedToSubmission(); // Function to submit SKU
-
-  //   }
-  // };
 
   const proceedToSubmission = async () => {
     try {
@@ -1545,19 +1538,6 @@ const Sku_Page = () => {
                               </span>
                             </td>
                             <td className="text-center align-middle">
-                              {/* <span>
-                                {0}{" "}
-                                <img
-                                  src="/assets/images/image-pic.png"
-                                  alt="Image"
-                                  style={{
-                                    width: "16px",
-                                    marginRight: "8px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={handleAddProductImageClick}
-                                />
-                              </span> */}
                               <img
                                 src="/assets/images/forward-arrow-img.png"
                                 alt="Forward"
