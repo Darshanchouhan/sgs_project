@@ -127,8 +127,7 @@ const VendorDashboard = () => {
   // Handle forward click for SKU
   const handleForwardClick = async (sku) => {
     try {
-      const currentStatus =
-        skuStatuses[sku.sku_id] || sku.status || "Not Started";
+      const currentStatus = sku.status || "Not Started";
 
       if (currentStatus === "Completed") {
         console.log("SKU is already completed. No status change needed.");
@@ -499,24 +498,12 @@ const VendorDashboard = () => {
                       <Pko_Chart
                         labels={["Not Started", "Draft", "Completed"]}
                         data={[
-                          skuData.filter(
-                            (sku) =>
-                              skuStatuses[sku.sku_id] === "Not Started" ||
-                              (!skuStatuses[sku.sku_id] &&
-                                sku.status === "Not Started"),
-                          ).length,
-                          skuData.filter(
-                            (sku) =>
-                              skuStatuses[sku.sku_id] === "Draft" ||
-                              (!skuStatuses[sku.sku_id] &&
-                                sku.status === "Draft"),
-                          ).length,
-                          skuData.filter(
-                            (sku) =>
-                              skuStatuses[sku.sku_id] === "Completed" ||
-                              (!skuStatuses[sku.sku_id] &&
-                                sku.status === "Completed"),
-                          ).length,
+                          skuData.filter((sku) => sku.status === "Not Started")
+                            .length,
+                          skuData.filter((sku) => sku.status === "Draft")
+                            .length,
+                          skuData.filter((sku) => sku.status === "Completed")
+                            .length,
                         ]}
                       />
                     </div>
@@ -535,10 +522,7 @@ const VendorDashboard = () => {
                         <span className="fs-12 fw-700">
                           {
                             skuData.filter(
-                              (sku) =>
-                                skuStatuses[sku.sku_id] === "Not Started" ||
-                                (!skuStatuses[sku.sku_id] &&
-                                  sku.status === "Not Started"),
+                              (sku) => sku.status === "Not Started",
                             ).length
                           }
                         </span>
@@ -553,12 +537,8 @@ const VendorDashboard = () => {
                         {/* Dynamically display the count of "Draft" SKUs */}
                         <span className="fs-12 fw-700">
                           {
-                            skuData.filter(
-                              (sku) =>
-                                skuStatuses[sku.sku_id] === "Draft" ||
-                                (!skuStatuses[sku.sku_id] &&
-                                  sku.status === "Draft"),
-                            ).length
+                            skuData.filter((sku) => sku.status === "Draft")
+                              .length
                           }
                         </span>
                       </li>
@@ -572,12 +552,8 @@ const VendorDashboard = () => {
                         {/* Dynamically display the count of "Completed" SKUs */}
                         <span className="fs-12 fw-700">
                           {
-                            skuData.filter(
-                              (sku) =>
-                                skuStatuses[sku.sku_id] === "Completed" ||
-                                (!skuStatuses[sku.sku_id] &&
-                                  sku.status === "Completed"),
-                            ).length
+                            skuData.filter((sku) => sku.status === "Completed")
+                              .length
                           }
                         </span>
                       </li>
@@ -642,8 +618,7 @@ const VendorDashboard = () => {
                   .filter((sku) => {
                     // Filter based on selectedSkuStatus
                     if (selectedSkuStatus === "All") return true;
-                    const status =
-                      skuStatuses[sku.sku_id] || sku.status || "Not Started";
+                    const status = sku.status || "Not Started";
                     return status === selectedSkuStatus;
                   })
                   .sort((a, b) => {
@@ -651,8 +626,7 @@ const VendorDashboard = () => {
                     return a.sku_id.localeCompare(b.sku_id); // Sort by SKU ID (string comparison)
                   })
                   .map((sku) => {
-                    const status =
-                      skuStatuses[sku.sku_id] || sku.status || "Not Started"; // Fetch updated status
+                    const status = sku.status || "Not Started"; // Fetch updated status
                     return (
                       <tr key={sku.sku_id}>
                         <td className="align-middle">{sku.sku_id}</td>

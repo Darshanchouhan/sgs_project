@@ -22,19 +22,19 @@ const Header = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-primary py-3">
+    <nav className="navbar navbar-expand-lg navbar-light bg-primary py-10">
       <div className="container-fluid px-5">
         {/* Logo and Heading on the left side */}
         <Link
           to="/vendordashboard"
-          className="text-decoration-none text-white fs-18"
+          className="text-decoration-none text-uppercase text-white fs-18 ls-4"
         >
           <img
-            src="/assets/images/home-icon.svg"
+            src="/assets/images/cvs-logo.svg"
             alt="Logo"
-            style={{ height: "40px", marginRight: "10px" }}
+            style={{ height: "28px", marginRight: "24px", paddingRight: "24px", borderRight: "1px solid #c2c2c2" }}
           />
-          AI for Sustainable Packaging
+          Smart Packaging Data
         </Link>
 
         {/* Navbar toggler for mobile */}

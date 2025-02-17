@@ -28,7 +28,7 @@ const Sku_Page = () => {
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
   const [questionsComponent, setQuestionsComponent] = useState([]); // Store questions from API
-  const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
+  // const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
   const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
   const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
@@ -36,8 +36,8 @@ const Sku_Page = () => {
   const [imagesFromDB, setImagesFromDB] = useState([]); // Images fetched from database
   const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
   const [loadingImages, setLoadingImages] = useState(false);
-  const [dimensionUnit, setDimensionUnit] = useState("Unit"); // Default unit for dimensions
-  const [weightUnit, setWeightUnit] = useState("Unit"); // Default unit for weights
+  // const [dimensionUnit, setDimensionUnit] = useState("Unit"); // Default unit for dimensions
+  // const [weightUnit, setWeightUnit] = useState("Unit"); // Default unit for weights
   const [mandatoryProgress, setMandatoryProgress] = useState(0);
   const [componentProgressAverage, setComponentProgressAverage] = useState(0); // Average progress
   const [isOverlayVisible, setOverlayVisible] = useState(false);
@@ -48,7 +48,6 @@ const Sku_Page = () => {
     [],
   );
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [isBackClick, setIsBackClick] = useState(false);
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
   };
@@ -358,7 +357,7 @@ const Sku_Page = () => {
   const proceedToSubmission = async () => {
     try {
       setHasSubmitted(true); // Set submission flag
-      await saveSkuData(false); // Call save function first
+      await saveSkuData(false, false); // Call save function first
       // Update SKU Status in Database**
       await axiosInstance.put(`/skus/${skuId}/update_status/`, {
         pko_id: pkoId,
@@ -658,7 +657,11 @@ const Sku_Page = () => {
   }, [skuId, pkoId]);
 
   //Save the Response
-  const saveSkuData = async (isDraft = true, showAlert = true) => {
+  const saveSkuData = async (
+    isDraft = true,
+    showAlert = true,
+    isBackClick = false,
+  ) => {
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
       return;
@@ -672,8 +675,7 @@ const Sku_Page = () => {
         parseFloat((componentProgressAverage * 90).toFixed(2))) /
         100,
     );
-
-    setIsSubmitting(true);
+    // setIsSubmitting(true);
     try {
       const payload = {
         pko_id: pkoId,
@@ -688,27 +690,19 @@ const Sku_Page = () => {
           responses: comp.responses || {},
         })),
         sku_progress: combinedProgress,
-        status: isDraft ? "Draft" : "Completed", // Include status in payload
+        // status: isDraft ? "Draft" : "Completed", // Include status in payload
       };
-
+      payload["status"] = isBackClick
+        ? combinedProgress != 100
+          ? "Draft"
+          : "Completed"
+        : isDraft
+          ? "Draft"
+          : "Completed";
       questions.forEach((question) => {
         const answer = skuData.dimensionsAndWeights[question.question_id];
-        let unit = "";
-        // Explicitly check for related units
-        if (/height|width|depth/i.test(question.question_text)) {
-          unit =
-            skuData.dimensionsAndWeights["height_unit"] ||
-            skuData.dimensionsAndWeights["width_unit"] ||
-            skuData.dimensionsAndWeights["depth_unit"];
-        } else if (/weight/i.test(question.question_text)) {
-          unit =
-            skuData.dimensionsAndWeights["netWeight_unit"] ||
-            skuData.dimensionsAndWeights["tareWeight_unit"] ||
-            skuData.dimensionsAndWeights["grossWeight_unit"];
-        } else {
-          unit =
-            skuData.dimensionsAndWeights[`${question.question_id}_unit`] || "";
-        }
+        let unit =
+          skuData.dimensionsAndWeights[`${question.question_id}_unit`] || "";
 
         if (answer !== undefined && answer !== "") {
           payload.primary_packaging_details[
@@ -732,8 +726,6 @@ const Sku_Page = () => {
     } catch (error) {
       console.error("Error saving SKU data:", error);
       alert("Failed to save SKU data. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -743,7 +735,7 @@ const Sku_Page = () => {
       // Skip autosave if the form has been submitted
       return;
     }
-    await saveSkuData(true);
+    await saveSkuData(true, false);
   };
 
   const handleInputChange = (field, value) => {
@@ -758,7 +750,7 @@ const Sku_Page = () => {
 
   // Define the back action
   const handleBackClick = async () => {
-    // await saveSkuData(true, false);
+    await saveSkuData(false, false, true);
     navigate("/vendordashboard"); // Navigate to Vendor Dashboard
   };
 
@@ -1078,7 +1070,7 @@ const Sku_Page = () => {
 
                   if (isDimension) {
                     synchronizeUnits(newUnit, "dimension"); // Synchronize dimension units
-                    setDimensionUnit(newUnit); // Update dimension unit
+                    // setDimensionUnit(newUnit); // Update dimension unit
                     // Update all dimension-related questions
                     setSkuData((prev) => ({
                       ...prev,
@@ -1091,7 +1083,7 @@ const Sku_Page = () => {
                     }));
                   } else if (isWeight) {
                     synchronizeUnits(newUnit, "weight"); // Synchronize weight units
-                    setWeightUnit(newUnit); // Update weight unit
+                    // setWeightUnit(newUnit); // Update weight unit
                     // Update all weight-related questions
                     setSkuData((prev) => ({
                       ...prev,
