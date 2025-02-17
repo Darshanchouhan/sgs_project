@@ -204,9 +204,9 @@ $column-gaps: (
 @font-face {
   font-family: "Britanica";
   src:
-    url("assets/fonts/britanica/britanicavariable-webfont.woff2")
+    url("/assets/fonts/britanica/britanicavariable-webfont.woff2")
       format("woff2"),
-    url("assets/fonts/britanica/britanicavariable-webfont.woff") format("woff");
+    url("/assets/fonts/britanica/britanicavariable-webfont.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
