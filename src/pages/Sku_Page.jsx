@@ -264,8 +264,15 @@ const Sku_Page = () => {
         return;
       }
 
+      const noImagesAttached = !imagesFromDB || imagesFromDB.length === 0;
+      console.log("No images attached?", noImagesAttached);
+
       // If there are validation issues, show the validation modal
-      if (skuIssues.length > 0 || componentIssues.length > 0) {
+      if (
+        skuIssues.length > 0 ||
+        componentIssues.length > 0 ||
+        noImagesAttached
+      ) {
         setShowValidationModal(true);
         console.log("Showing validation modal");
       } else {

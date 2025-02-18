@@ -11,21 +11,28 @@ const SkuValidation = ({
 }) => {
   const [isProceedEnabled, setIsProceedEnabled] = useState(false);
   const [additionalMessage, setAdditionalMessage] = useState("");
-  const noImagesAttached = imagesFromDB.length === 0; // Check if no images are attached
+  const noImagesAttached = !imagesFromDB || imagesFromDB.length === 0;
 
   useEffect(() => {
+    console.log("Validation Check: Images from DB:", imagesFromDB);
+
     if (
       validationIssues.length === 0 &&
       componentValidationIssues.length === 0 &&
-      imagesFromDB.length > 0
+      !noImagesAttached // ✅ Explicitly check if no images are attached
     ) {
       setAdditionalMessage("No issues found. You may proceed to submission!");
-      setIsProceedEnabled(true); // Enable button when no issues are found
+      setIsProceedEnabled(true);
     } else {
       setAdditionalMessage("");
-      setIsProceedEnabled(false); // Disable button when issues exist
+      setIsProceedEnabled(false);
     }
-  }, [validationIssues, componentValidationIssues, noImagesAttached]);
+  }, [
+    validationIssues,
+    componentValidationIssues,
+    imagesFromDB,
+    noImagesAttached,
+  ]);
 
   if (!show) return null; // Hide modal when not active
 
@@ -35,9 +42,12 @@ const SkuValidation = ({
         <div className="modal-content">
           <div className="modal-header flex-column align-items-center border-0 px-40">
             <h1 className="modal-title fs-22 fw-600 text-color-black mb-1">
-              {validationIssues.length + componentValidationIssues.length}{" "}
+              {validationIssues.length +
+                componentValidationIssues.length +
+                (noImagesAttached ? 1 : 0)}{" "}
               issue(s) found
             </h1>
+
             <p className="fs-14 fw-400 text-color-labels mb-0">
               Please resolve the following issues before submission.
             </p>
@@ -77,13 +87,14 @@ const SkuValidation = ({
                     </tr>
                   ))}
                 {/* New Validation Issue: No Image Uploaded */}
-                {noImagesAttached && (
+                {(validationIssues.length > 0 || noImagesAttached) && (
                   <tr>
                     <td className="p-12">Add/View Image</td>
                     <td className="p-12">N/A</td>
                     <td className="p-12">No image uploaded on SKU Page.</td>
                   </tr>
                 )}
+
                 {/* Success Message: No Issues Left */}
                 {additionalMessage && (
                   <tr>
