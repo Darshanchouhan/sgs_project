@@ -88,7 +88,7 @@
 }
 
 .fs-14 {
-  font-size: 0.875rem;
+  font-size: 0.875rem !important;
 }
 
 .fs-15 {
@@ -169,6 +169,18 @@
 
 .lh-8 {
   line-height: 0.5rem;
+}
+
+.lh-14 {
+  line-height: 0.875rem !important;
+}
+
+.lh-16 {
+  line-height: 1rem !important;
+}
+
+.lh-25 {
+  line-height: 2.5rem !important;
 }
 
 .ls-2 {
@@ -22795,6 +22807,26 @@ input[type="radio"] {
 }
 .form-section input::placeholder {
   font-size: 13px;
+}
+.modal-overlay .modal-dialog {
+  max-width: 30%;
+}
+.modal-overlay .modal-footer img {
+  max-height: 180px;
+}
+.modal-overlay .modal-footer {
+  background-image: url("/assets/images/dot-pattern-image.svg");
+  background-size: contain;
+  min-height: 250px;
+}
+.modal-overlay .modal-footer button img {
+  height: 16px;
+}
+.modal-overlay .btn-close {
+  background-image: url("/assets/images/close-icon-red.svg");
+}
+.modal-overlay .backButton img {
+  transform: rotate(180deg);
 }
 /* Custom css end (Azahar) */
 
