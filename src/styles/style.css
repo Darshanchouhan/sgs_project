@@ -239,7 +239,7 @@
   --bs-gray-800: #343a40;
   --bs-gray-900: #212529;
   --bs-primary: #d43014;
-  --bs-secondary: #cb122d;
+  --bs-secondary: #d42d1f;
   --bs-color-light-shade: #fff3f2;
   --bs-color-typo-primary: #2d2d2d;
   --bs-color-typo-secondary: #ababab;
@@ -250,8 +250,8 @@
   --bs-color-desabled-lite: #e0e0e0;
   --bs-color-labels: #676767;
   --bs-color-light-border: #ededed;
-  --bs-primary-rgb: 203, 18, 45;
-  --bs-secondary-rgb: 203, 18, 45;
+  --bs-primary-rgb: 212, 48, 20;
+  --bs-secondary-rgb: 212, 45, 31;
   --bs-color-light-shade-rgb: 255, 243, 242;
   --bs-color-typo-primary-rgb: 45, 45, 45;
   --bs-color-typo-secondary-rgb: 171, 171, 171;
@@ -22177,8 +22177,8 @@ fieldset:disabled .btn {
   }
 }
 body {
-  font-family: "Britanica", sans-serif;
-  font-weight: 600;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
 }
 
 .font-poppins {
@@ -22244,7 +22244,7 @@ input:focus {
 }
 
 .cvs-logo-login {
-  max-width: 45%;
+  max-width: 72%;
 }
 
 .gap-70 {

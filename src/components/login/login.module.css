@@ -1,16 +1,10 @@
 .loginBg {
-  background-image: url(/assets/images/login-bg-new.png);
+  background-image: url(/assets/images/login-bg.png);
   height: 100%;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
-  -webkit-background-size: 100% 100%;
-  -moz-background-size: 100% 100%;
-}
-
-.loginBg h4 {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
 }
 
 .loginFloatSection {

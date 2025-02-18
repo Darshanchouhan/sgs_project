@@ -28,7 +28,7 @@ const Login = ({
     : "border-opacity-70";
 
   return (
-    <div className="container-fluid h-100">
+    <div className="container-fluid p-40 vh-100">
       {/* {loading && (
         <div
           className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center`}
@@ -37,27 +37,34 @@ const Login = ({
         </div>
       )} */}
 
-      <div className="row vh-100">
+      <div className="row h-100">
         <div className="col-12 col-md-7 px-0">
-          <div className={`${styles.loginBg} position-relative`}>
-            <h4 className="fs-36 fw-600 text-white mb-0">
-              Smart Data
-              <br /> for Packaging
-              <br /> Compliance.
-            </h4>
+          <div
+            className={`${styles.loginBg} rounded-start-3 position-relative`}
+          >
+            <div className={`${styles.loginFloatSection} px-70 py-30 col-7`}>
+              <p className="fs-48 text-white mb-0 px-12 font-mulish fw-700">
+                AI for Sustainable <br /> Packaging Platform
+              </p>
+            </div>
           </div>
         </div>
         <div className="col-12 col-md-5 px-0">
-          <div className="d-flex flex-column align-items-center justify-content-center bg-color-light-gray h-100 py-40">
+          <div className="d-flex flex-column align-items-center justify-content-center bg-color-light-gray h-100 rounded-end-3 font-poppins py-40">
             <div className="entire-login-block d-flex flex-column">
               <img
-                src="/assets/images/cvs-logo-login.svg"
+                src="/assets/images/cvs-logo.svg"
                 className="cvs-logo-login pb-115"
-                alt="cvs-logo-login"
+                alt="cvs-logo"
               />
               {!showForgotPassword && (
                 <>
-                  <h4 className="fs-44 fw-600 text-secondary mb-3">Sign In</h4>
+                  <h4 className="fs-44 fw-500 text-secondary ls-4 mb-1">
+                    Login
+                  </h4>
+                  <p className="fs-20 fw-300 font-poppins text-color-dark mb-40 opacity-70">
+                    Welcome back!
+                  </p>
                 </>
               )}
 
@@ -106,18 +113,18 @@ const Login = ({
                     />
                   </div>
                   <p className="fs-16 ls-4 text-color-dark opacity-80 d-none">
-                    Forgot password?{" "}
+                    forgot password?{" "}
                     <a
                       href="#"
                       className="text-secondary opacity-100"
                       onClick={toggleForgotPassword}
                     >
-                      Reset it
+                      reset it
                     </a>
                   </p>
                   <button
                     type="submit"
-                    className="fw-600 rounded-1 bg-secondary fs-18 py-2 w-350 border-0 shadow-none text-center text-white text-uppercase ls-20"
+                    className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
                   >
                     Login
                     {/* {loading ? (
