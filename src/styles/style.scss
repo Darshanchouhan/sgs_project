@@ -152,7 +152,10 @@ $weights: (
 
 $line-heights: (
   8: 0.5rem,
+  14: 0.875rem,
+  16: 1rem,
   19: 1.188rem,
+  25: 2.5rem,
 );
 
 @each $element, $line-height in $line-heights {
