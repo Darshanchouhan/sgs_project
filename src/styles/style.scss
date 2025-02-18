@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-$font-primary: "Open Sans", sans-serif;
+$font-primary: "Britanica", sans-serif;
 $primary: #d43014;
-$secondary: #d42d1f;
+$secondary: #cb122d;
 $light-shade: #fff3f2;
 $breadcrumb-divider: url("/assets/images/breadcrumb-devider.svg");
 
@@ -121,6 +121,7 @@ $sizes: (
   23: 1.438rem,
   24: 1.5rem,
   32: 2rem,
+  36: 2.25rem,
   44: 2.75rem,
   48: 3rem,
 );
@@ -164,6 +165,7 @@ $line-heights: (
 $letter-spacings: (
   2: 0.25px,
   4: 0.4px,
+  20: 2px,
 );
 
 @each $element, $letter-spacing in $letter-spacings {
@@ -198,9 +200,20 @@ $column-gaps: (
   }
 }
 
+// Fonts
+@font-face {
+  font-family: "Britanica";
+  src:
+    url("/assets/fonts/britanica/britanicavariable-webfont.woff2")
+      format("woff2"),
+    url("/assets/fonts/britanica/britanicavariable-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   font-family: $font-primary; // This now uses the updated font from the variable
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .font-poppins {
