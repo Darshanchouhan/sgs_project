@@ -28,7 +28,7 @@ const Login = ({
     : "border-opacity-70";
 
   return (
-    <div className="container-fluid h-100">
+    <div className="container-fluid h-100 font-britanica">
       {/* {loading && (
         <div
           className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center`}
@@ -78,12 +78,12 @@ const Login = ({
               {!showForgotPassword ? (
                 <form onSubmit={handleSubmit} className="d-flex flex-column">
                   <div className="d-flex flex-column mb-12">
-                    <label className="fs-14 ls-4 text-color-dark mb-2">
+                    <label className="fs-18 text-color-dark mb-2 fw-600">
                       Email
                     </label>
                     <input
                       type="email"
-                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ${emailInputClass}`}
+                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${emailInputClass}`}
                       placeholder="vendors@asap.com"
                       value={email}
                       onChange={handleInputChange("email")}
@@ -92,12 +92,12 @@ const Login = ({
                     />
                   </div>
                   <div className="d-flex flex-column mb-12">
-                    <label className="fs-14 ls-4 text-color-dark mb-2">
+                    <label className="fs-18 text-color-dark mb-2 fw-600">
                       Password
                     </label>
                     <input
                       type="password"
-                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ${passwordInputClass}`}
+                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${passwordInputClass}`}
                       placeholder="Enter Password"
                       value={password}
                       onChange={handleInputChange("password")}

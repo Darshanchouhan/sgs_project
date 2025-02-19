@@ -608,7 +608,7 @@ const VendorDashboard = () => {
                 <th className="h-52 align-middle">Actions</th>
               </tr>
             </thead>
-            <tbody className="fw-500">
+            <tbody>
               {pkoData?.skus && pkoData.skus.length > 0 ? (
                 pkoData.skus
                   .filter((sku) => {

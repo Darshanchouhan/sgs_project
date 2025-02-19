@@ -191,6 +191,10 @@
   letter-spacing: 0.4px;
 }
 
+.ls-10 {
+  letter-spacing: 1px;
+}
+
 .gap-8 {
   -moz-column-gap: 0.5rem;
   column-gap: 0.5rem;
@@ -22189,8 +22193,8 @@ fieldset:disabled .btn {
   }
 }
 body {
-  font-family: "Britanica", sans-serif;
-  font-weight: 600;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
 }
 
 .font-poppins {
@@ -22199,6 +22203,11 @@ body {
 
 .font-mulish {
   font-family: "Mulish", sans-serif;
+}
+
+.font-britanica {
+  font-family: "Britanica", sans-serif;
+  letter-spacing: 1px;
 }
 
 input:focus {
@@ -22827,6 +22836,25 @@ input[type="radio"] {
 }
 .modal-overlay .backButton img {
   transform: rotate(180deg);
+}
+.myScroller::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+  height: 6px !important;
+}
+/* Track */
+.myScroller::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px #eeeeee;
+  border-radius: 2.5px;
+}
+/* Handle */
+.myScroller::-webkit-scrollbar-thumb {
+  background: #b3b1b1;
+  border-radius: 2.5px;
+}
+/* Handle on hover */
+.myScroller::-webkit-scrollbar-thumb:hover {
+  background: #1f252c;
 }
 /* Custom css end (Azahar) */
 

@@ -63,7 +63,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
 
   return (
     isVisible && (
-      <div className="modal-overlay">
+      <div className="modal-overlay font-britanica">
         <div className="modal-dialog modal-dialog-scrollable p-0 rounded-0">
           {/* Step 1 */}
           {currentStep === 0 && (
@@ -77,7 +77,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0">
+              <div className="modal-body text-center p-20 py-0 myScroller">
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
                   Welcome to the CVS Sustainable Packaging Platform
                 </h1>
@@ -117,7 +117,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0">
+              <div className="modal-body text-center p-20 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
                 </p>
@@ -171,7 +171,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0">
+              <div className="modal-body text-center p-20 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
                 </p>
@@ -225,7 +225,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0">
+              <div className="modal-body text-center p-20 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
                 </p>
@@ -279,7 +279,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0">
+              <div className="modal-body text-center p-20 py-0 myScroller">
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
                   What will CVS product vendors have to do?
                 </h1>
