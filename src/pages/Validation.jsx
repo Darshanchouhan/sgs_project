@@ -35,7 +35,7 @@ const ValidationModal = ({
               onClick={onBack}
             ></button> */}
           </div>
-          <div className="modal-body px-40 py-0">
+          <div className="modal-body px-40 py-0 myScroller">
             <table className="table table-bordered analysisTable fs-14 fw-400 text-color-typo-primary mb-0">
               <thead>
                 <tr>

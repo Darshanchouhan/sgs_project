@@ -56,7 +56,7 @@ const SkuValidation = ({
               Please resolve the following issues before submission.
             </p>
           </div>
-          <div className="modal-body px-40 py-0">
+          <div className="modal-body px-40 py-0 myScroller">
             <table className="table table-bordered analysisTable fs-14 fw-400 text-color-typo-primary mb-0">
               <thead>
                 <tr>
@@ -124,7 +124,7 @@ const SkuValidation = ({
             </button>
             <button
               type="button"
-              className="save-button btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
+              className="save-button btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
               onClick={isProceedEnabled}
               disabled={!isProceedEnabled} // Button is only enabled when no issues
             >

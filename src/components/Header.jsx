@@ -22,12 +22,12 @@ const Header = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-primary py-10">
+    <nav className="navbar navbar-expand-lg navbar-light bg-primary py-10 font-britanica">
       <div className="container-fluid px-5">
         {/* Logo and Heading on the left side */}
         <Link
           to="/vendordashboard"
-          className="text-decoration-none text-uppercase text-white fs-18 ls-4"
+          className="text-decoration-none text-uppercase text-white fs-18"
         >
           <img
             src="/assets/images/cvs-logo.svg"
