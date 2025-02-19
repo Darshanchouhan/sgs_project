@@ -424,13 +424,17 @@ const Sku_Page = () => {
         setImagesFromDB(response.data.images);
         console.log("Images fetched from DB:", response.data.images);
       } else {
-        // console.warn("No images found in the database for this SKU.");
+        console.warn("No images found in the database for this SKU.");
         setImagesFromDB([]);
       }
     } catch (error) {
       console.error("Error fetching images:", error);
     }
   };
+  // Ensure images are fetched when the SKU page is loaded
+  useEffect(() => {
+    refreshAddProductImage();
+  }, []); // Runs only once when the component mounts
 
   useEffect(() => {
     if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
