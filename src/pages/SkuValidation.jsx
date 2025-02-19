@@ -11,15 +11,16 @@ const SkuValidation = ({
 }) => {
   const [isProceedEnabled, setIsProceedEnabled] = useState(false);
   const [additionalMessage, setAdditionalMessage] = useState("");
-  const noImagesAttached = !imagesFromDB || imagesFromDB.length === 0;
+  const noImagesAttached = imagesFromDB.length === 0;
 
   useEffect(() => {
     console.log("Validation Check: Images from DB:", imagesFromDB);
-
+  
+    // Only disable proceed button if images are missing
     if (
       validationIssues.length === 0 &&
       componentValidationIssues.length === 0 &&
-      !noImagesAttached // ✅ Explicitly check if no images are attached
+      imagesFromDB.length > 0 //  Correctly check if images exist
     ) {
       setAdditionalMessage("No issues found. You may proceed to submission!");
       setIsProceedEnabled(true);
@@ -27,13 +28,16 @@ const SkuValidation = ({
       setAdditionalMessage("");
       setIsProceedEnabled(false);
     }
-  }, [
-    validationIssues,
-    componentValidationIssues,
-    imagesFromDB,
-    noImagesAttached,
-  ]);
-
+  }, [validationIssues, componentValidationIssues, imagesFromDB]);
+  
+  useEffect(() => {
+    console.log("Checking images again on validation:", imagesFromDB);
+    if (imagesFromDB.length > 0) {
+      setAdditionalMessage("No issues found. You may proceed to submission!");
+      setIsProceedEnabled(true);
+    }
+  }, [imagesFromDB]); // Run validation only when images update
+  
   if (!show) return null; // Hide modal when not active
 
   return (
@@ -87,13 +91,14 @@ const SkuValidation = ({
                     </tr>
                   ))}
                 {/* New Validation Issue: No Image Uploaded */}
-                {(validationIssues.length > 0 || noImagesAttached) && (
-                  <tr>
-                    <td className="p-12">Add/View Image</td>
-                    <td className="p-12">N/A</td>
-                    <td className="p-12">No image uploaded on SKU Page.</td>
-                  </tr>
-                )}
+                {noImagesAttached && (
+  <tr>
+    <td className="p-12">Add/View Image</td>
+    <td className="p-12">N/A</td>
+    <td className="p-12">No image uploaded on SKU Page.</td>
+  </tr>
+)}
+
 
                 {/* Success Message: No Issues Left */}
                 {additionalMessage && (
