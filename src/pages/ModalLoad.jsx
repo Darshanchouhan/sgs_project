@@ -71,13 +71,13 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-header p-20 py-3">
                 <button
                   type="button"
-                  className="btn-close opacity-100"
+                  className="btn-close opacity-100 fs-20"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0 myScroller">
+              <div className="modal-body text-center px-55 py-0 myScroller">
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
                   Welcome to the CVS Sustainable Packaging Platform
                 </h1>
@@ -90,7 +90,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-footer align-items-end p-20">
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto"
+                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Learn More
@@ -111,13 +111,13 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-header p-20 py-3">
                 <button
                   type="button"
-                  className="btn-close opacity-100"
+                  className="btn-close opacity-100 fs-20"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0 myScroller">
+              <div className="modal-body text-center px-55 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
                 </p>
@@ -133,7 +133,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex"
+                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     <img
@@ -144,7 +144,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto"
+                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
@@ -165,13 +165,13 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-header p-20 py-3">
                 <button
                   type="button"
-                  className="btn-close opacity-100"
+                  className="btn-close opacity-100 fs-20"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0 myScroller">
+              <div className="modal-body text-center px-55 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
                 </p>
@@ -187,7 +187,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex"
+                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     <img
@@ -198,7 +198,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto"
+                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
@@ -219,13 +219,13 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-header p-20 py-3">
                 <button
                   type="button"
-                  className="btn-close opacity-100"
+                  className="btn-close opacity-100 fs-20"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0 myScroller">
+              <div className="modal-body text-center px-55 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
                 </p>
@@ -241,7 +241,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex"
+                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     <img
@@ -252,7 +252,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto"
+                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
@@ -273,13 +273,13 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-header p-20 py-3">
                 <button
                   type="button"
-                  className="btn-close opacity-100"
+                  className="btn-close opacity-100 fs-20"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center p-20 py-0 myScroller">
+              <div className="modal-body text-center px-55 py-0 myScroller">
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
                   What will CVS product vendors have to do?
                 </h1>
@@ -298,7 +298,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex"
+                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     <img
@@ -309,7 +309,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto"
+                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleStart}
                   >
                     Start

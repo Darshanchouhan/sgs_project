@@ -45,7 +45,7 @@ const SkuValidation = ({
       <div className="modal-dialog p-0 modal-dialog-scrollable">
         <div className="modal-content h-100">
           <div className="modal-header flex-column align-items-center border-0 px-40">
-            <h1 className="modal-title fs-22 fw-600 text-color-black mb-1">
+            <h1 className="modal-title fs-22 fw-600 text-color-typo-primary mb-1">
               {validationIssues.length +
                 componentValidationIssues.length +
                 (noImagesAttached ? 1 : 0)}{" "}

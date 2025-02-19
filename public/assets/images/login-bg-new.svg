@@ -240,13 +240,13 @@
 </g>
 <path d="M2500 0H0V1100H2500V0Z" fill="url(#paint0_linear_3527_32053)"/>
 <g style="mix-blend-mode:multiply">
-<rect x="117.258" y="-310" width="2249.71" height="2373.47" fill="url(#pattern0_3527_32053)"/>
+<rect x="306.051" y="-60" width="1874.76" height="1977.89" fill="url(#pattern0_3527_32053)"/>
 </g>
-<rect x="50" y="-309.343" width="2400" height="2399.37" fill="url(#pattern1_3527_32053)"/>
+<rect x="250" y="-59.4521" width="2000" height="1999.47" fill="url(#pattern1_3527_32053)"/>
 </g>
 <defs>
 <pattern id="pattern0_3527_32053" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlink:href="#image0_3527_32053" transform="matrix(0.000808438 0 0 0.000766284 -0.0145707 0)"/>
+<use xlink:href="#image0_3527_32053" transform="matrix(0.000808438 0 0 0.000766284 -0.0145708 0)"/>
 </pattern>
 <pattern id="pattern1_3527_32053" patternContentUnits="objectBoundingBox" width="1" height="1">
 <use xlink:href="#image1_3527_32053" transform="scale(0.000319183)"/>

@@ -152,7 +152,7 @@
 }
 
 .fw-600 {
-  font-weight: 600;
+  font-weight: 600 !important;
 }
 
 .fw-700 {
@@ -193,6 +193,10 @@
 
 .ls-10 {
   letter-spacing: 1px;
+}
+
+.ls-30 {
+  letter-spacing: 3px;
 }
 
 .gap-8 {
@@ -322,7 +326,7 @@
   --bs-body-color-rgb: 33, 37, 41;
   --bs-body-bg: #fff;
   --bs-body-bg-rgb: 255, 255, 255;
-  --bs-emphasis-color: #000;
+  --bs-emphasis-color: #2d2d2d;
   --bs-emphasis-color-rgb: 0, 0, 0;
   --bs-secondary-color: rgba(33, 37, 41, 0.75);
   --bs-secondary-color-rgb: 33, 37, 41;
@@ -22818,7 +22822,7 @@ input[type="radio"] {
   font-size: 13px;
 }
 .modal-overlay .modal-dialog {
-  max-width: 30%;
+  max-width: 40%;
 }
 .modal-overlay .modal-footer img {
   max-height: 180px;
@@ -22855,6 +22859,9 @@ input[type="radio"] {
 /* Handle on hover */
 .myScroller::-webkit-scrollbar-thumb:hover {
   background: #1f252c;
+}
+.navbar {
+  height: 64px;
 }
 /* Custom css end (Azahar) */
 

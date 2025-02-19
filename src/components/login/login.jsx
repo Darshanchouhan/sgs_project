@@ -77,7 +77,7 @@ const Login = ({
 
               {!showForgotPassword ? (
                 <form onSubmit={handleSubmit} className="d-flex flex-column">
-                  <div className="d-flex flex-column mb-12">
+                  <div className="d-flex flex-column mb-32">
                     <label className="fs-18 text-color-dark mb-2 fw-600">
                       Email
                     </label>
@@ -91,7 +91,7 @@ const Login = ({
                       disabled={loading}
                     />
                   </div>
-                  <div className="d-flex flex-column mb-12">
+                  <div className="d-flex flex-column mb-32">
                     <label className="fs-18 text-color-dark mb-2 fw-600">
                       Password
                     </label>
