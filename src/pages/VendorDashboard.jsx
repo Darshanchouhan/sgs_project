@@ -256,9 +256,9 @@ const VendorDashboard = () => {
 
       {/* Page Header */}
 
-      <div className="py-14 bg-color-light-shade">
+      <div className="py-2 bg-color-light-shade">
         <div className="container-fluid px-5">
-          <div className="input-group w-395 h-44 border border-secondary rounded-2 fs-14">
+          <div className="input-group w-395 h-40 border border-secondary rounded-2 fs-14">
             <label
               className="d-flex align-items-center px-10  bg-white rounded-2 mb-0 border-0 fs-14 text-color-labels"
               htmlFor="inputGroupSelect01"
@@ -287,7 +287,7 @@ const VendorDashboard = () => {
           {/* Supplier Card */}
           <div className="col-12 col-md-4">
             <div className="card border-0 shadow-1 px-4 py-3 h-100">
-              <div className="card-header px-0 py-0 fs-24 fw-600 text-color-black border-0 bg-transparent">
+              <div className="card-header px-0 py-0 fs-24 fw-600 text-color-typo-primary border-0 bg-transparent">
                 {vendorData.supplier_name}
               </div>
               <div className="card-body px-0 pb-0 border-0">
@@ -415,7 +415,7 @@ const VendorDashboard = () => {
                     <span className="text-color-labels">
                       Due Date <span className="fs-12">(mm/dd/yyyy)</span>
                     </span>
-                    <p className="fs-24 text-color-labels fw-600 mb-0">
+                    <p className="fs-24 text-color-typo-primary fw-600 mb-0">
                       {pkoData?.duedate
                         ? new Date(pkoData.duedate).toLocaleDateString(
                             "en-US",
@@ -564,7 +564,7 @@ const VendorDashboard = () => {
         {/* Table */}
         <div className="d-flex align-items-center justify-content-between mt-30">
           <div className="d-flex align-items-center">
-            <h6 className="fs-20 fw-600 text-color-black pe-4">
+            <h6 className="fs-20 fw-600 text-color-typo-primary pe-4">
               PKO Project ID: {vendorData.pkos[0]?.pko_id || "N/A"}
             </h6>
             <div className="d-flex align-items-center ps-4 border-start border-color-labels">
@@ -871,7 +871,7 @@ const VendorDashboard = () => {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <h2 className="fs-24 fw-600 text-color-black mb-0">Contacts</h2>
+          <h2 className="fs-24 fw-600 text-color-typo-primary mb-0">Contacts</h2>
           <div className="contact-tbl mt-4">
             <table className="table table-bordered fs-14">
               <thead>

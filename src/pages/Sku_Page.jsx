@@ -1253,7 +1253,7 @@ const Sku_Page = () => {
 
             {/* Submission Last Date or Save Button */}
             <div className="d-flex align-items-center">
-              <p className="text-color-black fst-italic mb-0 opacity-70">
+              <p className="text-color-typo-primary fst-italic mb-0 opacity-70">
                 Submission Last Date: {submissionLastDate}
               </p>
 
@@ -1288,7 +1288,7 @@ const Sku_Page = () => {
         {/* Header Section */}
         <div className="d-flex align-items-center justify-content-between py-3">
           <div className="d-flex align-items-center">
-            <h6 className="fs-18 text-color-black mb-0">
+            <h6 className="fs-18 text-color-typo-primary mb-0">
               PKO Project ID: {pkoId}
             </h6>
 
@@ -1379,7 +1379,7 @@ const Sku_Page = () => {
                 style={{ maxHeight: "400px", overflowY: "auto" }}
               >
                 <div className="d-flex align-items-center justify-content-between">
-                  <h6 className="fs-22 fw-600 text-color-black">
+                  <h6 className="fs-22 fw-600 text-color-typo-primary">
                     Primary Packaging Details
                   </h6>
                   {/* <img src={addPackagePlusIcon} alt="Package Plus Icon" /> */}
@@ -1420,7 +1420,7 @@ const Sku_Page = () => {
                 style={{ maxHeight: "400px", overflowY: "auto" }}
               >
                 <div className="d-flex justify-content-between align-items-center">
-                  <h6 className="fs-22 fw-600 text-color-black mb-0">
+                  <h6 className="fs-22 fw-600 text-color-typo-primary mb-0">
                     SKU Components
                   </h6>
                   {/* Add SKU Component Button */}

@@ -182,7 +182,7 @@ const SkuProduct_Img = ({
           <div className="image-section">
             <div className="d-flex flex-column">
               <div className="mb-32">
-                <h2 className="fw-600 fs-24 text-color-black mb-2">
+                <h2 className="fw-600 fs-24 text-color-typo-primary mb-2">
                   Packaging Images
                 </h2>
                 <ul className="fs-16 fw-400 fst-italic text-color-list-item ps-3 mb-0">

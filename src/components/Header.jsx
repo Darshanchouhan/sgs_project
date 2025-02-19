@@ -27,13 +27,13 @@ const Header = () => {
         {/* Logo and Heading on the left side */}
         <Link
           to="/vendordashboard"
-          className="text-decoration-none text-uppercase text-white fs-18"
+          className="text-decoration-none text-uppercase text-white fs-18 fw-600 ls-30"
         >
           <img
             src="/assets/images/cvs-logo.svg"
             alt="Logo"
             style={{
-              height: "28px",
+              height: "26px",
               marginRight: "24px",
               paddingRight: "24px",
               borderRight: "1px solid #c2c2c2",
@@ -57,21 +57,21 @@ const Header = () => {
 
         {/* Navbar links and icons on the right side */}
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
+          <ul className="navbar-nav ms-auto align-items-center">
             {/* Example of 3 icons on the right side */}
-            <li className="nav-item">
+            <li className="nav-item me-10">
               <button
                 type="button"
-                className="btn p-0 border-none bg-transparent me-4"
+                className="btn p-0 border-none bg-transparent"
                 onClick={openModal} // Open modal on click
               >
                 <img src="/assets/images/help-circle.png" alt="help-circle" />
               </button>
             </li>
-            <li className="nav-item d-none">
+            <li className="nav-item me-10 d-flex align-items-center d-none">
               <button
                 type="button"
-                className="btn p-0 border-none bg-transparent me-4"
+                className="btn p-0 border-none bg-transparent"
               >
                 <img
                   src="/assets/images/notification-bell.png"
@@ -79,7 +79,7 @@ const Header = () => {
                 />
               </button>
             </li>
-            <li className="nav-item">
+            <li className="nav-item d-flex align-items-center">
               <button
                 type="button"
                 className="btn p-0 border-none bg-transparent"
@@ -89,7 +89,7 @@ const Header = () => {
               {/* Adding logout span */}
               <span
                 onClick={handleLogout}
-                className="logout-span"
+                className="fs-18 fw-600 logout-span"
                 style={{
                   marginLeft: "10px",
                   cursor: "pointer",

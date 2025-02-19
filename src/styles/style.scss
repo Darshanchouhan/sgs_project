@@ -57,6 +57,7 @@ $spacers: (
   30: $spacer * 1.875,
   32: $spacer * 2,
   40: $spacer * 2.5,
+  55: $spacer * 3.438,
   58: $spacer * 3.625,
   60: $spacer * 3.75,
   70: $spacer * 4.375,
@@ -170,6 +171,7 @@ $letter-spacings: (
   4: 0.4px,
   10: 1px,
   20: 2px,
+  30: 3px,
 );
 
 @each $element, $letter-spacing in $letter-spacings {
@@ -191,7 +193,7 @@ $column-gaps: (
 }
 
 // height
-@each $h in (20, 26, 42, 44, 51, 52, 72) {
+@each $h in (20, 26, 40, 42, 44, 51, 52, 72) {
   .h-#{$h} {
     height: unquote($h + "px !important");
   }
