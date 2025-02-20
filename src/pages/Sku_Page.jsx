@@ -52,6 +52,7 @@ const Sku_Page = () => {
     setOverlayVisible(true); // Show the overlay
   };
 
+
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
   };
@@ -412,6 +413,8 @@ const Sku_Page = () => {
     }
   };
 
+  
+
   const refreshAddProductImage = async () => {
     try {
       // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
@@ -454,6 +457,8 @@ const Sku_Page = () => {
       );
     }
   }, [location.state, pkoData]);
+
+  
 
   useEffect(() => {
     const totalMandatory = questions.filter((q) => q.mandatory).length;
@@ -945,14 +950,8 @@ const Sku_Page = () => {
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question.placeholder || "Enter Value"}
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
-              // onChange={(e) => {
-              //   const value = e.target.value;
-              //   // Validate input to allow only digits
-              //   if (/^\d*$/.test(value)) {
-              //     handleChange(e); // Update state only if valid
-              //   }
-              // }}
               onChange={handleChange}
+              onWheel={(e) => e.target.blur()}
               onKeyDown={handleKeyDown} // Restrict invalid key presses
             />
             {question.instructions && (
@@ -1035,6 +1034,7 @@ const Sku_Page = () => {
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
                 value={skuData.dimensionsAndWeights[question.question_id] || ""}
+                onWheel={(e) => e.target.blur()}
                 onChange={(e) => {
                   const value = e.target.value;
                   // Allow only numbers, decimal points, and empty input
@@ -1265,11 +1265,17 @@ const Sku_Page = () => {
               </button>
 
               <button
-                className="save-button px-4 py-12 fs-14 fw-600 border-0"
-                onClick={handleValidateAndSubmit}
-              >
-                Validate & Submit
-              </button>
+  className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
+    skuData.components.length > 0 &&
+    skuData.components.every((comp) => comp.form_status === "Completed")
+      ? "bg-secondary text-white" // Apply "Save as Draft" button color
+      : ""
+  }`}
+  onClick={handleValidateAndSubmit}
+>
+  Validate & Submit
+</button>
+
             </div>
             <SkuValidation
               validationIssues={validationIssues}
@@ -1279,6 +1285,7 @@ const Sku_Page = () => {
               onClose={() => setShowValidationModal(false)}
               onProceed={proceedToSubmission} // This function submits the SKU
               imagesFromDB={imagesFromDB}
+
             />
           </div>
         </div>
