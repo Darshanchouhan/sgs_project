@@ -21,6 +21,8 @@ const VendorDashboard = () => {
   const [isModalVisible, setIsModalVisible] = useState(true); // Modal visibility state
   const navigate = useNavigate();
   const [overallProgress, setOverallProgress] = useState(0); // State for overall progress
+  const [activeTab, setActiveTab] = useState("active"); // Default to Active PKOs
+
 
   // Function to close the modal
   const closeModal = () => {
@@ -332,6 +334,8 @@ const VendorDashboard = () => {
                     data-bs-target="#offcanvasRight"
                     aria-controls="offcanvasRight"
                     id="active-pkos"
+                    onClick={() => setActiveTab("active")} // Set active tab on click
+
                   >
                     <div className="d-flex align-items-center justify-content-between">
                       <span className="fs-14 text-color-labels">
@@ -358,6 +362,8 @@ const VendorDashboard = () => {
                     data-bs-target="#offcanvasRight"
                     aria-controls="offcanvasRight"
                     id="closed-pkos"
+                    onClick={() => setActiveTab("closed")} // Set closed tab on click
+
                   >
                     <div className="d-flex align-items-center justify-content-between">
                       <span className="fs-14 text-color-labels">
@@ -688,36 +694,30 @@ const VendorDashboard = () => {
               role="tablist"
             >
               <button
-                className="nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 active"
-                id="nav-home-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#nav-home"
-                type="button"
-                role="tab"
-                aria-controls="nav-home"
-                aria-selected="true"
-              >
-                Active PKOs
-              </button>
-              <button
-                className="nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3"
-                id="nav-profile-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#nav-profile"
-                type="button"
-                role="tab"
-                aria-controls="nav-profile"
-                aria-selected="false"
-              >
-                Closed PKOs
-              </button>
+      className={`nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
+        activeTab === "active" ? "active" : ""
+      }`}
+      type="button"
+      onClick={() => setActiveTab("active")}
+    >
+      Active PKOs
+    </button>
+    <button
+      className={`nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
+        activeTab === "closed" ? "active" : ""
+      }`}
+      type="button"
+      onClick={() => setActiveTab("closed")}
+    >
+      Closed PKOs
+    </button>
             </div>
           </nav>
           <div className="tab-content mt-4" id="nav-tabContent">
+           
             {/* Active PKOs Table */}
             <div
-              className="tab-pane fade show active"
-              id="nav-home"
+className={`tab-pane fade ${activeTab === "active" ? "show active" : ""}`}              id="nav-home"
               role="tabpanel"
               aria-labelledby="nav-home-tab"
               tabIndex="0"
@@ -785,8 +785,7 @@ const VendorDashboard = () => {
 
             {/* Closed PKOs Table */}
             <div
-              className="tab-pane fade"
-              id="nav-profile"
+className={`tab-pane fade ${activeTab === "closed" ? "show active" : ""}`}              id="nav-profile"
               role="tabpanel"
               aria-labelledby="nav-profile-tab"
               tabIndex="0"
