@@ -22745,16 +22745,29 @@ input[type="radio"] {
   border-radius: 50%;
 }
 /* Custom css start (Azahar) */
+.analysisModal {
+  background: rgba(0, 0, 0, 0.5);
+}
 .analysisModal .modal-dialog {
-  max-width: 46%;
+  max-width: 50% !important;
+}
+@media (max-width: 1199.98px) {
+  .analysisModal .modal-dialog {
+    max-width: 65% !important;
+  }
+}
+@media (max-width: 991.98px) {
+  .analysisModal .modal-dialog {
+    max-width: 80% !important;
+  }
 }
 .analysisModal .modal-header {
   padding-top: 4rem;
   padding-bottom: 2rem;
 }
 .analysisModal .modal-footer {
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
 }
 .analysisModal .btn-close {
   position: absolute;
@@ -22773,6 +22786,8 @@ input[type="radio"] {
 .analysisModal .modal-footer .btn:disabled {
   color: var(--bs-color-grey-btn);
   border-color: var(--bs-color-grey-btn);
+  background-color: transparent;
+  opacity: 1;
 }
 .offcanvas.offcanvas-end .nav-tabs .nav-link.active {
   border-bottom: 3px solid var(--bs-secondary) !important;
@@ -22824,15 +22839,35 @@ input[type="radio"] {
 .modal-overlay .modal-dialog {
   max-width: 40%;
 }
-.modal-overlay .modal-footer img {
+@media (max-width: 1199.98px) {
+  .modal-overlay .modal-dialog {
+    max-width: 60% !important;
+  }
+}
+@media (max-width: 991.98px) {
+  .modal-overlay .modal-dialog {
+    max-width: 80% !important;
+  }
+}
+.vendorOnboarding-modal .modal-footer img {
   max-height: 180px;
 }
-.modal-overlay .modal-footer {
+@media (min-width: 1600px) {
+  .vendorOnboarding-modal .modal-footer img {
+    max-height: 300px;
+  }
+}
+.vendorOnboarding-modal .modal-footer {
   background-image: url("/assets/images/dot-pattern-image.svg");
   background-size: contain;
   min-height: 250px;
 }
-.modal-overlay .modal-footer button img {
+@media (min-width: 1600px) {
+  .vendorOnboarding-modal .modal-footer {
+    min-height: 350px;
+  }
+}
+.vendorOnboarding-modal .modal-footer button img {
   height: 16px;
 }
 .modal-overlay .btn-close {
