@@ -417,7 +417,6 @@ const PkgDataForm = () => {
         ...prev,
         answers: {}, // Clear previous answers
         activeSection: "Component Information", // Reset to default section
-
       }));
     }
   }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
@@ -886,7 +885,7 @@ const PkgDataForm = () => {
             <input
               className="h-42 w-75"
               type="number"
-              onWheel={(e) => e.target.blur()}           
+              onWheel={(e) => e.target.blur()}
               step="1"
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
@@ -931,7 +930,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42  w-100" 
+              className="h-42  w-100"
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] || ""}

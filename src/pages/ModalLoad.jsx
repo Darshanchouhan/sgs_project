@@ -12,9 +12,12 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
   // Auto-close the modal after 5 minutes (optional, adjust as needed)
   useEffect(() => {
     if (count === 0) {
-      const timer = setTimeout(() => {
-        closeModal();
-      }, 5 * 60 * 1000); // Auto close after 5 minutes
+      const timer = setTimeout(
+        () => {
+          closeModal();
+        },
+        5 * 60 * 1000,
+      ); // Auto close after 5 minutes
 
       return () => clearTimeout(timer); // Cleanup timer on component unmount
     }
@@ -83,8 +86,8 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 </h1>
                 <p className="fs-16 fw-600 text-color-labels">
                   This application enables suppliers of CVS to submit packaging
-                  specifications accurately with clear instructions and automated
-                  validation checks.
+                  specifications accurately with clear instructions and
+                  automated validation checks.
                 </p>
               </div>
               <div className="modal-footer align-items-end p-20">
@@ -119,10 +122,12 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               </div>
               <div className="modal-body text-center px-55 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
-                  With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
+                  With the CVS Sustainable Packaging Platform you will be able
+                  to accomplish the following:
                 </p>
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
-                  Establish a packaging specification baseline for CVS owned brands.
+                  Establish a packaging specification baseline for CVS owned
+                  brands.
                 </h1>
               </div>
               <div className="modal-footer align-items-end p-20">
@@ -173,10 +178,12 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               </div>
               <div className="modal-body text-center px-55 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
-                  With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
+                  With the CVS Sustainable Packaging Platform you will be able
+                  to accomplish the following:
                 </p>
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
-                  Plan strategic and sustainable packaging goals and EPR cost mitigation
+                  Plan strategic and sustainable packaging goals and EPR cost
+                  mitigation
                 </h1>
               </div>
               <div className="modal-footer align-items-end p-20">
@@ -227,10 +234,12 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               </div>
               <div className="modal-body text-center px-55 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
-                  With the CVS Sustainable Packaging Platform you will be able to accomplish the following:
+                  With the CVS Sustainable Packaging Platform you will be able
+                  to accomplish the following:
                 </p>
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
-                  Enable accurate reporting for compliance with EPR and packaging regulations.
+                  Enable accurate reporting for compliance with EPR and
+                  packaging regulations.
                 </h1>
               </div>
               <div className="modal-footer align-items-end p-20">
@@ -284,10 +293,14 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   What will CVS product vendors have to do?
                 </h1>
                 <p className="fs-16 fw-600 text-color-labels">
-                  Suppliers will have to submit packaging data for all active PKOs, covering all SKUs assigned in respective PKOs. For each SKU, suppliers will need to add components and then complete component-specific forms.
+                  Suppliers will have to submit packaging data for all active
+                  PKOs, covering all SKUs assigned in respective PKOs. For each
+                  SKU, suppliers will need to add components and then complete
+                  component-specific forms.
                 </p>
                 <p className="fs-16 fw-600 text-color-labels">
-                  Suppliers will need to submit all forms for review before the last date of submission.
+                  Suppliers will need to submit all forms for review before the
+                  last date of submission.
                 </p>
               </div>
               <div className="modal-footer align-items-end p-20">

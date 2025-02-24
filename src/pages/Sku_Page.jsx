@@ -28,7 +28,6 @@ const Sku_Page = () => {
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
   const [questionsComponent, setQuestionsComponent] = useState([]); // Store questions from API
-  // const [isSubmitting, setIsSubmitting] = useState(false); // Submission state
   const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
   const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
@@ -36,13 +35,12 @@ const Sku_Page = () => {
   const [imagesFromDB, setImagesFromDB] = useState([]); // Images fetched from database
   const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
   const [loadingImages, setLoadingImages] = useState(false);
-  // const [dimensionUnit, setDimensionUnit] = useState("Unit"); // Default unit for dimensions
-  // const [weightUnit, setWeightUnit] = useState("Unit"); // Default unit for weights
   const [mandatoryProgress, setMandatoryProgress] = useState(0);
   const [componentProgressAverage, setComponentProgressAverage] = useState(0); // Average progress
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
   const [validationIssues, setValidationIssues] = useState([]); // Store validation errors
+  const [proceedToEnable, setProceedToEnable] = useState([]); // Store validation errors
   const [showValidationModal, setShowValidationModal] = useState(false); // Modal visibility
   const [componentValidationIssues, setComponentValidationIssues] = useState(
     [],
@@ -51,8 +49,6 @@ const Sku_Page = () => {
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
   };
-
-
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
   };
@@ -266,7 +262,7 @@ const Sku_Page = () => {
       }
 
       const noImagesAttached = !imagesFromDB || imagesFromDB.length === 0;
-      console.log("No images attached?", noImagesAttached);
+      console.log("No images attached?", noImagesAttached, imagesFromDB);
 
       // If there are validation issues, show the validation modal
       if (
@@ -274,6 +270,7 @@ const Sku_Page = () => {
         componentIssues.length > 0 ||
         noImagesAttached
       ) {
+        // setProceedToEnable(true)
         setShowValidationModal(true);
         console.log("Showing validation modal");
       } else {
@@ -413,8 +410,6 @@ const Sku_Page = () => {
     }
   };
 
-  
-
   const refreshAddProductImage = async () => {
     try {
       // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
@@ -457,8 +452,6 @@ const Sku_Page = () => {
       );
     }
   }, [location.state, pkoData]);
-
-  
 
   useEffect(() => {
     const totalMandatory = questions.filter((q) => q.mandatory).length;
@@ -825,6 +818,9 @@ const Sku_Page = () => {
     }
 
     try {
+      // Call saveSkuData before proceeding
+      await saveSkuData(false, false, true);
+
       // Fetch specific component details including responses
       const response = await axiosInstance.get(
         `/sku/${skuId}/components/?pko_id=${pkoId}`,
@@ -1087,8 +1083,6 @@ const Sku_Page = () => {
                     }));
                   } else if (isWeight) {
                     synchronizeUnits(newUnit, "weight"); // Synchronize weight units
-                    // setWeightUnit(newUnit); // Update weight unit
-                    // Update all weight-related questions
                     setSkuData((prev) => ({
                       ...prev,
                       dimensionsAndWeights: {
@@ -1265,17 +1259,18 @@ const Sku_Page = () => {
               </button>
 
               <button
-  className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
-    skuData.components.length > 0 &&
-    skuData.components.every((comp) => comp.form_status === "Completed")
-      ? "bg-secondary text-white" // Apply "Save as Draft" button color
-      : ""
-  }`}
-  onClick={handleValidateAndSubmit}
->
-  Validate & Submit
-</button>
-
+                className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
+                  skuData.components.length > 0 &&
+                  skuData.components.every(
+                    (comp) => comp.form_status === "Completed",
+                  )
+                    ? "bg-secondary text-white" // Apply "Save as Draft" button color
+                    : ""
+                }`}
+                onClick={handleValidateAndSubmit}
+              >
+                Validate & Submit
+              </button>
             </div>
             <SkuValidation
               validationIssues={validationIssues}
@@ -1285,7 +1280,6 @@ const Sku_Page = () => {
               onClose={() => setShowValidationModal(false)}
               onProceed={proceedToSubmission} // This function submits the SKU
               imagesFromDB={imagesFromDB}
-
             />
           </div>
         </div>

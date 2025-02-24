@@ -15,7 +15,7 @@ const SkuValidation = ({
 
   useEffect(() => {
     console.log("Validation Check: Images from DB:", imagesFromDB);
-  
+
     // Only disable proceed button if images are missing
     if (
       validationIssues.length === 0 &&
@@ -23,21 +23,34 @@ const SkuValidation = ({
       imagesFromDB.length > 0 //  Correctly check if images exist
     ) {
       setAdditionalMessage("No issues found. You may proceed to submission!");
+      console.log("no  validation issue enable prceed to submission button");
       setIsProceedEnabled(true);
     } else {
-      setAdditionalMessage("");
-      setIsProceedEnabled(false);
+      console.log(
+        "issue in proceed to enable",
+        validationIssues.length,
+        componentValidationIssues.length,
+        imagesFromDB.length,
+      );
+      if (validationIssues.length === 0 && imagesFromDB.length > 0) {
+        if (componentValidationIssues.length === 0) {
+          setAdditionalMessage("");
+          setIsProceedEnabled(true);
+        } else {
+          //if we want to set any message for component range kind of issue set here
+          setAdditionalMessage(
+            "Some values are out of the expected range. You can still proceed with submission.",
+          );
+          setIsProceedEnabled(true);
+        }
+      } else {
+        console.log("validation issue enable prceed to submission button");
+        setAdditionalMessage("");
+        setIsProceedEnabled(false);
+      }
     }
   }, [validationIssues, componentValidationIssues, imagesFromDB]);
-  
-  useEffect(() => {
-    console.log("Checking images again on validation:", imagesFromDB);
-    if (imagesFromDB.length > 0) {
-      setAdditionalMessage("No issues found. You may proceed to submission!");
-      setIsProceedEnabled(true);
-    }
-  }, [imagesFromDB]); // Run validation only when images update
-  
+
   if (!show) return null; // Hide modal when not active
 
   return (
@@ -92,13 +105,12 @@ const SkuValidation = ({
                   ))}
                 {/* New Validation Issue: No Image Uploaded */}
                 {noImagesAttached && (
-  <tr>
-    <td className="p-12">Add/View Image</td>
-    <td className="p-12">N/A</td>
-    <td className="p-12">No image uploaded on SKU Page.</td>
-  </tr>
-)}
-
+                  <tr>
+                    <td className="p-12">Add/View Image</td>
+                    <td className="p-12">N/A</td>
+                    <td className="p-12">No image uploaded on SKU Page.</td>
+                  </tr>
+                )}
 
                 {/* Success Message: No Issues Left */}
                 {additionalMessage && (
@@ -124,8 +136,11 @@ const SkuValidation = ({
             </button>
             <button
               type="button"
-              className="save-button btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
-              onClick={isProceedEnabled}
+              // className="save-button btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
+              className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
+                isProceedEnabled ? "bg-secondary text-white" : "btn btn-primary"
+              } rounded-pill m-0 mx-2 my-0`}
+              onClick={onProceed}
               disabled={!isProceedEnabled} // Button is only enabled when no issues
             >
               Proceed to Submission
