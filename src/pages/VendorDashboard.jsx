@@ -23,7 +23,6 @@ const VendorDashboard = () => {
   const [overallProgress, setOverallProgress] = useState(0); // State for overall progress
   const [activeTab, setActiveTab] = useState("active"); // Default to Active PKOs
 
-
   // Function to close the modal
   const closeModal = () => {
     setIsModalVisible(false); // Close the modal
@@ -335,7 +334,6 @@ const VendorDashboard = () => {
                     aria-controls="offcanvasRight"
                     id="active-pkos"
                     onClick={() => setActiveTab("active")} // Set active tab on click
-
                   >
                     <div className="d-flex align-items-center justify-content-between">
                       <span className="fs-14 text-color-labels">
@@ -363,7 +361,6 @@ const VendorDashboard = () => {
                     aria-controls="offcanvasRight"
                     id="closed-pkos"
                     onClick={() => setActiveTab("closed")} // Set closed tab on click
-
                   >
                     <div className="d-flex align-items-center justify-content-between">
                       <span className="fs-14 text-color-labels">
@@ -634,7 +631,7 @@ const VendorDashboard = () => {
                         <td className="align-middle">{sku.sku_id}</td>
                         <td className="align-middle">{sku.description}</td>
                         <td className="align-middle">
-                          {sku.category || "N/A"}
+                          {pkoData.category || "N/A"}
                         </td>
                         <td className="align-middle">{sku.brand}</td>
                         <td className="align-middle">{sku.upc}</td>
@@ -694,30 +691,30 @@ const VendorDashboard = () => {
               role="tablist"
             >
               <button
-      className={`nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
-        activeTab === "active" ? "active" : ""
-      }`}
-      type="button"
-      onClick={() => setActiveTab("active")}
-    >
-      Active PKOs
-    </button>
-    <button
-      className={`nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
-        activeTab === "closed" ? "active" : ""
-      }`}
-      type="button"
-      onClick={() => setActiveTab("closed")}
-    >
-      Closed PKOs
-    </button>
+                className={`nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
+                  activeTab === "active" ? "active" : ""
+                }`}
+                type="button"
+                onClick={() => setActiveTab("active")}
+              >
+                Active PKOs
+              </button>
+              <button
+                className={`nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
+                  activeTab === "closed" ? "active" : ""
+                }`}
+                type="button"
+                onClick={() => setActiveTab("closed")}
+              >
+                Closed PKOs
+              </button>
             </div>
           </nav>
           <div className="tab-content mt-4" id="nav-tabContent">
-           
             {/* Active PKOs Table */}
             <div
-className={`tab-pane fade ${activeTab === "active" ? "show active" : ""}`}              id="nav-home"
+              className={`tab-pane fade ${activeTab === "active" ? "show active" : ""}`}
+              id="nav-home"
               role="tabpanel"
               aria-labelledby="nav-home-tab"
               tabIndex="0"
@@ -785,7 +782,8 @@ className={`tab-pane fade ${activeTab === "active" ? "show active" : ""}`}      
 
             {/* Closed PKOs Table */}
             <div
-className={`tab-pane fade ${activeTab === "closed" ? "show active" : ""}`}              id="nav-profile"
+              className={`tab-pane fade ${activeTab === "closed" ? "show active" : ""}`}
+              id="nav-profile"
               role="tabpanel"
               aria-labelledby="nav-profile-tab"
               tabIndex="0"
@@ -870,7 +868,9 @@ className={`tab-pane fade ${activeTab === "closed" ? "show active" : ""}`}      
           ></button>
         </div>
         <div className="offcanvas-body">
-          <h2 className="fs-24 fw-600 text-color-typo-primary mb-0">Contacts</h2>
+          <h2 className="fs-24 fw-600 text-color-typo-primary mb-0">
+            Contacts
+          </h2>
           <div className="contact-tbl mt-4">
             <table className="table table-bordered fs-14">
               <thead>
