@@ -63,7 +63,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
 
   return (
     isVisible && (
-      <div className="modal-overlay font-britanica">
+      <div className="modal-overlay vendorOnboarding-modal font-britanica">
         <div className="modal-dialog modal-dialog-scrollable p-0 rounded-0">
           {/* Step 1 */}
           {currentStep === 0 && (
