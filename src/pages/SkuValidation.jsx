@@ -129,7 +129,7 @@ const SkuValidation = ({
           <div className="modal-footer justify-content-center border-0 px-40">
             <button
               type="button"
-              className="btn btn-outline-secondary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
+              className="btn btn-outline-secondary rounded-1 fs-14 fw-600 px-3 py-10 m-0 mx-2 my-0"
               onClick={onClose}
             >
               Back to Data Collection Form
@@ -137,9 +137,9 @@ const SkuValidation = ({
             <button
               type="button"
               // className="save-button btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
-              className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
+              className={`save-button px-3 py-10 fs-14 fw-600 border-0 ${
                 isProceedEnabled ? "bg-secondary text-white" : "btn btn-primary"
-              } rounded-pill m-0 mx-2 my-0`}
+              } rounded-1 m-0 mx-2 my-0`}
               onClick={onProceed}
               disabled={!isProceedEnabled} // Button is only enabled when no issues
             >

@@ -7,7 +7,7 @@ const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
     datasets: [
       {
         data: [percentage, 100 - percentage],
-        backgroundColor: ["#D42D1F", "#E0E0E0"], // Filled color and remaining color
+        backgroundColor: ["#cb122d", "#E0E0E0"], // Filled color and remaining color
         borderWidth: 0,
         cutout: isVendorPage ? "75%" : "80%", // Thicker for vendor, thinner otherwise
       },
@@ -54,7 +54,7 @@ const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
             textAlign: "center",
           }}
         >
-          <span className="fs-24 fw-700">{percentage}%</span> <br /> completed
+          <span className="fs-24 fw-700 text-secondary">{percentage}%</span> <br /> completed
         </div>
       )}
     </div>

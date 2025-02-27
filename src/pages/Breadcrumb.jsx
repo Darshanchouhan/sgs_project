@@ -59,7 +59,7 @@ const Breadcrumb = ({
               Save & Draft
             </button> */}
             <button
-              className="save-button fs-14 fw-600 border-0 px-4 py-12"
+              className="save-button fs-14 fw-600 border-0 px-4 py-12 h-44"
               style={{
                 backgroundColor: isFormFilled ? "#d43014" : "#cccccc",
                 color: isFormFilled ? "#ffffff" : "#666666",

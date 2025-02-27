@@ -93,15 +93,10 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
               <div className="modal-footer align-items-end p-20">
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Learn More
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="ms-1"
-                    />
                   </button>
                 </div>
               </div>
@@ -138,26 +133,16 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="me-1"
-                    />
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="ms-1"
-                    />
                   </button>
                 </div>
               </div>
@@ -194,26 +179,16 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="me-1"
-                    />
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="ms-1"
-                    />
                   </button>
                 </div>
               </div>
@@ -250,26 +225,16 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="me-1"
-                    />
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="ms-1"
-                    />
                   </button>
                 </div>
               </div>
@@ -311,26 +276,16 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                 />
                 <div className="d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="me-1"
-                    />
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 px-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleStart}
                   >
                     Start
-                    <img
-                      src="/assets/images/arrow-right-forward-red.svg"
-                      alt="arrow-right-forward-red"
-                      className="ms-1"
-                    />
                   </button>
                 </div>
               </div>

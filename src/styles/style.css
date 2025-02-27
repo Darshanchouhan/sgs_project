@@ -22267,6 +22267,14 @@ input:focus {
 .entire-login-block {
   max-width: 70%;
 }
+.entire-login-block input[value=""] {
+  letter-spacing: 1px;
+  font-weight: 600 !important;
+}
+.entire-login-block input:focus {
+  letter-spacing: 1px;
+  font-weight: 600 !important;
+}
 
 .cvs-logo-login {
   max-width: 45%;
@@ -22311,7 +22319,7 @@ input,
 textarea,
 select {
   padding: 10px;
-  border: 1px solid #d1d1d1;
+  border: 1px solid #A9A9A9;
   border-radius: 4px;
   font-size: 14px;
   color: black;
@@ -22666,6 +22674,12 @@ input[type="radio"] {
   background: url(/assets/images/component-down.svg) no-repeat right 16px center;
   background-size: 24px 24px;
 }
+.select-arrow-pos select:focus-visible {
+  outline: 1px solid var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  background: url(/assets/images/chevron-down.svg) no-repeat right 16px center;
+  background-size: 24px 24px;
+}
 /* Media Query */
 @media (max-width: 1365px) {
   .container-height {
@@ -22857,6 +22871,11 @@ input[type="radio"] {
     max-height: 300px;
   }
 }
+@media (min-width: 1800px) {
+  .vendorOnboarding-modal .modal-dialog {
+    height: calc(100% - 6.75rem) !important;
+  }
+}
 .vendorOnboarding-modal .modal-footer {
   background-image: url("/assets/images/dot-pattern-image.svg");
   background-size: contain;
@@ -22867,8 +22886,21 @@ input[type="radio"] {
     min-height: 350px;
   }
 }
-.vendorOnboarding-modal .modal-footer button img {
-  height: 16px;
+.vendorOnboarding-modal .modal-footer button {
+  background-image: url(/assets/images/arrow-right-forward-red.svg) !important;
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+.vendorOnboarding-modal .modal-footer button:hover {
+  background-image: url(/assets/images/arrow-right-forward.svg) !important;
+}
+.vendorOnboarding-modal .modal-footer button.backButton {
+  background-image: url(/assets/images/arrow-left-backward-red.svg) !important;
+  background-position: left 6px center;
+}
+.vendorOnboarding-modal .modal-footer button.backButton:hover {
+  background-image: url(/assets/images/arrow-left-backward-white.svg) !important;
 }
 .modal-overlay .btn-close {
   background-image: url("/assets/images/close-icon-red.svg");
@@ -22897,6 +22929,15 @@ input[type="radio"] {
 }
 .navbar {
   height: 64px;
+}
+.w-mx-content {
+  width: max-content;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-bg-type: transparent !important;
+}
+.table-striped > tbody > tr:nth-of-type(even) > * {
+  background-color: #fafafa !important;
 }
 /* Custom css end (Azahar) */
 
