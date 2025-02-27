@@ -1289,12 +1289,12 @@ const Sku_Page = () => {
         {/* Header Section */}
         <div className="d-flex align-items-center justify-content-between py-3">
           <div className="d-flex align-items-center">
-            <h6 className="fs-18 text-color-typo-primary mb-0">
+            <h6 className="fs-18 text-color-typo-primary mb-0 me-3">
               PKO Project ID: {pkoId}
             </h6>
 
             <span
-              className={`fw-600 px-12 py-2 text-nowrap d-flex align-items-center w-114
+              className={`fs-14 fw-600 px-2 py-6 text-nowrap d-flex align-items-center w-114
         ${
           new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
             ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
@@ -1509,11 +1509,11 @@ const Sku_Page = () => {
                   /* Case 2: Components Exist or Table is Shown */
                   <div>
                     {/* Components Table */}
-                    <table className="table fs-14 w-100 bg-transparent table-striped component-tbl mt-4">
+                    <table className="table table-bordered fs-14 w-100 bg-transparent table-striped component-tbl mt-4">
                       <thead>
                         <tr>
                           <th scope="col">Component Name</th>
-                          <th className="text-center" scope="col">
+                          <th className="text-center w-25" scope="col">
                             Form Status
                           </th>
                           <th className="text-center" scope="col">
@@ -1531,9 +1531,9 @@ const Sku_Page = () => {
                                 {component.form_status || "Pending"}
                               </span>
                             </td> */}
-                            <td className="text-center align-middle">
+                            <td className="text-start align-middle">
                               <span
-                                className={`d-inline-flex align-items-center py-2 px-12 rounded-pill fw-600 ${
+                                className={`fs-14 d-inline-flex align-items-center py-6 px-2 rounded-pill fw-600 ${
                                   component.form_status === "Completed"
                                     ? "color-active-bg text-color-completed" // ApplyCompleted class
                                     : "bg-color-padding-label text-secondary" // Default class for Pending

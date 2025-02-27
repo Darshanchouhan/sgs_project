@@ -575,7 +575,7 @@ const VendorDashboard = () => {
                 SKU Status
               </label>
               <select
-                className="fs-14 sku-status px-12 border border-secondary text-secondary rounded-2 h-44 w-165 fw-600 form-select form-list"
+                className="fs-14 sku-status px-12 border border-secondary text-secondary rounded-2 h-40 w-165 fw-600 form-select form-list"
                 aria-label="SKU Status Filter"
                 value={selectedSkuStatus}
                 onChange={(e) => setSelectedSkuStatus(e.target.value)}
@@ -592,7 +592,7 @@ const VendorDashboard = () => {
         {/* Table Section */}
 
         <div className="table-container-pko-tbl mt-3">
-          <table className="table table-bordered fs-14">
+          <table className="table table-bordered table-striped fs-14">
             <thead>
               <tr>
                 <th className="h-52 align-middle">SKU ID</th>

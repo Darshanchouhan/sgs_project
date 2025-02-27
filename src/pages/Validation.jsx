@@ -64,7 +64,7 @@ const ValidationModal = ({
           <div className="modal-footer justify-content-center border-0 px-40">
             <button
               type="button"
-              className="btn btn-outline-secondary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
+              className="btn btn-outline-secondary rounded-1 fs-14 fw-600 px-3 py-10 m-0 mx-2 my-0"
               onClick={onBack}
             >
               Back to the Current Section
@@ -74,7 +74,7 @@ const ValidationModal = ({
             {isPreviousValidation ? (
               <button
                 type="button"
-                className="btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
+                className="btn btn-primary rounded-1 fs-14 fw-600 px-3 py-10 m-0 mx-2 my-0"
                 onClick={onPrevious}
               >
                 Proceed to Previous Section
@@ -82,7 +82,7 @@ const ValidationModal = ({
             ) : (
               <button
                 type="button"
-                className="btn btn-primary rounded-pill fs-14 fw-600 px-4 py-12 m-0 mx-2 my-0"
+                className="btn btn-primary rounded-1 fs-14 fw-600 px-3 py-10 m-0 mx-2 my-0"
                 onClick={onProceed}
               >
                 Proceed to Next Section

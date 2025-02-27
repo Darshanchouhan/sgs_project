@@ -22,12 +22,12 @@ const Header = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-primary py-10 font-britanica">
+    <nav className="navbar navbar-expand-lg navbar-light bg-secondary py-10 font-britanica">
       <div className="container-fluid px-5">
         {/* Logo and Heading on the left side */}
         <Link
           to="/vendordashboard"
-          className="text-decoration-none text-uppercase text-white fs-18 fw-600 ls-30"
+          className="text-decoration-none text-uppercase text-white fs-18 fw-600 ls-30 d-flex align-items-center"
         >
           <img
             src="/assets/images/cvs-logo.svg"
@@ -36,7 +36,7 @@ const Header = () => {
               height: "26px",
               marginRight: "24px",
               paddingRight: "24px",
-              borderRight: "1px solid #c2c2c2",
+              borderRight: "1px solid rgba(255, 255, 255, 0.5)",
             }}
           />
           Smart Packaging Data
