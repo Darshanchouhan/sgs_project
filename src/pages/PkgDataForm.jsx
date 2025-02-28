@@ -1068,7 +1068,7 @@ const PkgDataForm = () => {
       );
 
       return (
-        <div className="col-12 col-md-6">
+        <div className="col-12 col-md-6 col-xl-8 col-xxxl-6">
           <div className="form-group mt-4" key={question.question_id}>
             <div className="d-flex justify-content-between align-items-center mb-2 h-26">
               <label className="mb-0">
