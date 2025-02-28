@@ -70,7 +70,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
         <div className="modal-dialog modal-dialog-scrollable p-0 rounded-0">
           {/* Step 1 */}
           {currentStep === 0 && (
-            <div className="modal-content h-100">
+            <div className="modal-content h-100 firstView-modal">
               <div className="modal-header p-20 py-3">
                 <button
                   type="button"
@@ -80,7 +80,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center px-55 py-0 myScroller">
+              <div className="modal-body text-center px-40 py-0 myScroller">
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
                   Welcome to the CVS Sustainable Packaging Platform
                 </h1>
@@ -90,10 +90,15 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   automated validation checks.
                 </p>
               </div>
-              <div className="modal-footer align-items-end p-20">
-                <div className="d-flex justify-content-between align-items-center w-100">
+              <div className="modal-footer align-items-end p-20 position-relative">
+                <img
+                  src="/assets/images/sustainable-packaging-modal-image.svg"
+                  alt="sustainable-packaging-modal-image"
+                  className="w-100"
+                />
+                <div className="actionBtns-group d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-12 pe-4 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Learn More
@@ -115,7 +120,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center px-55 py-0 myScroller">
+              <div className="modal-body text-center px-40 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able
                   to accomplish the following:
@@ -125,21 +130,21 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   brands.
                 </h1>
               </div>
-              <div className="modal-footer align-items-end p-20">
+              <div className="modal-footer align-items-end p-20 position-relative">
                 <img
                   src="/assets/images/packaging-specifications-image.svg"
                   alt="packaging-specifications-image"
                   className="w-100"
                 />
-                <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="actionBtns-group d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-12 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-12 pe-4 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
@@ -161,7 +166,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center px-55 py-0 myScroller">
+              <div className="modal-body text-center px-40 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able
                   to accomplish the following:
@@ -171,21 +176,21 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   mitigation
                 </h1>
               </div>
-              <div className="modal-footer align-items-end p-20">
+              <div className="modal-footer align-items-end p-20 position-relative">
                 <img
                   src="/assets/images/packaging-goals-image.svg"
                   alt="packaging-goals-image"
                   className="w-100"
                 />
-                <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="actionBtns-group d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-12 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-12 pe-4 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
@@ -207,7 +212,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center px-55 py-0 myScroller">
+              <div className="modal-body text-center px-40 py-0 myScroller">
                 <p className="fs-16 fw-600 text-color-labels">
                   With the CVS Sustainable Packaging Platform you will be able
                   to accomplish the following:
@@ -217,21 +222,21 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   packaging regulations.
                 </h1>
               </div>
-              <div className="modal-footer align-items-end p-20">
+              <div className="modal-footer align-items-end p-20 position-relative">
                 <img
                   src="/assets/images/reporting-image.svg"
                   alt="reporting-image"
                   className="w-100"
                 />
-                <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="actionBtns-group d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-12 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-12 pe-4 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleNext}
                   >
                     Next
@@ -253,7 +258,7 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   onClick={closeModal}
                 ></button>
               </div>
-              <div className="modal-body text-center px-55 py-0 myScroller">
+              <div className="modal-body text-center px-40 py-0 myScroller">
                 <h1 className="title text-secondary mb-12 fs-36 lh-25">
                   What will CVS product vendors have to do?
                 </h1>
@@ -268,21 +273,21 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
                   last date of submission.
                 </p>
               </div>
-              <div className="modal-footer align-items-end p-20">
+              <div className="modal-footer align-items-end p-20 position-relative">
                 <img
                   src="/assets/images/reporting-image.svg"
                   alt="reporting-image"
                   className="w-100"
                 />
-                <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="actionBtns-group d-flex justify-content-between align-items-center w-100">
                   <button
-                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-2 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
+                    className="backButton btn btn-outline-secondary p-6 ps-4 pe-12 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex fw-600"
                     onClick={handleBack}
                   >
                     Back
                   </button>
                   <button
-                    className="btn btn-outline-secondary p-6 ps-2 pe-4 fs-14 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
+                    className="btn btn-outline-secondary p-6 ps-12 pe-4 fs-16 lh-14 ls-20 text-uppercase rounded-1 d-flex ms-auto fw-600"
                     onClick={handleStart}
                   >
                     Start

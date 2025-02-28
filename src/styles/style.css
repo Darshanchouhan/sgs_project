@@ -22864,11 +22864,26 @@ input[type="radio"] {
   }
 }
 .vendorOnboarding-modal .modal-footer img {
-  max-height: 180px;
+  max-height: 250px;
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
 }
-@media (min-width: 1600px) {
+.vendorOnboarding-modal .firstView-modal .modal-footer img {
+  bottom: 40px;
+}
+.vendorOnboarding-modal .modal-footer .actionBtns-group {
+  z-index: 9;
+}
+@media (min-width: 1500px) {
   .vendorOnboarding-modal .modal-footer img {
     max-height: 300px;
+  }
+}
+@media (min-width: 1800px) {
+  .vendorOnboarding-modal .modal-footer img {
+    max-height: 400px;
   }
 }
 @media (min-width: 1800px) {
@@ -22880,10 +22895,16 @@ input[type="radio"] {
   background-image: url("/assets/images/dot-pattern-image.svg");
   background-size: contain;
   min-height: 250px;
+  margin-top: 30px;
 }
-@media (min-width: 1600px) {
+@media (min-width: 1500px) {
   .vendorOnboarding-modal .modal-footer {
-    min-height: 350px;
+    min-height: 300px;
+  }
+}
+@media (min-width: 1800px) {
+  .vendorOnboarding-modal .modal-footer {
+    min-height: 400px;
   }
 }
 .vendorOnboarding-modal .modal-footer button {
