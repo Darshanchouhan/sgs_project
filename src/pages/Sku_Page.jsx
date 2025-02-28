@@ -745,7 +745,7 @@ const Sku_Page = () => {
       ...prev,
       dimensionsAndWeights: {
         ...prev.dimensionsAndWeights,
-        [field]: value,
+        [field]: value === "" ? "" : value, // Ensure 0 is not treated as empty
       },
     }));
   };
@@ -872,7 +872,7 @@ const Sku_Page = () => {
     { label: "Brand", value: skuDetails?.brand || "N/A" },
     { label: "UPC#", value: skuDetails?.upc || "N/A" },
     { label: "Segment", value: pkoData?.segment || "N/A" },
-    { label: "Business Unit", value: pkoData?.business_unit || "N/A" },
+    { label: "Business Unit", value: pkoData?.businessunit || "N/A" },
     { label: "Size", value: skuDetails?.size || "N/A" },
     { label: "Category", value: pkoData?.category || "N/A" },
   ];
@@ -1029,7 +1029,7 @@ const Sku_Page = () => {
                 className="form-control border-0 rounded-2 px-2"
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
-                value={skuData.dimensionsAndWeights[question.question_id] || ""}
+                value={skuData.dimensionsAndWeights[question.question_id] ?? ""}
                 onWheel={(e) => e.target.blur()}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -1432,7 +1432,7 @@ const Sku_Page = () => {
                         className="btn btn-outline-primary"
                         onClick={handleAddProductImageClick}
                       >
-                        Add/View Images
+                        + Add/View Images
                       </button>
                       <SkuProduct_Img
                         updateProductImageCount={() => {}}

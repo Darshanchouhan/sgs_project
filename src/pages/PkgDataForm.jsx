@@ -609,6 +609,9 @@ const PkgDataForm = () => {
     setPkgData((prev) => {
       const updatedAnswers = { ...prev.answers };
 
+      // Handle the case where the value is 0
+      updatedAnswers[questionId] = value === "" ? "" : value;
+
       // Find the current question
       const question = Object.values(pkgData.sections)
         .flat()
@@ -815,7 +818,7 @@ const PkgDataForm = () => {
             <input
               className="h-42 w-75"
               type="text" // Use text to allow decimal inputs
-              value={pkgData.answers[question.question_id] || ""}
+              value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={(e) => {
                 const value = e.target.value;
@@ -887,7 +890,7 @@ const PkgDataForm = () => {
               type="number"
               onWheel={(e) => e.target.blur()}
               step="1"
-              value={pkgData.answers[question.question_id] || ""}
+              value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
               onKeyDown={(e) => {
@@ -933,7 +936,7 @@ const PkgDataForm = () => {
               className="h-42  w-100"
               type="number"
               step="1"
-              value={pkgData.answers[question.question_id] || ""}
+              value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
               onWheel={(e) => e.target.blur()}
@@ -958,7 +961,7 @@ const PkgDataForm = () => {
             <input
               className="h-42 w-100"
               type="text" // Use text to allow decimal inputs
-              value={pkgData.answers[question.question_id] || ""}
+              value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={(e) => {
                 const value = e.target.value;
@@ -1081,10 +1084,6 @@ const PkgDataForm = () => {
               <span className="ms-2">{infoIcon}</span>
             </div>
             {renderField(question)}
-            {/* Recursively render follow-up questions */}
-            {/* {question.follow_up_questions &&
-              question.follow_up_questions.length > 0 &&
-              renderQuestions(question.follow_up_questions)} */}
           </div>
         </div>
       );

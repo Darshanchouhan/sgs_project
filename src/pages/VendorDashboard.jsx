@@ -884,16 +884,20 @@ const VendorDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {["supplier_creative", "supplier_qa", "broker"].map(
-                  (contactType, index) => (
+                {["supplier_creative", "supplier_qa", "broker"]
+                  .filter((contactType) => {
+                    const name = vendorData[`${contactType}_contact_name`];
+                    const email = vendorData[`${contactType}_contact_email`];
+                    return name && email; // Only include contacts with both name and email
+                  })
+                  .map((contactType, index) => (
                     <tr key={index}>
                       <td>{vendorData.supplier_name}</td>
                       <td>{vendorData[`${contactType}_contact_name`]}</td>
                       <td>{vendorData[`${contactType}_contact_email`]}</td>
                       <td>{vendorData[`${contactType}_contact_phone`]}</td>
                     </tr>
-                  ),
-                )}
+                  ))}
               </tbody>
             </table>
           </div>

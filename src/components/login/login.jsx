@@ -83,7 +83,7 @@ const Login = ({
                     </label>
                     <input
                       type="email"
-                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${emailInputClass}`}
+                      className={`fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${emailInputClass}`}
                       placeholder="vendors@asap.com"
                       value={email}
                       onChange={handleInputChange("email")}
@@ -97,7 +97,7 @@ const Login = ({
                     </label>
                     <input
                       type="password"
-                      className={`h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${passwordInputClass}`}
+                      className={`fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${passwordInputClass}`}
                       placeholder="Enter Password"
                       value={password}
                       onChange={handleInputChange("password")}
@@ -146,7 +146,7 @@ const Login = ({
                           </label>
                           <input
                             type="email"
-                            className="h-40 text-color-dark rounded-2 px-20 py-12 w-350"
+                            className="fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-350"
                             placeholder="vendors@asap.com"
                             required
                             disabled={loading}
