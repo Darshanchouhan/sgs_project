@@ -901,7 +901,22 @@ const Sku_Page = () => {
         "ArrowRight",
         "Delete",
         "Tab",
+        "a", // Allow 'a' for select all (Command + A)
+        "c", // Allow 'c' for copy (Command + C)
+        "v", // Allow 'v' for paste (Command + V)
+        "x", // Allow 'x' for cut (Command + X)
       ];
+      // Check if the key is a meta key (Command on Mac, Ctrl on Windows)
+      const isMetaKey = e.metaKey || e.ctrlKey;
+
+      // Allow copy, paste, and cut commands
+      if (
+        isMetaKey &&
+        (e.key === "c" || e.key === "v" || e.key === "x" || e.key === "a")
+      ) {
+        return; // Allow the default behavior for these key combinations
+      }
+
       if (
         e.key === "-" ||
         (!allowedKeys.includes(e.key) && !/^\d$/.test(e.key))
@@ -927,6 +942,7 @@ const Sku_Page = () => {
               onChange={(e) =>
                 handleInputChange(question.question_id, e.target.value)
               }
+              tabIndex={0} // Make the input focusable
             />
             {question.instructions && (
               <Tooltip
@@ -949,6 +965,7 @@ const Sku_Page = () => {
               onChange={handleChange}
               onWheel={(e) => e.target.blur()}
               onKeyDown={handleKeyDown} // Restrict invalid key presses
+              tabIndex={0} // Make the input focusable
             />
             {question.instructions && (
               <Tooltip
@@ -1046,7 +1063,8 @@ const Sku_Page = () => {
                     e.key !== "Backspace" &&
                     e.key !== "Delete" &&
                     e.key !== "ArrowLeft" &&
-                    e.key !== "ArrowRight"
+                    e.key !== "ArrowRight" &&
+                    !(e.ctrlKey || e.metaKey) // Allow Ctrl (Windows) / Cmd
                   ) {
                     e.preventDefault();
                   }
@@ -1055,6 +1073,7 @@ const Sku_Page = () => {
                     e.preventDefault();
                   }
                 }}
+                tabIndex={0} // Make the input focusable
               />
 
               {/* Unit Dropdown */}
@@ -1097,6 +1116,8 @@ const Sku_Page = () => {
                   // Update the specific question's unit
                   handleInputChange(`${question.question_id}_unit`, newUnit);
                 }}
+                tabIndex={1} // Make the dropdown focusable
+                onFocus={() => console.log("Dropdown focused!")}
               >
                 {question.dropdown_options.map((option, index) => (
                   <option key={index} value={option}>
@@ -1137,6 +1158,7 @@ const Sku_Page = () => {
               className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14"
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
               onChange={handleChange}
+              tabIndex={0} // Make the dropdown focusable
             >
               <option value="">
                 {question.placeholder || "Select an option"}
@@ -1162,21 +1184,6 @@ const Sku_Page = () => {
         return null;
     }
   };
-  // const renderFollowUpQuestions = (followUps) => {
-  //   return followUps.map((followUp) => (
-  //     <div
-  //       key={followUp.question_id}
-  //       className={`col-12 ${
-  //         followUp.question_type === "Float + Dropdown" ? "col-md-6" : "col-12"
-  //       } mb-3`}
-  //     >
-  //       <label className="fs-14 text-color-typo-primary mb-2 d-block">
-  //         {followUp.question_text}
-  //       </label>
-  //       {renderField(followUp)}
-  //     </div>
-  //   ));
-  // };
 
   // Render Questions with Dependent Logic
   const renderQuestions = (questions) => {

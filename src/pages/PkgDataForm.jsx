@@ -835,7 +835,8 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
@@ -899,7 +900,8 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
@@ -946,7 +948,8 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
@@ -978,7 +981,8 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
