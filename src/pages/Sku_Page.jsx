@@ -287,6 +287,17 @@ const Sku_Page = () => {
     let issues = [];
 
     questions.forEach((question) => {
+      // Check if the value is 0 for numeric fields
+      if (
+        (question.question_type === "Integer" ||
+          question.question_type === "Float + Dropdown") &&
+        skuData.dimensionsAndWeights[question.question_id] === "0"
+      ) {
+        issues.push({
+          issue: `${question.question_text} should be greater than zero.`,
+        });
+      }
+      //check mandatory fields
       if (
         question.mandatory &&
         (!skuData.dimensionsAndWeights[question.question_id] ||
@@ -1038,7 +1049,7 @@ const Sku_Page = () => {
 
         return (
           <div className="d-flex align-items-center gap-2">
-            <div className="d-flex align-items-center border border-color-typo-secondary rounded-2">
+            <div className="d-flex align-items-center border border-color-typo-secondary rounded-2 ">
               {/* Input Field */}
               <input
                 type="number"
@@ -1064,12 +1075,26 @@ const Sku_Page = () => {
                     e.key !== "Delete" &&
                     e.key !== "ArrowLeft" &&
                     e.key !== "ArrowRight" &&
+                    e.key !== "Tab" &&
                     !(e.ctrlKey || e.metaKey) // Allow Ctrl (Windows) / Cmd
                   ) {
                     e.preventDefault();
                   }
                   // Prevent more than one dot
                   if (e.key === "." && e.target.value.includes(".")) {
+                    e.preventDefault();
+                  }
+                  if (e.key === "Tab" && !e.shiftKey) {
+                    // Remove preventDefault() so Tab works naturally
+                    document
+                      .getElementById(`dropdown-${question.question_id}`)
+                      ?.focus();
+                  }
+                }}
+                onPaste={(e) => {
+                  // Prevent pasting non-numeric values
+                  const pasteData = e.clipboardData.getData("text");
+                  if (!/^\d*\.?\d*$/.test(pasteData)) {
                     e.preventDefault();
                   }
                 }}
@@ -1116,8 +1141,8 @@ const Sku_Page = () => {
                   // Update the specific question's unit
                   handleInputChange(`${question.question_id}_unit`, newUnit);
                 }}
-                tabIndex={1} // Make the dropdown focusable
-                onFocus={() => console.log("Dropdown focused!")}
+                tabIndex={0} // Make the dropdown focusable
+                onFocus={() => console.log("Dropdown focused!")} // Debugging: Check if focus works
               >
                 {question.dropdown_options.map((option, index) => (
                   <option key={index} value={option}>
@@ -1180,6 +1205,23 @@ const Sku_Page = () => {
           </div>
         );
 
+      case "No Input Required":
+        return (
+          <div className="d-flex align-items-center gap-2">
+            <span className="fs-14 text-color-typo-primary">
+              {question.question_text}
+            </span>
+            {question.instructions && (
+              <Tooltip
+                id={question.question_id}
+                instructions={question.instructions}
+                activeTooltipId={activeTooltipId}
+                setActiveTooltipId={setActiveTooltipId}
+              />
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
@@ -1203,15 +1245,18 @@ const Sku_Page = () => {
           key={question.question_id}
           className={`col-12 ${
             question.question_type === "Float + Dropdown" ||
-            question.question_type === "Dropdown"
+            question.question_type === "Dropdown" ||
+            question.question_type === "No Input Required"
               ? "col-md-6"
               : "col-12"
           } mb-3`}
         >
-          <label className="fs-14 text-color-typo-primary mb-2 d-block">
-            {question.question_text}
-            {question.mandatory && <span> *</span>}
-          </label>
+          {question.question_type !== "No Input Required" && (
+            <label className="fs-14 text-color-typo-primary mb-2 d-block">
+              {question.question_text}
+              {question.mandatory && <span> *</span>}
+            </label>
+          )}
           {renderField(question)}
         </div>
       );
@@ -1396,27 +1441,6 @@ const Sku_Page = () => {
                   Provide all relevant primary packaging details for the SKU
                 </p>
 
-                {/* <div className="row">
-                  {questions.map((question) => (
-                    <React.Fragment key={question.question_id}>
-                      <div
-                        className={`col-12 ${
-                          question.question_type === "Float + Dropdown" ||
-                          question.question_type === "Dropdown"
-                            ? "col-md-6"
-                            : "col-12"
-                        } mb-3`}
-                      >
-                        <label className="fs-14 text-color-typo-primary mb-2 d-block">
-                          {question.question_text}
-                        </label>
-                        {renderField(question)}
-
-                      </div>
-
-                    </React.Fragment>
-                  ))}
-                </div> */}
                 <div className="row">{renderQuestions(questions)}</div>
               </div>
             </div>

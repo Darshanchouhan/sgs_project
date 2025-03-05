@@ -469,68 +469,6 @@ const PkgDataForm = () => {
   }, [pkgData.sections, location.state?.responses, setPkgData]);
 
   useEffect(() => {
-    // Ensure both pkgData.sections and location.state.responses are available
-    if (
-      isFirstLoad.current &&
-      location.state?.responses &&
-      Object.keys(pkgData.sections).length > 0
-    ) {
-      setPkgData((prev) => {
-        const updatedAnswers = { ...prev.answers }; // Preserve existing answers
-
-        Object.entries(location.state.responses).forEach(
-          ([questionText, response]) => {
-            const question = Object.values(pkgData.sections)
-              .flat()
-              .find((q) => q.question_text === questionText);
-
-            if (question) {
-              if (
-                question.question_type == "Integer + Dropdown" ||
-                question.question_type == "Float + Dropdown"
-              ) {
-                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/;
-                const match = response.match(regex);
-
-                if (match) {
-                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
-                  const unit = match[3]; // Extract unit part
-                  updatedAnswers[question.question_id] = value;
-                  updatedAnswers[`${question.question_id}_unit`] = unit;
-                }
-              } else {
-                updatedAnswers[question.question_id] = response;
-              }
-            } else {
-              console.warn(`Question not found for text: ${questionText}`);
-            }
-          },
-        );
-
-        console.log("Mapped Answers from Responses:", updatedAnswers);
-        // Mark as loaded to prevent future runs
-        isFirstLoad.current = false;
-        return {
-          ...prev,
-          answers: updatedAnswers, // Update answers without clearing existing ones
-        };
-      });
-    }
-  }, [pkgData.sections, location.state?.responses, setPkgData]);
-
-  // console.log("Persisted SKU Data:", skuData);
-  // console.log("Persisted SKU Details:", skuDetails);
-  // console.log("Persisted PKO Data:", pkoData);
-
-  useEffect(() => {
-    console.log("Received State in PkgDataForm:", {
-      componentName,
-      pkoId,
-      description,
-    });
-  }, [componentName, pkoId, description]);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.get("questionnaire/");
@@ -768,6 +706,7 @@ const PkgDataForm = () => {
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
+              tabIndex={0} // Make the input focusable
             />
           </div>
         );
@@ -798,6 +737,7 @@ const PkgDataForm = () => {
               className="w-100"
               value={pkgData.answers[question.question_id] || ""}
               onChange={handleChange}
+              tabIndex={0} // Make focusable
             >
               <option value="">Select an option</option>
               {question.dropdown_options
@@ -836,6 +776,7 @@ const PkgDataForm = () => {
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
                   e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
                   !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
@@ -845,6 +786,14 @@ const PkgDataForm = () => {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
 
             {/* Dropdown for the unit selection */}
@@ -865,6 +814,7 @@ const PkgDataForm = () => {
                   synchronizeUnits(newUnit, "inside");
                 }
               }}
+              tabIndex={0} // Make focusable
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -901,11 +851,20 @@ const PkgDataForm = () => {
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
                   e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
                   !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
             <select
               className="bg-color-light-shade form-list w-25"
@@ -921,6 +880,7 @@ const PkgDataForm = () => {
                   synchronizeUnits(newUnit, "inside");
                 }
               }}
+              tabIndex={0} // Make focusable
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -949,11 +909,20 @@ const PkgDataForm = () => {
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
                   e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
                   !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
           </div>
         );
@@ -982,6 +951,7 @@ const PkgDataForm = () => {
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
                   e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
                   !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
@@ -991,6 +961,14 @@ const PkgDataForm = () => {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
           </div>
         );
@@ -1000,41 +978,6 @@ const PkgDataForm = () => {
     }
   };
 
-  // const renderQuestions = (questions) => {
-  //   return questions.map((question) => {
-  //     // Collect answers for all parent questions
-  //     const parentAnswers = Array.isArray(question.dependent_question)
-  //       ? question.dependent_question.map(
-  //           (parentId) => pkgData.answers[parentId] || "",
-  //         )
-  //       : [pkgData.answers[question.dependent_question] || ""];
-
-  //     // Check if the question is visible based on dependencies
-  //     const isDependentVisible = isAnswerMatch(
-  //       question.field_dependency,
-  //       parentAnswers,
-  //     );
-
-  //     if (question.dependent_question && !isDependentVisible) {
-  //       return null; // Skip rendering if conditions aren't met
-  //     }
-
-  //     return (
-  //       <div className="form-group mt-4" key={question.question_id}>
-  //         <label>
-  //           {question.mandatory
-  //             ? `${question.question_text} *`
-  //             : question.question_text}
-  //         </label>
-  //         {renderField(question)}
-  //         {/* Recursively render follow-up questions */}
-  //         {question.follow_up_questions &&
-  //           question.follow_up_questions.length > 0 &&
-  //           renderQuestions(question.follow_up_questions)}
-  //       </div>
-  //     );
-  //   });
-  // };
   const renderQuestions = (questions) => {
     return questions.map((question) => {
       // Collect all parent answers
