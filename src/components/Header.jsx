@@ -23,7 +23,7 @@ const Header = () => {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-secondary py-10 font-britanica">
-      <div className="container-fluid px-5">
+      <div className="container-fluid px-20 px-md-5">
         {/* Logo and Heading on the left side */}
         <Link
           to="/vendordashboard"

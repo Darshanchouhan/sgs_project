@@ -41,6 +41,7 @@ const LoginPage = () => {
 
       // If login is successful, proceed to fetch user profile and navigate
       if (response && response.status == 200) {
+        localStorage.setItem("loadCount", 0);
         // Fetch user profile after successful login
         await fetchUserProfile(); // Fetch user profile
 

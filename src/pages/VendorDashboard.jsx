@@ -15,7 +15,6 @@ const VendorDashboard = () => {
   const [loading, setLoading] = useState(true); // Loading indicator
   const [pkoData, setPkoData] = useState(null); // State to hold PKO data
   const [selectedPkoId, setSelectedPkoId] = useState(""); // State for selected PKO ID
-  const { skuStatuses, updateSkuStatus } = useContext(VendorContext);
   const [selectedSkuStatus, setSelectedSkuStatus] = useState("All");
   const [loadCount, setLoadCount] = useState(0); // State to track page load count
   const [isModalVisible, setIsModalVisible] = useState(true); // Modal visibility state
@@ -25,6 +24,7 @@ const VendorDashboard = () => {
 
   // Function to close the modal
   const closeModal = () => {
+    localStorage.setItem("loadCount", 1);
     setIsModalVisible(false); // Close the modal
   };
 
@@ -55,8 +55,6 @@ const VendorDashboard = () => {
         setSelectedPkoId(defaultPkoId);
       } catch (error) {
         console.error("Error fetching vendor data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -103,6 +101,8 @@ const VendorDashboard = () => {
         }
       } catch (error) {
         console.error("Error fetching PKO data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -155,10 +155,6 @@ const VendorDashboard = () => {
       );
 
       if (response.status === 200) {
-        console.log("SKU status updated successfully:", response.data);
-
-        updateSkuStatus(sku.sku_id, "Draft");
-
         setPkoData((prevPkoData) => {
           const updatedSkus = prevPkoData.skus.map((item) =>
             item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item,
@@ -187,78 +183,27 @@ const VendorDashboard = () => {
     }
   };
 
-  // const handleForwardClick = async (sku) => {
-  //   try {
-  //     console.log("Sending PUT request with:", {
-  //       pko_id: selectedPkoId,
-  //       status: "Draft",
-  //     });
-
-  //     const response = await axiosInstance.put(
-  //       `/skus/${sku.sku_id}/update_status/`,
-  //       {
-  //         pko_id: selectedPkoId,
-  //         status: "Draft",
-  //       },
-  //     );
-
-  //     if (response.status === 200) {
-  //       console.log("SKU status updated successfully:", response.data);
-
-  //       updateSkuStatus(sku.sku_id, "Draft");
-
-  //       setPkoData((prevPkoData) => {
-  //         const updatedSkus = prevPkoData.skus.map((item) =>
-  //           item.sku_id === sku.sku_id ? { ...item, status: "Draft" } : item,
-  //         );
-  //         return { ...prevPkoData, skus: updatedSkus };
-  //       });
-
-  //       // Navigate to SKU Page with necessary state
-  //       navigate("/skus", {
-  //         state: {
-  //           skuId: sku.sku_id,
-  //           skuDetails: sku,
-  //           pkoData: pkoData || null,
-  //           duedate: pkoData?.duedate || null,
-  //         },
-  //       });
-  //     } else {
-  //       console.warn(
-  //         "Failed to update SKU status. Status code:",
-  //         response.status,
-  //       );
-  //       alert("Failed to update SKU status. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error during forward action for SKU:", error);
-  //     alert(`Failed to update SKU status: ${error.message}`);
-  //   }
-  // };
-
-  console.log("Navigating with PKO Data:", pkoData);
-
-  //loading state
-  if (loading) {
-    return <div className="text-center py-5">Loading...</div>;
-  }
-  //no data state
-  if (!vendorData) {
-    return <div className="text-center py-5">No data available</div>;
-  }
-
   const skuData = pkoData?.skus || []; // Ensure no errors if SKUs are missing
-  // const selectedPko = vendorData.pkos[0] || {};
 
   return (
     <div>
       {/* Navbar */}
       <Header></Header>
-
+      {loading && (
+        <div className="loader">
+          <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
+            <img
+              src="/assets/images/loading_gif.gif"
+              alt="Loading..."
+              width="120px"
+              height="120px"
+            />
+          </div>
+        </div>
+      )}
       {/* Page Header */}
-
       <div className="py-2 bg-color-light-shade">
-        <div className="container-fluid px-5">
+        <div className="container-fluid px-20 px-md-5">
           <div className="input-group w-395 h-40 border border-secondary rounded-2 fs-14">
             <label
               className="d-flex align-items-center px-10  bg-white rounded-2 mb-0 border-0 fs-14 text-color-labels"
@@ -272,7 +217,7 @@ const VendorDashboard = () => {
               value={selectedPkoId}
               onChange={handlePkoChange}
             >
-              {vendorData.pkos.map((pko, index) => (
+              {vendorData?.pkos?.map((pko, index) => (
                 <option key={index} value={pko.pko_id}>
                   {pko.pko_id}
                 </option>
@@ -283,13 +228,13 @@ const VendorDashboard = () => {
       </div>
 
       {/* Main Section */}
-      <div className="container-fluid ps-4 pe-5 pt-30 container-height d-flex flex-column">
+      <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
         <div className="row">
           {/* Supplier Card */}
-          <div className="col-12 col-md-4">
+          <div className="col-12 col-md-6 col-xl-4 mb-3 mb-xl-0">
             <div className="card border-0 shadow-1 px-4 py-3 h-100">
               <div className="card-header px-0 py-0 fs-24 fw-600 text-color-typo-primary border-0 bg-transparent">
-                {vendorData.supplier_name}
+                {vendorData?.supplier_name}
               </div>
               <div className="card-body px-0 pb-0 border-0">
                 <div className="row mb-3">
@@ -300,7 +245,7 @@ const VendorDashboard = () => {
                   </div>
                   <div className="col-7 d-flex align-items-center">
                     <span className="fs-14 text-color-labels fw-600">
-                      {vendorData.cvs_supplier}
+                      {vendorData?.cvs_supplier}
                     </span>
                   </div>
                 </div>
@@ -312,7 +257,7 @@ const VendorDashboard = () => {
                   </div>
                   <div className="col-7 d-flex flex-column align-items-start">
                     <span className="fs-14 text-color-labels fw-600">
-                      {vendorData.creative_contact_email}
+                      {vendorData?.creative_contact_email}
                     </span>
                     <button
                       type="button"
@@ -345,7 +290,7 @@ const VendorDashboard = () => {
                       />
                     </div>
                     <p className="fs-24 text-color-typo-primary fw-600 mb-0">
-                      {vendorData.pkos
+                      {vendorData?.pkos
                         .filter(
                           (pko) =>
                             new Date(pko.duedate) > new Date(pko.startdate),
@@ -372,7 +317,7 @@ const VendorDashboard = () => {
                       />
                     </div>
                     <p className="fs-24 text-color-typo-primary fw-600 mb-0">
-                      {vendorData.pkos
+                      {vendorData?.pkos
                         .filter(
                           (pko) =>
                             new Date(pko.duedate) < new Date(pko.startdate),
@@ -387,7 +332,7 @@ const VendorDashboard = () => {
           </div>
 
           {/* PKO Status */}
-          <div className="col-12 col-md-4">
+          <div className="col-12 col-md-6 col-xl-4 mb-3 mb-xl-0">
             <div className="d-flex gap-3 h-100 px-4 py-3 shadow-1">
               <div className="d-flex flex-column flex-fill border-end pe-2">
                 <h6 className="text-color-typo-primary fw-600 mb-3">
@@ -431,28 +376,6 @@ const VendorDashboard = () => {
                         : "N/A"}
                     </p>
                   </div>
-                  {/* <div className="d-flex align-items-center bg-color-light-gray p-3 mt-12">
-                    <span className="text-color-labels fs-12 fw-600 text-nowrap">
-                      Due Date:
-                    </span>
-                    <span
-                      className="text-color-labels fs-14 fw-600 ms-2"
-                      style={{ lineHeight: "1" }}
-                    >
-                      (
-                      {pkoData?.duedate
-                        ? new Date(pkoData.duedate).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "2-digit",
-                              day: "2-digit",
-                              year: "numeric",
-                            },
-                          )
-                        : "mm/dd/yyyy"}
-                      )
-                    </span>
-                  </div> */}
                 </div>
               </div>
               <div className="d-flex  justify-content-center align-items-center flex-column flex-fill">
@@ -460,16 +383,6 @@ const VendorDashboard = () => {
                   Overall Progress
                 </h6>
                 <div className=" d-flex align-items-center h-100">
-                  {/* <ProgressLoader
-                    percentage={0}
-                    size={130}
-                    isVendorPage={true}
-                  />{" "} */}
-                  {console.log(
-                    "Rendering ProgressLoader with percentage:",
-                    Math.round(overallProgress),
-                  )}
-
                   <ProgressLoader
                     percentage={Math.round(overallProgress)} // Display calculated average progress
                     size={130}
@@ -484,7 +397,7 @@ const VendorDashboard = () => {
           </div>
 
           {/* SKU Status */}
-          <div className="col-12 col-md-4">
+          <div className="col-12 col-md-6 col-xl-4 mb-3 mb-xl-0">
             <div className="card h-100 border-0 shadow-1 px-4 py-3 d-flex flex-column">
               <div className="card-header px-0 py-0 text-color-typo-primary fw-600 border-0 bg-transparent">
                 SKU Status
@@ -568,7 +481,7 @@ const VendorDashboard = () => {
         <div className="d-flex align-items-center justify-content-between mt-30">
           <div className="d-flex align-items-center">
             <h6 className="fs-20 fw-600 text-color-typo-primary pe-4">
-              PKO Project ID: {vendorData.pkos[0]?.pko_id || "N/A"}
+              PKO Project ID: {vendorData?.pkos[0]?.pko_id || "N/A"}
             </h6>
             <div className="d-flex align-items-center ps-4 border-start border-color-labels">
               <label className="fs-14 color-typo-primary me-2 mb-0 text-nowrap">
@@ -591,7 +504,7 @@ const VendorDashboard = () => {
 
         {/* Table Section */}
 
-        <div className="table-container-pko-tbl mt-3">
+        <div className="table-container-pko-tbl mt-3 table-responsive">
           <table className="table table-bordered table-striped fs-14">
             <thead>
               <tr>
@@ -744,7 +657,7 @@ const VendorDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {vendorData.pkos
+                    {vendorData?.pkos
                       .filter(
                         (pko) =>
                           new Date(pko.duedate) >= new Date(pko.startdate),
@@ -813,7 +726,7 @@ const VendorDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {vendorData.pkos
+                    {vendorData?.pkos
                       .filter(
                         (pko) =>
                           new Date(pko.duedate) < new Date(pko.startdate),
@@ -886,16 +799,16 @@ const VendorDashboard = () => {
               <tbody>
                 {["supplier_creative", "supplier_qa", "broker"]
                   .filter((contactType) => {
-                    const name = vendorData[`${contactType}_contact_name`];
-                    const email = vendorData[`${contactType}_contact_email`];
+                    const name = vendorData?.[`${contactType}_contact_name`];
+                    const email = vendorData?.[`${contactType}_contact_email`];
                     return name && email; // Only include contacts with both name and email
                   })
                   .map((contactType, index) => (
                     <tr key={index}>
-                      <td>{vendorData.supplier_name}</td>
-                      <td>{vendorData[`${contactType}_contact_name`]}</td>
-                      <td>{vendorData[`${contactType}_contact_email`]}</td>
-                      <td>{vendorData[`${contactType}_contact_phone`]}</td>
+                      <td>{vendorData?.supplier_name}</td>
+                      <td>{vendorData?.[`${contactType}_contact_name`]}</td>
+                      <td>{vendorData?.[`${contactType}_contact_email`]}</td>
+                      <td>{vendorData?.[`${contactType}_contact_phone`]}</td>
                     </tr>
                   ))}
               </tbody>

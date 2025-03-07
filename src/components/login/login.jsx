@@ -29,16 +29,23 @@ const Login = ({
 
   return (
     <div className="container-fluid h-100 font-britanica">
-      {/* {loading && (
-        <div
-          className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center`}
-        >
-          <img src="/assets/images/loader.svg" alt="Loading..." />
+      {loading && (
+        <div className={`${styles.loader}`}>
+          <div
+            className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center bg-secondary rounded-4`}
+          >
+            <img
+              src="/assets/images/loading_gif.gif"
+              alt="Loading..."
+              width="120px"
+              height="120px"
+            />
+          </div>
         </div>
-      )} */}
+      )}
 
-      <div className="row vh-100">
-        <div className="col-12 col-md-7 px-0">
+      <div className="row vh-100 loginPage-holder">
+        <div className="col-12 col-lg-7 px-0">
           <div className={`${styles.loginBg} position-relative`}>
             <h4 className="fs-36 fw-600 text-white mb-0">
               Smart Data
@@ -47,12 +54,12 @@ const Login = ({
             </h4>
           </div>
         </div>
-        <div className="col-12 col-md-5 px-0">
+        <div className="col-12 col-lg-5 px-0">
           <div className="d-flex flex-column align-items-center justify-content-center bg-color-light-gray h-100 py-40">
             <div className="entire-login-block d-flex flex-column">
               <img
                 src="/assets/images/cvs-logo-login.svg"
-                className="cvs-logo-login pb-115"
+                className="cvs-logo-login pb-5 pb-lg-115"
                 alt="cvs-logo-login"
               />
               {!showForgotPassword && (
@@ -83,7 +90,7 @@ const Login = ({
                     </label>
                     <input
                       type="email"
-                      className={`fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${emailInputClass}`}
+                      className={`fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-100 ls-10 fw-600 ${emailInputClass}`}
                       placeholder="vendors@asap.com"
                       value={email}
                       onChange={handleInputChange("email")}
@@ -97,7 +104,7 @@ const Login = ({
                     </label>
                     <input
                       type="password"
-                      className={`fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-350 ls-10 fw-600 ${passwordInputClass}`}
+                      className={`fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-100 ls-10 fw-600 ${passwordInputClass}`}
                       placeholder="Enter Password"
                       value={password}
                       onChange={handleInputChange("password")}
@@ -117,11 +124,11 @@ const Login = ({
                   </p>
                   <button
                     type="submit"
-                    className="fw-600 rounded-1 bg-secondary fs-18 py-2 w-350 border-0 shadow-none text-center text-white text-uppercase ls-20"
+                    className="fw-600 rounded-1 bg-secondary fs-18 py-2 w-100 border-0 shadow-none text-center text-white text-uppercase ls-20"
                   >
                     Login
                     {/* {loading ? (
-                      <img src="/assets/images/loader.svg" alt="Loading..." />
+                      <img src="/assets/images/loading_gif.gif" alt="Loading..." />
                     ) : (
                       "Login"
                     )} */}
@@ -146,7 +153,7 @@ const Login = ({
                           </label>
                           <input
                             type="email"
-                            className="fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-350"
+                            className="fs-16 h-40 text-color-dark rounded-2 px-20 py-12 w-100"
                             placeholder="vendors@asap.com"
                             required
                             disabled={loading}
@@ -155,15 +162,23 @@ const Login = ({
 
                         <button
                           type="button"
-                          className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
+                          className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-100 border-0 shadow-none text-center text-white"
                           onClick={handleSendLink}
                           disabled={loading}
                         >
                           {loading ? (
-                            <img
-                              src="/assets/images/loader.svg"
-                              alt="Loading..."
-                            />
+                            <div className={`${styles.loader}`}>
+                              <div
+                                className={`${styles.loaderOverlay} d-flex align-items-center justify-content-center bg-secondary rounded-4`}
+                              >
+                                <img
+                                  src="/assets/images/loading_gif.gif"
+                                  alt="Loading..."
+                                  width="120px"
+                                  height="120px"
+                                />
+                              </div>
+                            </div>
                           ) : (
                             "Send Link"
                           )}
@@ -188,7 +203,7 @@ const Login = ({
                         click the link to reset your password.
                       </p>
                       <button
-                        className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-350 border-0 shadow-none text-center text-white"
+                        className="fw-600 rounded-1 bg-secondary fs-18 py-12 w-100 border-0 shadow-none text-center text-white"
                         onClick={toggleForgotPassword}
                       >
                         Back to Login

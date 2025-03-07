@@ -16,14 +16,9 @@ import ValidationModal from "./Validation";
 
 const PkgDataForm = () => {
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
-  const {
-    skuData,
-    setSkuData,
-    skuDetails,
-    setSkuDetails,
-    pkoData,
-    setPkoData,
-  } = useContext(SkuContext);
+  const { skuData, setSkuData, setSkuDetails, setPkoData } =
+    useContext(SkuContext);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const sectionRefs = useRef({}); // Store refs for each section
@@ -38,13 +33,10 @@ const PkgDataForm = () => {
   const [overlayImage, setOverlayImage] = useState(null);
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
   const [showValidationModal, setShowValidationModal] = useState(false);
-  const [nextSection, setNextSection] = useState(null); // To track the next section
   const [unansweredQuestions, setUnansweredQuestions] = useState([]);
-  const [isSaveAsDraft, setIsSaveAsDraft] = useState(false);
   const [isPreviousValidation, setIsPreviousValidation] = useState(false);
 
   const handleNextClick = () => {
-    setIsSaveAsDraft(false);
     setIsPreviousValidation(false);
     const sectionKeys = Object.keys(pkgData.sections);
     const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
@@ -68,7 +60,6 @@ const PkgDataForm = () => {
 
   const handlePreviousClick = () => {
     setIsPreviousValidation(true); // Indicate this is a Previous operation
-    setIsSaveAsDraft(false); // Reset Save as Draft flag
     const validationResults = validateCurrentSection(); // Validate current section
     setUnansweredQuestions(validationResults); // Update unanswered questions state
 
@@ -137,44 +128,13 @@ const PkgDataForm = () => {
     }
   };
 
-  // const onSaveDraft = () => {
-  //   // Call the existing handleSave function to save the data to the database
-  //   handleSave();
-  //   setShowValidationModal(false); // Close the modal
-  //   setIsSaveAsDraft(false); // Reset the Save as Draft flag
-  // };
-
   const handleSaveDraft = () => {
-    setIsSaveAsDraft(true); // Show Save as Draft button
     setIsPreviousValidation(false); // Reset Previous validation flag
     handleSave(); // Directly save without validation
   };
 
-  // const validateAllSections = () => {
-  //   const unansweredQuestions = [];
-
-  //   Object.values(pkgData.sections)
-  //     .flat()
-  //     .forEach((question) => {
-  //       const isAnswered =
-  //         pkgData.answers[question.question_id] !== undefined &&
-  //         pkgData.answers[question.question_id] !== "";
-
-  //       // Add all mandatory unanswered questions
-  //       if (question.mandatory && !isAnswered) {
-  //         unansweredQuestions.push({
-  //           fieldName: question.question_text,
-  //           issue: "Please provide response for all mandatory fields.",
-  //         });
-  //       }
-  //     });
-
-  //   return unansweredQuestions;
-  // };
-
   const handleBackToCurrentSection = () => {
     setShowValidationModal(false); // Close the modal
-    setIsSaveAsDraft(false); // Reset Save as Draft flag
     setIsPreviousValidation(false); // Reset Previous validation flag
   };
 
@@ -477,6 +437,8 @@ const PkgDataForm = () => {
         processQuestions(data); // Process the fetched data
       } catch (error) {
         console.error("Error fetching questionnaire data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -1158,6 +1120,18 @@ const PkgDataForm = () => {
   return (
     <div>
       <Header></Header>
+      {loading && (
+        <div className="loader">
+          <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
+            <img
+              src="/assets/images/loading_gif.gif"
+              alt="Loading..."
+              width="120px"
+              height="120px"
+            />
+          </div>
+        </div>
+      )}
       <Breadcrumb
         onBackClick={handleBackClick}
         onSaveClick={handleSaveDraft}
@@ -1193,14 +1167,6 @@ const PkgDataForm = () => {
               ))}
 
               <div className="progress-loader-container pkgdataform-loader mt-4 d-flex align-items-center">
-                {/* <ProgressLoader
-                  percentage={Math.round(progressPercentage)}
-                  size={24}
-                />
-                <span className="progress-percentage-text ms-2">
-                  {Math.round(progressPercentage)}% completed
-                </span> */}
-
                 <ProgressLoader
                   percentage={Math.round(pkgData.pkgFormProgress)}
                   size={24}
@@ -1220,8 +1186,6 @@ const PkgDataForm = () => {
           unansweredQuestions={unansweredQuestions} // Pass the unanswered questions
           onBack={handleBackToCurrentSection}
           onProceed={handleProceedToNextSection}
-          // onSaveDraft={onSaveDraft} // Save as Draft functionality
-          // showSaveAsDraftButton={isSaveAsDraft} // Pass flag for Save as Draft
           onPrevious={proceedToPreviousSection}
           isPreviousValidation={isPreviousValidation}
         />
@@ -1242,18 +1206,6 @@ const PkgDataForm = () => {
 
         {/* Next Button */}
         <button
-          // onClick={() => {
-          //   const sectionKeys = Object.keys(pkgData.sections);
-          //   const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
-          //   if (currentIndex < sectionKeys.length - 1) {
-          //     const nextSection = sectionKeys[currentIndex + 1];
-          //     setPkgData((prev) => ({ ...prev, activeSection: nextSection }));
-          //     sectionRefs.current[nextSection]?.current?.scrollIntoView({
-          //       behavior: "smooth",
-          //       block: "start",
-          //     });
-          //   }
-          // }}
           onClick={handleNextClick}
           className={`btn btn-primary ${
             Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
