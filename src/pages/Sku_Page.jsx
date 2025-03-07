@@ -776,32 +776,54 @@ const Sku_Page = () => {
   };
 
   const handleForwardClick = async (index) => {
+    if (!skuId || !pkoId) {
+      console.error(
+        "SKU ID or PKO ID is missing. Cannot fetch component details.",
+      );
+      return;
+    }
+
     try {
       // Call saveSkuData before proceeding
       await saveSkuData(false, false, true);
 
       // Fetch specific component details including responses
-      const components = componentsData || [];
-
-      if (components[index]) {
-        const componentData = components[index];
-
-        // Navigate to PkgDataForm with all necessary data
-        navigate("/component", {
-          state: {
-            skuId, // Pass SKU ID
-            componentId: componentData.id,
-            componentName: componentData.name,
-            formStatus: componentData.form_status,
-            responses: componentData.responses || {}, // Pass fetched responses
-            pkoId: pkoData?.pko_id || "N/A",
-            description: skuDetails?.description || "Description Not Available",
-            skuDetails,
-            pkoData,
+      const response = await axiosInstance.get(
+        `/sku/${skuId}/components/?pko_id=${pkoId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
-        });
+        },
+      );
+
+      if (response.status === 200) {
+        const components = response.data; // Expecting an array of component objects
+
+        if (components[index]) {
+          const componentData = components[index];
+
+          // Navigate to PkgDataForm with all necessary data
+          navigate("/component", {
+            state: {
+              skuId, // Pass SKU ID
+              componentId: componentData.id,
+              componentName: componentData.name,
+              formStatus: componentData.form_status,
+              responses: componentData.responses || {}, // Pass fetched responses
+              pkoId: pkoData?.pko_id || "N/A",
+              description:
+                skuDetails?.description || "Description Not Available",
+              skuDetails,
+              pkoData,
+            },
+          });
+        } else {
+          console.warn("Selected component not found in API response.");
+        }
       } else {
-        console.warn("Selected component not found in API response.");
+        console.error("Failed to fetch components. Status:", response.status);
+        alert("Failed to fetch component details. Please try again.");
       }
     } catch (error) {
       console.error("Error fetching component details:", error);
