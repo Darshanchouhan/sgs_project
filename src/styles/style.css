@@ -22985,6 +22985,21 @@ input[type="radio"] {
 .table-striped > tbody > tr:nth-of-type(even) > * {
   background-color: #fafafa !important;
 }
+#deleteModal {
+  background: rgba(0, 0, 0, 0.5);
+}
+#deleteModal .modal-dialog {
+  background: transparent !important;
+  box-shadow: none !important;
+  width: max-content !important;
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  #deleteModal .modal-dialog {
+    max-width: 500px !important;
+    min-width: 500px !important;
+  }
+}
 /* Custom css end (Azahar) */
 
 .offcanvas {

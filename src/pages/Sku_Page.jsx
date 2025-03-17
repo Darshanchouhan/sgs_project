@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import Header from "../components/Header";
 import "./../styles/style.css";
 import axiosInstance from "../services/axiosInstance";
@@ -53,13 +53,30 @@ const Sku_Page = () => {
   const [componentToDelete, setComponentToDelete] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null); // Track which component is being edited
   const [editedComponentName, setEditedComponentName] = useState(""); // Store the edited name
-
+  const dropdownRef = useRef(null); // Create a ref for the dropdown
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
   };
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
   };
+
+  // Function to handle clicks outside the dropdown
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setOpenDropdownIndex(null); // Close the dropdown if clicked outside
+    }
+  };
+
+  useEffect(() => {
+    // Add event listener for clicks outside
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchAndValidateComponentData = async () => {
     let issues = [];
@@ -856,12 +873,14 @@ const Sku_Page = () => {
     } finally {
       setShowDeletePopup(false); // Close the popup after deletion
       setComponentToDelete(null); // Reset the component to delete
+      setOpenDropdownIndex(null); // Close the dropdown
     }
   };
 
   const handleEditComponent = (index) => {
     setEditingIndex(index);
     setEditedComponentName(skuData.components[index].name);
+    setOpenDropdownIndex(null); // Close the dropdown
   };
 
   const handleSaveEdit = async (index) => {
@@ -884,6 +903,7 @@ const Sku_Page = () => {
       }));
 
       setEditingIndex(null); // Exit editing mode
+      setOpenDropdownIndex(null); // Close the dropdown
       alert("Component name updated successfully!");
     } catch (error) {
       console.error("Error updating component name:", error);
@@ -894,21 +914,47 @@ const Sku_Page = () => {
   const handleCancelEdit = () => {
     setEditingIndex(null);
     setEditedComponentName("");
+    setOpenDropdownIndex(null); // Close the dropdown
   };
 
   const renderDeleteConfirmation = () => {
     if (!showDeletePopup || !componentToDelete) return null;
 
     return (
-      <div className="confirmation-dialog">
-        <div className="dialog-content">
-          <h5>
-            Are you sure you want to delete the component{" "}
-            {componentToDelete.name}?
-          </h5>
-          <div className="dialog-actions">
-            <button onClick={() => setShowDeletePopup(false)}>No</button>
-            <button onClick={handleDeleteComponent}>Yes</button>
+      <div
+        className="modal d-block show fade"
+        id="deleteModal"
+        tabIndex="-1"
+        aria-labelledby="deleteModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-md modal-dialog-centered p-0">
+          <div className="modal-content">
+            <div className="modal-body text-center px-4 py-5">
+              <h5 className="fs-22 fw-600 mb-0">
+                Are you sure you want to delete the component{" "}
+                {componentToDelete.name}?
+              </h5>
+            </div>
+            <div className="modal-footer justify-content-center px-4 pt-0 pb-5 border-0">
+              <button
+                type="button"
+                className="btn btn-outline-secondary px-4 py-12 fs-14 fw-600"
+                onClick={() => {
+                  setShowDeletePopup(false);
+                  setOpenDropdownIndex(null);
+                }}
+              >
+                No
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary px-4 py-12 fs-14 fw-600"
+                onClick={handleDeleteComponent}
+              >
+                Yes
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1689,7 +1735,10 @@ const Sku_Page = () => {
                                     />
                                   </span>
                                   {openDropdownIndex === index && (
-                                    <div className="dropdown-menu show">
+                                    <div
+                                      className="dropdown-menu show"
+                                      ref={dropdownRef} // Attach ref to the dropdown
+                                    >
                                       <button
                                         className="dropdown-item"
                                         onClick={() =>
