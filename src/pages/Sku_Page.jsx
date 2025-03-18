@@ -54,6 +54,8 @@ const Sku_Page = () => {
   const [editingIndex, setEditingIndex] = useState(null); // Track which component is being edited
   const [editedComponentName, setEditedComponentName] = useState(""); // Store the edited name
   const dropdownRef = useRef(null); // Create a ref for the dropdown
+  const encodedPkoId = encodeURIComponent(pkoId);
+
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
   };
@@ -402,7 +404,7 @@ const Sku_Page = () => {
         setLoadingImages(true);
 
         const response = await axiosInstance.get(
-          `skus/${skuId}/images/?pko_id=${pkoId}`,
+          `skus/${skuId}/images/?pko_id=${encodedPkoId}`,
         );
 
         if (response.data && response.data.images) {
@@ -428,7 +430,7 @@ const Sku_Page = () => {
       // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
 
       const response = await axiosInstance.get(
-        `skus/${skuId}/images/?pko_id=${pkoId}`,
+        `skus/${skuId}/images/?pko_id=${encodedPkoId}`,
       );
 
       if (response.data && response.data.images) {
@@ -545,7 +547,7 @@ const Sku_Page = () => {
         // setLoading(true);
         try {
           const response = await axiosInstance.get(
-            `/skus/${skuId}/?pko_id=${pkoId}`,
+            `/skus/${skuId}/?pko_id=${encodedPkoId}`,
           );
           const data = response.data;
 
@@ -806,7 +808,7 @@ const Sku_Page = () => {
 
       // Fetch specific component details including responses
       const response = await axiosInstance.get(
-        `/sku/${skuId}/components/?pko_id=${pkoId}`,
+        `/sku/${skuId}/components/?pko_id=${encodedPkoId}`,
         {
           headers: {
             "Content-Type": "application/json",
