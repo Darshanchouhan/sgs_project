@@ -43,7 +43,7 @@ const Sku_Page = () => {
   const [proceedToEnable, setProceedToEnable] = useState([]); // Store validation errors
   const [showValidationModal, setShowValidationModal] = useState(false); // Modal visibility
   const [componentValidationIssues, setComponentValidationIssues] = useState(
-    [],
+    []
   );
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const handleInstructionClick = () => {
@@ -52,13 +52,13 @@ const Sku_Page = () => {
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
   };
-
+  const encodedPkoId = encodeURIComponent(pkoId);
   const fetchAndValidateComponentData = async () => {
     let issues = [];
 
     if (!skuId || !pkoId) {
       console.warn(
-        "SKU ID or PKO ID is missing. Cannot fetch component details.",
+        "SKU ID or PKO ID is missing. Cannot fetch component details."
       );
       return issues;
     }
@@ -68,14 +68,14 @@ const Sku_Page = () => {
         "Fetching components for SKU ID:",
         skuId,
         "and PKO ID:",
-        pkoId,
+        pkoId
       );
 
       const response = await axiosInstance.get(
-        `/sku/${skuId}/components/?pko_id=${pkoId}`,
+        `/sku/${skuId}/components/?pko_id=${encodedPkoId}`,
         {
           headers: { "Content-Type": "application/json" },
-        },
+        }
       );
 
       if (response.status === 200) {
@@ -89,13 +89,13 @@ const Sku_Page = () => {
           // Apply validation rules from PkgDataForm
           const componentIssues = validateComponentResponses(
             component,
-            componentResponse,
+            componentResponse
           );
           console.log(
             "Component Issues for",
             component.name,
             ":",
-            componentIssues,
+            componentIssues
           );
 
           if (componentIssues.length > 0) {
@@ -123,8 +123,8 @@ const Sku_Page = () => {
     return conditions.some((condition) =>
       parentAnswers.some(
         (parentAnswer) =>
-          (parentAnswer || "").trim().toLowerCase() === condition,
-      ),
+          (parentAnswer || "").trim().toLowerCase() === condition
+      )
     );
   };
 
@@ -152,13 +152,13 @@ const Sku_Page = () => {
           question.field_dependency,
           Array.isArray(question.dependent_question)
             ? question.dependent_question.map((qId) =>
-                Object.keys(responses).find((key) => key.endsWith(`||${qId}`)),
+                Object.keys(responses).find((key) => key.endsWith(`||${qId}`))
               )
             : [
                 Object.keys(responses).find((key) =>
-                  key.endsWith(`||${question.dependent_question}`),
+                  key.endsWith(`||${question.dependent_question}`)
                 ),
-              ],
+              ]
         );
 
       // **Check Mandatory Fields**
@@ -183,7 +183,7 @@ const Sku_Page = () => {
         const validationRules = question.validation_dropdown?.find(
           (rule) =>
             rule.name?.toLowerCase() === selectedComponentType?.toLowerCase() &&
-            rule.unit?.toLowerCase() === unit?.toLowerCase(),
+            rule.unit?.toLowerCase() === unit?.toLowerCase()
         );
 
         if (validationRules) {
@@ -244,19 +244,19 @@ const Sku_Page = () => {
       // Check if at least one component is added
       if (skuData.components.length === 0) {
         alert(
-          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission",
+          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission"
         );
         return;
       }
 
       // Check if any component is still in Pending status
       const hasPendingComponent = skuData.components.some(
-        (component) => component.form_status !== "Completed",
+        (component) => component.form_status !== "Completed"
       );
 
       if (hasPendingComponent) {
         alert(
-          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission",
+          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission"
         );
         return;
       }
@@ -311,7 +311,7 @@ const Sku_Page = () => {
           const question = questions.find(
             (q) =>
               questionText.startsWith(q.question_text) &&
-              questionText.endsWith(`||${q.question_id}`),
+              questionText.endsWith(`||${q.question_id}`)
           );
 
           if (question) {
@@ -331,7 +331,7 @@ const Sku_Page = () => {
               answers[question.question_id] = response;
             }
           }
-        },
+        }
       );
 
       // Update SKU state with formatted answers
@@ -368,7 +368,7 @@ const Sku_Page = () => {
       setPkoData((prevPkoData) => ({
         ...prevPkoData,
         skus: prevPkoData.skus.map((sku) =>
-          sku.sku_id === skuId ? { ...sku, status: "Completed" } : sku,
+          sku.sku_id === skuId ? { ...sku, status: "Completed" } : sku
         ),
       }));
 
@@ -390,7 +390,7 @@ const Sku_Page = () => {
         setLoadingImages(true);
 
         const response = await axiosInstance.get(
-          `skus/${skuId}/images/?pko_id=${pkoId}`,
+          `skus/${skuId}/images/?pko_id=${encodedPkoId}`
         );
 
         if (response.data && response.data.images) {
@@ -415,7 +415,7 @@ const Sku_Page = () => {
       // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
 
       const response = await axiosInstance.get(
-        `skus/${skuId}/images/?pko_id=${pkoId}`,
+        `skus/${skuId}/images/?pko_id=${encodedPkoId}`
       );
 
       if (response.data && response.data.images) {
@@ -448,7 +448,7 @@ const Sku_Page = () => {
           day: "2-digit",
           month: "short",
           year: "numeric",
-        }),
+        })
       );
     }
   }, [location.state, pkoData]);
@@ -460,7 +460,7 @@ const Sku_Page = () => {
       (q) =>
         q.mandatory &&
         skuData.dimensionsAndWeights[q.question_id] !== undefined &&
-        skuData.dimensionsAndWeights[q.question_id] !== "",
+        skuData.dimensionsAndWeights[q.question_id] !== ""
     ).length;
 
     // Calculate progress as 10% of answered mandatory questions
@@ -516,7 +516,7 @@ const Sku_Page = () => {
 
       try {
         const response = await axiosInstance.get(
-          `/skus/${skuId}/?pko_id=${pkoId}`,
+          `/skus/${skuId}/?pko_id=${encodedPkoId}`
         );
         const data = response.data;
 
@@ -525,7 +525,7 @@ const Sku_Page = () => {
         // Prevent overwriting status if already submitted
         if (hasSubmitted && data.status === "Draft") {
           console.log(
-            "Skipping status update since form is already submitted.",
+            "Skipping status update since form is already submitted."
           );
           return;
         }
@@ -539,7 +539,7 @@ const Sku_Page = () => {
               const question = questions.find(
                 (q) =>
                   questionText.startsWith(q.question_text) &&
-                  questionText.endsWith(`||${q.question_id}`),
+                  questionText.endsWith(`||${q.question_id}`)
               );
 
               if (question) {
@@ -559,7 +559,7 @@ const Sku_Page = () => {
                   answers[question.question_id] = response;
                 }
               }
-            },
+            }
           );
 
           // Set the SKU data properly
@@ -616,12 +616,12 @@ const Sku_Page = () => {
 
       try {
         const response = await axiosInstance.get(
-          `/sku/${skuId}/components/?pko_id=${pkoId}`,
+          `/sku/${skuId}/components/?pko_id=${encodedPkoId}`,
           {
             headers: {
               "Content-Type": "application/json",
             },
-          },
+          }
         );
 
         if (response.status === 200) {
@@ -647,7 +647,7 @@ const Sku_Page = () => {
         } else {
           console.error(
             "Failed to fetch component details. Status:",
-            response.status,
+            response.status
           );
         }
       } catch (error) {
@@ -662,7 +662,7 @@ const Sku_Page = () => {
   const saveSkuData = async (
     isDraft = true,
     showAlert = true,
-    isBackClick = false,
+    isBackClick = false
   ) => {
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
@@ -675,7 +675,7 @@ const Sku_Page = () => {
     const combinedProgress = Math.round(
       (Math.round(mandatoryProgress * 10) +
         parseFloat((componentProgressAverage * 90).toFixed(2))) /
-        100,
+        100
     );
     // setIsSubmitting(true);
     try {
@@ -699,8 +699,8 @@ const Sku_Page = () => {
           ? "Draft"
           : "Completed"
         : isDraft
-          ? "Draft"
-          : "Completed";
+        ? "Draft"
+        : "Completed";
       questions.forEach((question) => {
         const answer = skuData.dimensionsAndWeights[question.question_id];
         let unit =
@@ -783,7 +783,7 @@ const Sku_Page = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       // Update the components list in the state
@@ -812,7 +812,7 @@ const Sku_Page = () => {
   const handleForwardClick = async (index) => {
     if (!skuId || !pkoId) {
       console.error(
-        "SKU ID or PKO ID is missing. Cannot fetch component details.",
+        "SKU ID or PKO ID is missing. Cannot fetch component details."
       );
       return;
     }
@@ -823,12 +823,12 @@ const Sku_Page = () => {
 
       // Fetch specific component details including responses
       const response = await axiosInstance.get(
-        `/sku/${skuId}/components/?pko_id=${pkoId}`,
+        `/sku/${skuId}/components/?pko_id=${encodedPkoId}`,
         {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       if (response.status === 200) {
@@ -912,7 +912,7 @@ const Sku_Page = () => {
 
     // Check if the question is related to height, width, or depth
     const showOverlayForDimension = /height|width|depth/i.test(
-      question.question_text,
+      question.question_text
     );
 
     switch (question.question_type) {
@@ -1185,7 +1185,7 @@ const Sku_Page = () => {
         skuData.dimensionsAndWeights[question.dependent_question];
       const isDependentVisible = isAnswerMatch(
         question.field_dependency,
-        parentAnswer,
+        parentAnswer
       );
 
       if (question.dependent_question && !isDependentVisible) {
@@ -1262,7 +1262,7 @@ const Sku_Page = () => {
                 className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
                   skuData.components.length > 0 &&
                   skuData.components.every(
-                    (comp) => comp.form_status === "Completed",
+                    (comp) => comp.form_status === "Completed"
                   )
                     ? "bg-secondary text-white" // Apply "Save as Draft" button color
                     : ""
