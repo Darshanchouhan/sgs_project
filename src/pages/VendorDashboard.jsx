@@ -481,7 +481,7 @@ const VendorDashboard = () => {
         <div className="d-flex align-items-center justify-content-between mt-30">
           <div className="d-flex align-items-center">
             <h6 className="fs-20 fw-600 text-color-typo-primary pe-4">
-              PKO Project ID: {vendorData?.pkos[0]?.pko_id || "N/A"}
+              PKO Project ID: {selectedPkoId || "N/A"}
             </h6>
             <div className="d-flex align-items-center ps-4 border-start border-color-labels">
               <label className="fs-14 color-typo-primary me-2 mb-0 text-nowrap">
