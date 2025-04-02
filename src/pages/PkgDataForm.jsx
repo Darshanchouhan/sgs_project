@@ -35,7 +35,9 @@ const PkgDataForm = () => {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [unansweredQuestions, setUnansweredQuestions] = useState([]);
   const [isPreviousValidation, setIsPreviousValidation] = useState(false);
-
+  const [persistentValidationErrors, setPersistentValidationErrors] = useState(
+    [],
+  );
   const handleNextClick = () => {
     setIsPreviousValidation(false);
     const sectionKeys = Object.keys(pkgData.sections);
@@ -64,9 +66,11 @@ const PkgDataForm = () => {
     setUnansweredQuestions(validationResults); // Update unanswered questions state
 
     if (validationResults.length > 0) {
-      setShowValidationModal(true); // Show the validation modal
+      // Show the validation modal if there are unanswered questions
+      setShowValidationModal(true);
     } else {
-      proceedToPreviousSection(); // Proceed directly if no validation issues
+      // If no validation issues, proceed to the previous section
+      proceedToPreviousSection();
     }
   };
 
@@ -99,6 +103,10 @@ const PkgDataForm = () => {
     if (currentIndex < sectionKeys.length - 1) {
       const nextSectionKey = sectionKeys[currentIndex + 1]; // Determine the next section key
       setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey })); // Update the active section
+      //Update persistent errors with unanswered questions
+      setPersistentValidationErrors(
+        unansweredQuestions.map((q) => q.question_id),
+      );
 
       // Scroll to the next section
       sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
@@ -116,15 +124,31 @@ const PkgDataForm = () => {
 
     if (currentIndex > 0) {
       const previousSection = sectionKeys[currentIndex - 1];
+
+      // Validate current section before proceeding
+      const validationResults = validateCurrentSection();
+
+      // Update persistent errors with current section's validation results
+      setPersistentValidationErrors((prev) => {
+        const currentSectionErrors = validationResults.map(
+          (q) => q.question_id,
+        );
+        return [...new Set([...prev, ...currentSectionErrors])];
+      });
+
+      // Set the active section to the previous section
       setPkgData((prev) => ({
         ...prev,
         activeSection: previousSection,
       }));
+
+      // Scroll to the previous section
       sectionRefs.current[previousSection]?.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-      setShowValidationModal(false); // Close modal after navigation
+
+      setShowValidationModal(false);
     }
   };
 
@@ -140,6 +164,7 @@ const PkgDataForm = () => {
 
   const validateCurrentSection = () => {
     const unansweredQuestions = [];
+    const errorIds = [];
 
     // Get the selected "Component Type"
     const componentTypeQuestion = Object.values(pkgData.sections)
@@ -173,9 +198,11 @@ const PkgDataForm = () => {
       if (isVisible) {
         if (question.mandatory && !isAnswered) {
           unansweredQuestions.push({
+            question_id: question.question_id,
             fieldName: question.question_text,
             issue: "Please provide response for all the mandatory fields",
           });
+          errorIds.push(question.question_id); // Add question ID to error list
         }
 
         // **Validation for all fields with "validationdependency": "Y"**
@@ -267,9 +294,11 @@ const PkgDataForm = () => {
 
               if (issue) {
                 unansweredQuestions.push({
+                  question_id: question.question_id,
                   fieldName: question.question_text,
                   issue: `${question.question_text} ${issue}`,
                 });
+                errorIds.push(question.question_id); // Add question ID to error list
               }
             } else {
               console.log(
@@ -281,6 +310,10 @@ const PkgDataForm = () => {
         }
       }
     });
+    // Update persistent errors
+    setPersistentValidationErrors((prev) => [
+      ...new Set([...prev, ...errorIds]),
+    ]);
 
     console.log("Final Validation Issues:", unansweredQuestions);
     return unansweredQuestions;
@@ -294,7 +327,7 @@ const PkgDataForm = () => {
 
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
-  const isFirstLoad = useRef(true);
+  // const isFirstLoad = useRef(true);
 
   const autosavePkgData = async () => {
     await handleSave(false); // Call handleSave with showAlert = false
@@ -584,6 +617,12 @@ const PkgDataForm = () => {
         totalMandatory,
         updatedAnswers,
       );
+
+      // Clear persistent error if field is now valid
+      setPersistentValidationErrors((prevErrors) =>
+        prevErrors.filter((id) => id !== questionId),
+      );
+
       return {
         ...prev,
         answers: updatedAnswers,
@@ -621,6 +660,9 @@ const PkgDataForm = () => {
   const renderField = (question) => {
     const handleChange = (e) =>
       handleInputChange(question.question_id, e.target.value);
+    const hasError = persistentValidationErrors.includes(question.question_id);
+    // Apply conditional styles based on validation errors
+    const inputClass = hasError ? "input-error" : "";
 
     const isOutsideDimension = /outside/i.test(question.question_text);
     const isInsideDimension = /inside/i.test(question.question_text);
@@ -663,7 +705,7 @@ const PkgDataForm = () => {
           <div className="input-group align-items-center">
             <input
               maxLength="100"
-              className="h-42  w-100"
+              className={`h-42 w-100 ${inputClass}`}
               type="text"
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
@@ -680,7 +722,7 @@ const PkgDataForm = () => {
               <label key={option} className="me-3">
                 <input
                   type="radio"
-                  className="me-2"
+                  className={`me-2 ${inputClass}`}
                   name={question.question_id}
                   value={option}
                   checked={pkgData.answers[question.question_id] === option}
@@ -696,7 +738,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center select-arrow-pos">
             <select
-              className="w-100"
+              className={`w-100 ${inputClass}`}
               value={pkgData.answers[question.question_id] || ""}
               onChange={handleChange}
               tabIndex={0} // Make focusable
@@ -718,7 +760,7 @@ const PkgDataForm = () => {
           <div className="input-group align-items-center">
             {/* Input for the float value */}
             <input
-              className="h-42 w-75"
+              className={`h-42 w-75 ${inputClass}`}
               type="text" // Use text to allow decimal inputs
               value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
@@ -799,7 +841,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 w-75"
+              className={`h-42 w-75 ${inputClass}`}
               type="number"
               onWheel={(e) => e.target.blur()}
               step="1"
@@ -857,7 +899,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42  w-100"
+              className={`h-42 w-100 ${inputClass}`}
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] ?? ""}
@@ -893,7 +935,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 w-100"
+              className={`h-42 w-100 ${inputClass}`}
               type="text" // Use text to allow decimal inputs
               value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
@@ -957,7 +999,9 @@ const PkgDataForm = () => {
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
       }
-
+      const hasError = persistentValidationErrors.includes(
+        question.question_id,
+      );
       // Info Icon with Instructions
       const infoIcon = checkImagePath(question.instructions) ? (
         <InfoOutlinedIcon
@@ -980,7 +1024,7 @@ const PkgDataForm = () => {
         <div className="col-12 col-md-6 col-xl-8 col-xxxl-6">
           <div className="form-group mt-4" key={question.question_id}>
             <div className="d-flex justify-content-between align-items-center mb-2 h-26">
-              <label className="mb-0">
+              <label className={`mb-0 ${hasError ? "label-error" : ""}`}>
                 {question.mandatory ? (
                   <>
                     {question.question_text}{" "}
@@ -1088,6 +1132,9 @@ const PkgDataForm = () => {
       );
 
       if (response.status === 200) {
+        // Clear persistent errors on successful save
+        //  setPersistentValidationErrors([]);
+
         console.log("Save Response:", response.data);
         if (showAlert) alert("Component data saved successfully!");
 

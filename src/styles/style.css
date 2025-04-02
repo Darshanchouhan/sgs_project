@@ -23048,3 +23048,19 @@ input[type="radio"] {
   background-color: rgba(255, 255, 255, 0.8);
   z-index: 9999;
 }
+/* .input-error {
+  border-color: red;
+}
+
+.label-error {
+  color: red;
+} */
+
+.input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5 !important;
+}
+
+.label-error {
+  color: #dc3545 !important;
+}
