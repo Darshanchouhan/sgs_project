@@ -89,6 +89,22 @@ const SkuProduct_Img = ({
     input.click();
   };
 
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    const newImages = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+
+    setImages(newImages);
+    setImagesToUpload(files);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
   // const handleAddImage = async () => {
   //   const input = document.createElement("input");
   //   input.type = "file";
@@ -205,7 +221,11 @@ const SkuProduct_Img = ({
                 </ul>
               </div>
               {combinedImages.length === 0 ? (
-                <div className="noImagesAdded-block text-center">
+                <div
+                  className="noImagesAdded-block text-center"
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                >
                   <div>
                     <img src="/assets/images/BoxImg.png" alt="box-img" />
                   </div>
@@ -220,10 +240,17 @@ const SkuProduct_Img = ({
                   >
                     + Add Packaging Images
                   </button>
+                  <p className="fs-14 fw-400 text-color-labels mt-3">
+                    Or drag and drop images here
+                  </p>
                 </div>
               ) : (
                 <div className="gallery-grid">
-                  <div className="drag-drop-img-box d-flex align-items-center justify-content-center bg-color-drag-drop-box border border-secondary text-center p-40">
+                  <div
+                    className="drag-drop-img-box d-flex align-items-center justify-content-center bg-color-drag-drop-box border border-secondary text-center p-40"
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                  >
                     <div>
                       <p className="fs-14 fw-400 text-color-labels mb-3">
                         Click the below button to upload images.
@@ -235,6 +262,9 @@ const SkuProduct_Img = ({
                       >
                         + Add Packaging Images
                       </button>
+                      <p className="fs-14 fw-400 text-color-labels mt-3">
+                        Or drag and drop images here
+                      </p>
                     </div>
                   </div>
                   {combinedImages &&
