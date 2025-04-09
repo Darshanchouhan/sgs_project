@@ -38,6 +38,9 @@ const PkgDataForm = () => {
   const [persistentValidationErrors, setPersistentValidationErrors] = useState(
     [],
   );
+
+  const [isFullValidation, setIsFullValidation] = useState(false); // Step 1: Create a flag
+
   const handleNextClick = () => {
     setIsPreviousValidation(false);
     const sectionKeys = Object.keys(pkgData.sections);
@@ -157,8 +160,123 @@ const PkgDataForm = () => {
     handleSave(); // Directly save without validation
   };
 
+  const validateAllSections = () => {
+    const allUnansweredQuestions = [];
+
+    // Loop through all sections
+    Object.entries(pkgData.sections).forEach(([sectionName, questions]) => {
+      questions.forEach((question) => {
+        const isAnswered =
+          pkgData.answers[question.question_id] !== undefined &&
+          pkgData.answers[question.question_id] !== "";
+
+        // Check if the question is visible
+        const isVisible =
+          !question.dependent_question ||
+          isAnswerMatch(
+            question.field_dependency,
+            Array.isArray(question.dependent_question)
+              ? question.dependent_question.map((qId) => pkgData.answers[qId])
+              : [pkgData.answers[question.dependent_question]],
+          );
+
+        if (isVisible) {
+          if (question.mandatory && !isAnswered) {
+            allUnansweredQuestions.push({
+              section: sectionName,
+              question_id: question.question_id,
+              fieldName: question.question_text,
+              issue: "Please provide response for all the mandatory fields",
+            });
+          }
+
+          // Validation for fields with "validationdependency": "Y"
+          if (
+            question.validationdependency === "Y" &&
+            question.validation_dropdown &&
+            isAnswered
+          ) {
+            let selectedUnit = pkgData.answers[`${question.question_id}_unit`];
+            const enteredValue = parseFloat(
+              pkgData.answers[question.question_id],
+            );
+
+            // Get the selected "Component Type"
+            const componentTypeQuestion = Object.values(pkgData.sections)
+              .flat()
+              .find((q) => q.question_text === "Component Type");
+
+            const componentTypeQuestionId = componentTypeQuestion?.question_id;
+            const selectedComponentType =
+              pkgData.answers[componentTypeQuestionId];
+
+            if (!selectedUnit && question.dropdown_options?.length > 0) {
+              selectedUnit = question.dropdown_options[0];
+            }
+
+            if (selectedComponentType && selectedUnit && !isNaN(enteredValue)) {
+              const validationRules = question.validation_dropdown.filter(
+                (rule) =>
+                  rule.name?.toLowerCase() ===
+                    selectedComponentType?.toLowerCase() &&
+                  rule.unit?.toLowerCase() === selectedUnit?.toLowerCase(),
+              );
+
+              if (validationRules.length > 0) {
+                const rule = validationRules[0];
+                let issue = null;
+
+                if (
+                  rule.min_weight !== undefined &&
+                  rule.max_weight !== undefined &&
+                  (enteredValue < rule.min_weight ||
+                    enteredValue > rule.max_weight)
+                ) {
+                  issue = `Weight should be between ${rule.min_weight} and ${rule.max_weight} ${selectedUnit}`;
+                } else if (
+                  rule.min_length !== undefined &&
+                  rule.max_length !== undefined &&
+                  (enteredValue < rule.min_length ||
+                    enteredValue > rule.max_length)
+                ) {
+                  issue = `Length should be between ${rule.min_length} and ${rule.max_length} ${selectedUnit}`;
+                } else if (
+                  rule.min_width !== undefined &&
+                  rule.max_width !== undefined &&
+                  (enteredValue < rule.min_width ||
+                    enteredValue > rule.max_width)
+                ) {
+                  issue = `Width should be between ${rule.min_width} and ${rule.max_width} ${selectedUnit}`;
+                } else if (
+                  rule.min_depth !== undefined &&
+                  rule.max_depth !== undefined &&
+                  (enteredValue < rule.min_depth ||
+                    enteredValue > rule.max_depth)
+                ) {
+                  issue = `Depth should be between ${rule.min_depth} and ${rule.max_depth} ${selectedUnit}`;
+                }
+
+                if (issue) {
+                  allUnansweredQuestions.push({
+                    section: sectionName,
+                    question_id: question.question_id,
+                    fieldName: question.question_text,
+                    issue: `${question.question_text} ${issue}`,
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+    console.log("all unanswerd question", allUnansweredQuestions);
+    return allUnansweredQuestions;
+  };
+
   const handleBackToCurrentSection = () => {
     setShowValidationModal(false); // Close the modal
+    setIsFullValidation(false); // Reset the flag
     setIsPreviousValidation(false); // Reset Previous validation flag
   };
 
@@ -321,9 +439,12 @@ const PkgDataForm = () => {
 
   useEffect(() => {
     if (showValidationModal) {
-      setUnansweredQuestions(validateCurrentSection()); // Update modal dynamically
+      // Step 3: Check the flag before validating the current section
+      if (!isFullValidation) {
+        setUnansweredQuestions(validateCurrentSection()); // Update modal dynamically
+      }
     }
-  }, [pkgData.answers, showValidationModal]);
+  }, [pkgData.answers, showValidationModal, isFullValidation]);
 
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
@@ -536,6 +657,24 @@ const PkgDataForm = () => {
   const handleBackClick = async () => {
     await handleSave(false); // Call save function with false flag to skip alert
     navigate("/skus"); // Navigate back after saving
+  };
+
+  const handleBackToSkuClick = async () => {
+    setIsFullValidation(true);
+    const allValidationResults = validateAllSections();
+    setUnansweredQuestions(allValidationResults);
+
+    if (allValidationResults.length > 0) {
+      // Update persistent errors before showing the modal
+      setPersistentValidationErrors(
+        allValidationResults.map((q) => q.question_id),
+      );
+      setShowValidationModal(true);
+    } else {
+      // Call handleSave before navigating back
+      await handleSave(false); // Call save function with false flag to skip alert
+      handleBackClick(); // Navigate back after saving
+    }
   };
 
   const handleInputChange = (questionId, value) => {
@@ -1235,6 +1374,11 @@ const PkgDataForm = () => {
           onProceed={handleProceedToNextSection}
           onPrevious={proceedToPreviousSection}
           isPreviousValidation={isPreviousValidation}
+          isAllSectionsValidation={
+            Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
+            Object.keys(pkgData.sections).length - 1
+          } // Set to true for all sections validation
+          onBackToSku={handleBackClick}
         />
       )}
       {/* Footer with Previous and Next buttons */}
@@ -1251,18 +1395,17 @@ const PkgDataForm = () => {
           <FaArrowLeft /> Previous
         </button>
 
-        {/* Next Button */}
-        <button
-          onClick={handleNextClick}
-          className={`btn btn-primary ${
-            Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
-            Object.keys(pkgData.sections).length - 1
-              ? "invisible"
-              : ""
-          }`}
-        >
-          Next <FaArrowRight />
-        </button>
+        {/* Conditional rendering: Show Next button or Back to SKU page button */}
+        {Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
+        Object.keys(pkgData.sections).length - 1 ? (
+          <button onClick={handleBackToSkuClick} className="btn btn-primary">
+            Back to SKU Page
+          </button>
+        ) : (
+          <button onClick={handleNextClick} className="btn btn-primary">
+            Next <FaArrowRight />
+          </button>
+        )}
       </div>
     </div>
   );

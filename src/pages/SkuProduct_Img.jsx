@@ -69,21 +69,30 @@ const SkuProduct_Img = ({
   const handleAddImage = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*";
-    input.multiple = true;
+    input.accept = ".jpg,.jpeg,.png,.gif"; // Specify accepted file types
+    input.multiple = false;
 
     input.onchange = (event) => {
-      const files = Array.from(event.target.files);
-      const newImages = files.map((file) => ({
-        file,
-        url: URL.createObjectURL(file), // Generate temporary URL for display
-      }));
+      const file = event.target.files[0];
 
-      // setImages((prev) => [...prev, ...newImages]); // Add new images to state
-      // setImagesToUpload((prev) => [...prev, ...files]); // Update parent with new files
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert(
+          "The selected image is more than 5MB. Please select an image less than 5MB.",
+        );
+        return;
+      }
+
+      const newImages = [
+        {
+          file,
+          url: URL.createObjectURL(file),
+        },
+      ];
 
       setImages(newImages); // ✅ Replace the state instead of appending
-      setImagesToUpload(files); // ✅ Replace the upload list
+      setImagesToUpload([file]); // ✅ Replace the upload list
     };
 
     input.click();
@@ -91,14 +100,43 @@ const SkuProduct_Img = ({
 
   const handleDrop = (event) => {
     event.preventDefault();
+
     const files = Array.from(event.dataTransfer.files);
-    const newImages = files.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
+
+    if (files.length > 1) {
+      alert("Only one image can be selected at a time.");
+      return;
+    }
+
+    // return if file doesn't exist
+    const file = files[0];
+    if (!file) return;
+
+    // check type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      alert(
+        "Invalid file type. Please select a .jpg, .jpeg, .png, or .gif image.",
+      );
+      return;
+    }
+
+    // check for 5Mb size
+    if (file.size > 5 * 1024 * 1024) {
+      alert(
+        "The selected image is more than 5MB. Please select an image less than 5MB.",
+      );
+      return;
+    }
+
+    const newImages = [
+      {
+        file,
+        url: URL.createObjectURL(file),
+      },
+    ];
 
     setImages(newImages);
-    setImagesToUpload(files);
   };
 
   const handleDragOver = (event) => {
@@ -205,6 +243,11 @@ const SkuProduct_Img = ({
                   <li>
                     Attach at least 1 image of the package or individual
                     packaging components below.
+                  </li>
+                  <li>
+                    Image files must be in one of the following formats: '.jpg',
+                    '.jpeg', '.png', or '.gif' and image size should be less
+                    than 5 MB.
                   </li>
                   <li>
                     The image does not need to contain final graphics and can be
