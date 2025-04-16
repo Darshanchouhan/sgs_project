@@ -171,14 +171,10 @@ const PkgDataForm = () => {
           pkgData.answers[question.question_id] !== "";
 
         // Check if the question is visible
-        const isVisible =
-          !question.dependent_question ||
-          isAnswerMatch(
-            question.field_dependency,
-            Array.isArray(question.dependent_question)
-              ? question.dependent_question.map((qId) => pkgData.answers[qId])
-              : [pkgData.answers[question.dependent_question]],
-          );
+        const isVisible = isAnswerMatch(
+          question.dependent_question,
+          pkgData.answers,
+        );
 
         if (isVisible) {
           if (question.mandatory && !isAnswered) {
@@ -304,14 +300,10 @@ const PkgDataForm = () => {
         pkgData.answers[question.question_id] !== "";
 
       // Check if the question is visible
-      const isVisible =
-        !question.dependent_question ||
-        isAnswerMatch(
-          question.field_dependency,
-          Array.isArray(question.dependent_question)
-            ? question.dependent_question.map((qId) => pkgData.answers[qId])
-            : [pkgData.answers[question.dependent_question]],
-        );
+      const isVisible = isAnswerMatch(
+        question.dependent_question,
+        pkgData.answers,
+      );
 
       if (isVisible) {
         if (question.mandatory && !isAnswered) {
@@ -463,14 +455,10 @@ const PkgDataForm = () => {
       Object.values(pkgData.sections)
         .flat()
         .forEach((question) => {
-          const isVisible =
-            !question.dependent_question ||
-            isAnswerMatch(
-              question.field_dependency,
-              Array.isArray(question.dependent_question)
-                ? question.dependent_question.map((qId) => pkgData.answers[qId])
-                : [pkgData.answers[question.dependent_question]],
-            );
+          const isVisible = isAnswerMatch(
+            question.dependent_question,
+            pkgData.answers,
+          );
 
           if (isVisible && question.mandatory) {
             console.log(
@@ -681,83 +669,74 @@ const PkgDataForm = () => {
     setPkgData((prev) => {
       const updatedAnswers = { ...prev.answers };
 
-      // Handle the case where the value is 0
+      // Set the new value (allow 0)
       updatedAnswers[questionId] = value === "" ? "" : value;
 
       // Find the current question
-      const question = Object.values(pkgData.sections)
+      const currentQuestion = Object.values(pkgData.sections)
         .flat()
         .find((q) => q.question_id === questionId);
 
-      // Check if the field is a "Float + Dropdown" or "Integer + Dropdown"
+      // Default unit setup
       if (
-        (question?.question_type === "Float + Dropdown" ||
-          question?.question_type === "Integer + Dropdown") &&
+        (currentQuestion?.question_type === "Float + Dropdown" ||
+          currentQuestion?.question_type === "Integer + Dropdown") &&
         !updatedAnswers[`${questionId}_unit`]
       ) {
-        // Ensure a default unit is selected if not already set
-        updatedAnswers[`${questionId}_unit`] = question.dropdown_options[0];
+        updatedAnswers[`${questionId}_unit`] =
+          currentQuestion.dropdown_options[0];
       }
 
-      // Update the current question's answer
-      updatedAnswers[questionId] = value;
+      //  Update dependent questions: clear answers only if they become invisible
+      const allQuestions = Object.values(pkgData.sections).flat();
 
-      // Find and clear answers for all dependent questions
-      const dependentQuestionIds = Object.values(pkgData.sections)
-        .flat()
-        .filter((q) =>
-          Array.isArray(q.dependent_question)
-            ? q.dependent_question.includes(questionId)
-            : q.dependent_question === questionId,
-        )
-        .map((q) => q.question_id);
+      allQuestions.forEach((question) => {
+        if (question.dependent_question) {
+          const isNowVisible = isAnswerMatch(
+            question.dependent_question,
+            updatedAnswers,
+          );
 
-      dependentQuestionIds.forEach((depQuestionId) => {
-        delete updatedAnswers[depQuestionId]; // Clear dependent answers
+          // If it depends on this input and becomes hidden => clear its answer
+          const dependsOnThisInput = (() => {
+            const dep = question.dependent_question;
+            if (!dep || typeof dep !== "object") return false;
+
+            const mainMatch = dep.main_dependency?.question_id === questionId;
+            const andMatch = dep.and_condition?.question_id === questionId;
+            return mainMatch || andMatch;
+          })();
+
+          if (dependsOnThisInput && !isNowVisible) {
+            delete updatedAnswers[question.question_id];
+            delete updatedAnswers[`${question.question_id}_unit`];
+          }
+        }
       });
 
-      // Update the current question's answer
-      updatedAnswers[questionId] = value;
-
-      // Dynamically calculate visible mandatory counts
+      //  Recalculate progress
       let totalMandatory = 0;
       let answeredMandatory = 0;
 
-      Object.values(pkgData.sections)
-        .flat()
-        .forEach((question) => {
-          // Check if the question is visible
-          const isVisible =
-            !question.dependent_question ||
-            isAnswerMatch(
-              question.field_dependency,
-              Array.isArray(question.dependent_question)
-                ? question.dependent_question.map((qId) => updatedAnswers[qId])
-                : [updatedAnswers[question.dependent_question]],
-            );
+      allQuestions.forEach((question) => {
+        const isVisible = isAnswerMatch(
+          question.dependent_question,
+          updatedAnswers,
+        );
 
-          if (isVisible && question.mandatory) {
-            totalMandatory++;
-            if (
-              updatedAnswers[question.question_id] !== undefined &&
-              updatedAnswers[question.question_id] !== ""
-            ) {
-              answeredMandatory++;
-            }
+        if (isVisible && question.mandatory) {
+          totalMandatory++;
+          const ans = updatedAnswers[question.question_id];
+          if (ans !== undefined && ans !== "") {
+            answeredMandatory++;
           }
-        });
+        }
+      });
 
-      // Calculate progress percentage
       const progressPercentage =
         totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0;
-      console.log(
-        "answered question",
-        answeredMandatory,
-        totalMandatory,
-        updatedAnswers,
-      );
 
-      // Clear persistent error if field is now valid
+      // Clear persistent errors for this question if answered
       setPersistentValidationErrors((prevErrors) =>
         prevErrors.filter((id) => id !== questionId),
       );
@@ -779,21 +758,38 @@ const PkgDataForm = () => {
     setIsFormFilled(hasAnswers);
   }, [pkgData.answers]);
 
-  const isAnswerMatch = (fieldDependency, parentAnswers) => {
-    if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
+  const isAnswerMatch = (dependentQuestionObj, answers) => {
+    // No dependency → always visible
+    if (!dependentQuestionObj || typeof dependentQuestionObj !== "object") {
+      return true;
+    }
 
-    // Normalize fieldDependency into an array of conditions
-    const conditions = fieldDependency
-      .split(" OR ") // Split conditions by "OR"
-      .map((condition) => condition.trim().toLowerCase());
+    const { main_dependency, and_condition } = dependentQuestionObj;
 
-    // Check for exact matches only
-    return conditions.some((condition) =>
-      parentAnswers.some(
-        (parentAnswer) =>
-          (parentAnswer || "").trim().toLowerCase() === condition,
-      ),
-    );
+    // Validate presence of main_dependency
+    if (
+      !main_dependency?.question_id ||
+      !Array.isArray(main_dependency.expected_values)
+    ) {
+      return false; // if dependency structure is incorrect
+    }
+
+    const mainAnswer = answers[main_dependency.question_id];
+    const mainConditionMet =
+      main_dependency.expected_values.includes(mainAnswer);
+
+    let andConditionMet = true;
+
+    if (
+      and_condition?.question_id &&
+      and_condition?.expected_value !== undefined
+    ) {
+      const andAnswer = answers[and_condition.question_id];
+      andConditionMet = andAnswer === and_condition.expected_value;
+    }
+
+    // Return only if BOTH match
+    return mainConditionMet && andConditionMet;
   };
 
   const renderField = (question) => {
@@ -1124,16 +1120,9 @@ const PkgDataForm = () => {
   const renderQuestions = (questions) => {
     return questions.map((question) => {
       // Collect all parent answers
-      const parentAnswers = Array.isArray(question.dependent_question)
-        ? question.dependent_question.map(
-            (parentId) => pkgData.answers[parentId] || "",
-          )
-        : [pkgData.answers[question.dependent_question] || ""];
-
-      // Check if the question is visible based on dependency
       const isDependentVisible = isAnswerMatch(
-        question.field_dependency,
-        parentAnswers,
+        question.dependent_question,
+        pkgData.answers,
       );
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met

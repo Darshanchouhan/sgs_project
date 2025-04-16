@@ -11766,6 +11766,10 @@ fieldset:disabled .btn {
   padding-left: 1.875rem !important;
 }
 
+.ps-35 {
+  padding-left: 2.188rem !important;
+}
+
 .ps-40 {
   padding-left: 2.5rem !important;
 }
@@ -22999,6 +23003,26 @@ input[type="radio"] {
     max-width: 500px !important;
     min-width: 500px !important;
   }
+}
+.import-data-modal-popup .border-color-list-item {
+  border-color: var(--bs-color-list-item) !important;
+}
+.import-data-modal-popup .modal-dialog {
+  max-width: 53%;
+}
+@media (max-width: 575.98px) {
+  .import-data-modal-popup .modal-dialog {
+    max-width: 97%;
+  }
+}
+.import-data-modal-popup .popover {
+  max-width: max-content;
+  box-shadow: 0px 2px 10px 0px #00000033;
+}
+.import-data-modal-popup .btn-close {
+  background-image: url("/assets/images/close-icon-red-new.svg");
+  background-size: 24px;
+  opacity: 1;
 }
 /* Custom css end (Azahar) */
 
