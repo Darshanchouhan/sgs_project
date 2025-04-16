@@ -79,7 +79,7 @@ const SkuProduct_Img = ({
 
       if (file.size > 5 * 1024 * 1024) {
         alert(
-          "The selected image is more than 5MB. Please select an image less than 5MB."
+          "The selected image is more than 5MB. Please select an image less than 5MB.",
         );
         return;
       }
@@ -116,7 +116,7 @@ const SkuProduct_Img = ({
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!validTypes.includes(file.type)) {
       alert(
-        "Invalid file type. Please select a .jpg, .jpeg, .png, or .gif image."
+        "Invalid file type. Please select a .jpg, .jpeg, .png, or .gif image.",
       );
       return;
     }
@@ -124,7 +124,7 @@ const SkuProduct_Img = ({
     // check for 5Mb size
     if (file.size > 5 * 1024 * 1024) {
       alert(
-        "The selected image is more than 5MB. Please select an image less than 5MB."
+        "The selected image is more than 5MB. Please select an image less than 5MB.",
       );
       return;
     }

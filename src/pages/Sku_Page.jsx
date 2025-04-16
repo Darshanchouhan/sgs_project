@@ -48,7 +48,7 @@ const Sku_Page = () => {
   const [componentValidationIssues, setComponentValidationIssues] = useState(
     [],
   );
-  const [selectedComponentType, setSelectedComponentType] = useState('');
+  const [selectedComponentType, setSelectedComponentType] = useState("");
   const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
@@ -58,7 +58,6 @@ const Sku_Page = () => {
   const [dropdownListComing, setDropdownListComing] = useState([]); // Store the dropdown list
   const dropdownRef = useRef(null); // Create a ref for the dropdown
   const encodedPkoId = encodeURIComponent(pkoId);
-
 
   const handleComponentTypeChange = (e) => {
     setSelectedComponentType(e.target.value);
@@ -83,9 +82,7 @@ const Sku_Page = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get( 
-          `component-type-options/`,
-        );
+        const response = await axiosInstance.get(`component-type-options/`);
         setDropdownListComing(response.data);
       } catch (err) {
         console.error(err);
@@ -164,7 +161,7 @@ const Sku_Page = () => {
     // const componentTypeQuestionId = componentTypeQuestion?.question_id;
     const selectedComponentType =
       responses[
-      `${componentTypeQuestion.question_text}||${componentTypeQuestion.question_id}`
+        `${componentTypeQuestion.question_text}||${componentTypeQuestion.question_id}`
       ];
 
     questionsComponent.forEach((question) => {
@@ -179,13 +176,13 @@ const Sku_Page = () => {
           question.field_dependency,
           Array.isArray(question.dependent_question)
             ? question.dependent_question.map((qId) =>
-              Object.keys(responses).find((key) => key.endsWith(`||${qId}`)),
-            )
+                Object.keys(responses).find((key) => key.endsWith(`||${qId}`)),
+              )
             : [
-              Object.keys(responses).find((key) =>
-                key.endsWith(`||${question.dependent_question}`),
-              ),
-            ],
+                Object.keys(responses).find((key) =>
+                  key.endsWith(`||${question.dependent_question}`),
+                ),
+              ],
         );
 
       // **Check Mandatory Fields**
@@ -591,7 +588,7 @@ const Sku_Page = () => {
           const averageProgress =
             progressValues != 0
               ? progressValues.reduce((sum, progress) => sum + progress, 0) /
-              progressValues.length
+                progressValues.length
               : 0;
 
           // Update the state with the average
@@ -685,7 +682,7 @@ const Sku_Page = () => {
     const combinedProgress = Math.round(
       (Math.round(mandatoryProgress * 10) +
         parseFloat((componentProgressAverage * 90).toFixed(2))) /
-      100,
+        100,
     );
     // setIsSubmitting(true);
     try {
@@ -774,7 +771,7 @@ const Sku_Page = () => {
       return; // Exit early without modifying the state
     }
 
-    if (selectedComponentType === '') {
+    if (selectedComponentType === "") {
       alert("Component type cannot be empty!");
       return; // Exit early without modifying the state
     }
@@ -818,9 +815,9 @@ const Sku_Page = () => {
         showInput: false, // Hide input field after adding the component
         isCancelDisabled: false, // Enable the cancel button for subsequent adds
       }));
-      
+
       // Reset selected component type
-      setSelectedComponentType('');
+      setSelectedComponentType("");
 
       alert("Component added successfully!");
     } catch (error) {
@@ -1228,7 +1225,7 @@ const Sku_Page = () => {
                 className="form-select background-position border-0 bg-color-light-shade text-color-typo-primary px-12 w-72 fw-400"
                 value={
                   skuData.dimensionsAndWeights[
-                  `${question.question_id}_unit`
+                    `${question.question_id}_unit`
                   ] || question.dropdown_options[0] // Ensure default unit selection
                 }
                 onChange={(e) => {
@@ -1365,12 +1362,13 @@ const Sku_Page = () => {
       return (
         <div
           key={question.question_id}
-          className={`col-12 ${question.question_type === "Float + Dropdown" ||
-              question.question_type === "Dropdown" ||
-              question.question_type === "No Input Required"
+          className={`col-12 ${
+            question.question_type === "Float + Dropdown" ||
+            question.question_type === "Dropdown" ||
+            question.question_type === "No Input Required"
               ? "col-md-6"
               : "col-12"
-            } mb-3`}
+          } mb-3`}
         >
           {question.question_type !== "No Input Required" && (
             <label className="fs-14 text-color-typo-primary mb-2 d-block">
@@ -1444,13 +1442,14 @@ const Sku_Page = () => {
               </button>
 
               <button
-                className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${skuData.components.length > 0 &&
-                    skuData.components.every(
-                      (comp) => comp.form_status === "Completed",
-                    )
+                className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
+                  skuData.components.length > 0 &&
+                  skuData.components.every(
+                    (comp) => comp.form_status === "Completed",
+                  )
                     ? "bg-secondary text-white" // Apply "Save as Draft" button color
                     : ""
-                  }`}
+                }`}
                 onClick={handleValidateAndSubmit}
               >
                 Validate & Submit
@@ -1470,15 +1469,15 @@ const Sku_Page = () => {
       </div>
       <Autosave saveFunction={autosaveSkuData} dependencies={[skuData]} />
       <div className="d-flex align-items-center justify-content-end px-40 mt-2">
-        <button type="button" className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#importSkuDataModal">
+        {/* <button type="button" className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#importSkuDataModal">
           <img src="/assets/images/import-icon.svg" className="me-2" alt="import-icon" />Import data from other SKUs
-        </button>
+        </button> */}
       </div>
-      <Importdata 
-        title="Import data from other SKUs" 
-        chooseComponentDrop={false} 
-        openModal="importSkuDataModal" 
-        infoTxt="This action will import primary packaging details and all component form data into the current SKU form." 
+      <Importdata
+        title="Import data from other SKUs"
+        chooseComponentDrop={false}
+        openModal="importSkuDataModal"
+        infoTxt="This action will import primary packaging details and all component form data into the current SKU form."
         popoverTitle="All existing responses filled for this SKU will be overwritten."
         popoverConfirmTxt="Are you sure you want to proceed?"
         popoverInfoIcon="/assets/images/error-alert-triangle-icon.svg"
@@ -1502,17 +1501,19 @@ const Sku_Page = () => {
 
             <span
               className={`fs-14 fw-600 px-2 py-6 text-nowrap d-flex align-items-center w-114
-        ${new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-                  ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
-                  : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
-                }`}
+        ${
+          new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+            ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
+            : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
+        }`}
             >
               <span
                 className={`circle me-2 
-      ${new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-                    ? "bg-color-completed" // Green circle for Active
-                    : "" // Gray circle for Closed
-                  }`}
+      ${
+        new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+          ? "bg-color-completed" // Green circle for Active
+          : "" // Gray circle for Closed
+      }`}
               ></span>
               {new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
                 ? "Active"
@@ -1530,8 +1531,9 @@ const Sku_Page = () => {
                   <div key={index} className="d-flex flex-column">
                     <p className="sku-details-label">{field.label}</p>
                     <h6
-                      className={`sku-details-value ${field.label === "Description" ? "long-description" : ""
-                        }`}
+                      className={`sku-details-value ${
+                        field.label === "Description" ? "long-description" : ""
+                      }`}
                     >
                       {field.value}
                     </h6>
@@ -1618,7 +1620,7 @@ const Sku_Page = () => {
                         + Add/View Images
                       </button>
                       <SkuProduct_Img
-                        updateProductImageCount={() => { }}
+                        updateProductImageCount={() => {}}
                         setImagesToUpload={setImagesToUpload}
                         imagesFromDB={imagesFromDB}
                       />
@@ -1695,7 +1697,7 @@ const Sku_Page = () => {
                     <table className="table table-bordered fs-14 w-100 bg-transparent table-striped component-tbl mt-4">
                       <thead>
                         <tr>
-                        <th scope="col">Component Type</th>
+                          <th scope="col">Component Type</th>
                           <th scope="col">Component Name</th>
                           <th className="text-center w-25" scope="col">
                             Form Status
@@ -1728,16 +1730,18 @@ const Sku_Page = () => {
                             </td>
                             <td className="text-start align-middle">
                               <span
-                                className={`fs-14 d-inline-flex align-items-center py-6 px-2 rounded-pill fw-600 ${component.form_status === "Completed"
+                                className={`fs-14 d-inline-flex align-items-center py-6 px-2 rounded-pill fw-600 ${
+                                  component.form_status === "Completed"
                                     ? "color-active-bg text-color-completed" // ApplyCompleted class
                                     : "bg-color-padding-label text-secondary" // Default class for Pending
-                                  }`}
+                                }`}
                               >
                                 <span
-                                  className={`circle me-2 ${component.form_status === "Completed"
+                                  className={`circle me-2 ${
+                                    component.form_status === "Completed"
                                       ? "bg-color-completed"
                                       : ""
-                                    }`}
+                                  }`}
                                 ></span>
                                 {component.form_status || "Pending"}
                               </span>
@@ -1813,21 +1817,23 @@ const Sku_Page = () => {
                                         />
                                         Edit
                                       </button>
-                                        <button 
-                                          type="button" 
-                                          className="dropdown-item" 
-                                          data-bs-toggle="modal" 
-                                          data-bs-target="#importComponentDataModal">
-                                          <img
-                                            src="/assets/images/import-icon-black.svg"
-                                            alt="import"
-                                            className="me-2"
-                                            style={{
-                                              width: "16px",
-                                              height: "16px",
-                                            }}
-                                          />Import Data
-                                        </button>
+                                      {/* <button
+                                        type="button"
+                                        className="dropdown-item"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#importComponentDataModal"
+                                      >
+                                        <img
+                                          src="/assets/images/import-icon-black.svg"
+                                          alt="import"
+                                          className="me-2"
+                                          style={{
+                                            width: "16px",
+                                            height: "16px",
+                                          }}
+                                        />
+                                        Import Data
+                                      </button> */}
                                       <button
                                         className="dropdown-item"
                                         onClick={() => {
@@ -1863,13 +1869,19 @@ const Sku_Page = () => {
                         className="d-flex align-items-center gap-3 mt-3"
                         id="addSkuComponentBlock"
                       >
-                        <select className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14 w-25" id="dropdown" value={selectedComponentType} onChange={handleComponentTypeChange}>
-                          <option value="" disabled>Component Type</option>
-                          {dropdownListComing && dropdownListComing?.options?.map((item)=>{
-                             return(
-                              <option value={`${item}`}>{item}</option>
-                             )
-                          })}
+                        <select
+                          className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14 w-25"
+                          id="dropdown"
+                          value={selectedComponentType}
+                          onChange={handleComponentTypeChange}
+                        >
+                          <option value="" disabled>
+                            Component Type
+                          </option>
+                          {dropdownListComing &&
+                            dropdownListComing?.options?.map((item) => {
+                              return <option value={`${item}`}>{item}</option>;
+                            })}
                         </select>
                         <input
                           type="text"
@@ -1896,18 +1908,19 @@ const Sku_Page = () => {
                           <span>Add Component</span>
                         </div>
                         <div
-                          className={`d-flex align-items-center cursor-pointer text-color-primary ${skuData.isCancelDisabled
+                          className={`d-flex align-items-center cursor-pointer text-color-primary ${
+                            skuData.isCancelDisabled
                               ? "opacity-50 cursor-not-allowed"
                               : ""
-                            }`}
+                          }`}
                           onClick={
                             !skuData.isCancelDisabled
                               ? () =>
-                                setSkuData((prev) => ({
-                                  ...prev,
-                                  showInput: false,
-                                  newComponent: "",
-                                }))
+                                  setSkuData((prev) => ({
+                                    ...prev,
+                                    showInput: false,
+                                    newComponent: "",
+                                  }))
                               : null
                           }
                         >
