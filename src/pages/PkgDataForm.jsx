@@ -526,6 +526,7 @@ const PkgDataForm = () => {
   useEffect(() => {
     if (pkgData.sections && location.state?.responses) {
       const answers = {};
+      if(Object.keys(location.state.responses).length > 0){
       Object.entries(location.state.responses).forEach(
         ([questionText, response]) => {
           const question = Object.values(pkgData.sections)
@@ -560,15 +561,17 @@ const PkgDataForm = () => {
           }
         },
       );
-
-      console.log("Populated answers for component:", answers);
+    }
+      else{
+          answers[24] = location.state?.component_type;
+      }
 
       setPkgData((prev) => ({
         ...prev,
         answers,
       }));
     }
-  }, [pkgData.sections, location.state?.responses, setPkgData]);
+  }, [pkgData.sections, location.state?.responses, setPkgData,location.state.component_type]);
 
   useEffect(() => {
     const fetchData = async () => {

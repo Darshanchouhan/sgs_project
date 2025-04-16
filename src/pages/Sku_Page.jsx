@@ -861,6 +861,7 @@ const Sku_Page = () => {
               componentId: componentData.id,
               componentName: componentData.name,
               formStatus: componentData.form_status,
+              component_type: componentData.component_type,
               responses: componentData.responses || {}, // Pass fetched responses
               pkoId: pkoData?.pko_id || "N/A",
               description:
