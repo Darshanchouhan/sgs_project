@@ -23,6 +23,7 @@ import { VendorProvider } from "./pages/VendorContext"; // Assuming you have thi
 
 // Import Redux actions
 import { login } from "./store/authSlice"; // Import login action
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   // Call the hook to start tracking inactivity and refreshing the token
@@ -83,6 +84,12 @@ function App() {
               <Route
                 path="/component"
                 element={<PrivateRoute element={<PkgDataForm />} />}
+              />
+
+              {/* Private Route - Admin Dashboard */}
+              <Route
+                path="/admindashboard"
+                element={<PrivateRoute element={<AdminDashboard />} />}
               />
 
               {/* Other routes can go here */}

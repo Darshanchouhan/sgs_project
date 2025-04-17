@@ -22557,6 +22557,10 @@ input[type="radio"] {
   background-color: #257cff; /* blue */
 }
 
+.status-dot.in-progress {
+  background-color: #1AB1DE; /* light blue */
+}
+
 .status-dot.completed {
   background-color: #30ab30; /* Green */
 }
@@ -22643,6 +22647,9 @@ input[type="radio"] {
 .w-60 {
   width: 60%;
 }
+.w-30 {
+  width: 30%;
+}
 .w-40 {
   width: 40%;
 }
@@ -22650,6 +22657,17 @@ input[type="radio"] {
 .bg-color-draft {
   background-color: #007bff !important; /* Blue Background */
   color: white !important; /* White Text */
+}
+
+.active-pill {
+  color: #30ab30;
+  border-color: #30ab30 !important;
+  background-color: #E0F9E2;
+}
+.closed-pill {
+  color: #EB4747;
+  border-color: #EB4747 !important;
+  background-color: #F9E0E0;
 }
 
 .fw-400 {
@@ -23023,6 +23041,9 @@ input[type="radio"] {
   background-image: url("/assets/images/close-icon-red-new.svg");
   background-size: 24px;
   opacity: 1;
+}
+.sideNav .btn.active {
+  background-color: #FF4D3B;
 }
 /* Custom css end (Azahar) */
 

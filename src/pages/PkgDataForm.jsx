@@ -174,6 +174,7 @@ const PkgDataForm = () => {
         const isVisible = isAnswerMatch(
           question.dependent_question,
           pkgData.answers,
+          Object.values(pkgData.sections).flat(),
         );
 
         if (isVisible) {
@@ -303,6 +304,7 @@ const PkgDataForm = () => {
       const isVisible = isAnswerMatch(
         question.dependent_question,
         pkgData.answers,
+        Object.values(pkgData.sections).flat(),
       );
 
       if (isVisible) {
@@ -458,6 +460,7 @@ const PkgDataForm = () => {
           const isVisible = isAnswerMatch(
             question.dependent_question,
             pkgData.answers,
+            Object.values(pkgData.sections).flat(),
           );
 
           if (isVisible && question.mandatory) {
@@ -697,7 +700,8 @@ const PkgDataForm = () => {
         if (question.dependent_question) {
           const isNowVisible = isAnswerMatch(
             question.dependent_question,
-            updatedAnswers,
+            pkgData.answers,
+            Object.values(pkgData.sections).flat(),
           );
 
           // If it depends on this input and becomes hidden => clear its answer
@@ -724,7 +728,8 @@ const PkgDataForm = () => {
       allQuestions.forEach((question) => {
         const isVisible = isAnswerMatch(
           question.dependent_question,
-          updatedAnswers,
+          pkgData.answers,
+          Object.values(pkgData.sections).flat(),
         );
 
         if (isVisible && question.mandatory) {
@@ -761,37 +766,83 @@ const PkgDataForm = () => {
     setIsFormFilled(hasAnswers);
   }, [pkgData.answers]);
 
-  const isAnswerMatch = (dependentQuestionObj, answers) => {
-    // No dependency → always visible
+  // const isAnswerMatch = (dependentQuestionObj, answers) => {
+  //   // No dependency → always visible
+  //   if (!dependentQuestionObj || typeof dependentQuestionObj !== "object") {
+  //     return true;
+  //   }
+
+  //   const { main_dependency, and_condition } = dependentQuestionObj;
+
+  //   // Validate presence of main_dependency
+  //   if (
+  //     !main_dependency?.question_id ||
+  //     !Array.isArray(main_dependency.expected_values)
+  //   ) {
+  //     return false; // if dependency structure is incorrect
+  //   }
+
+  //   const mainAnswer = answers[`${main_dependency.question_id}`];
+  //   const mainConditionMet =
+  //     main_dependency.expected_values.includes(mainAnswer);
+
+  //   let andConditionMet = true;
+
+  //   if (
+  //     and_condition?.question_id &&
+  //     and_condition?.expected_value !== undefined
+  //   ) {
+  //     const andAnswer = answers[`${and_condition.question_id}`];
+  //     andConditionMet = andAnswer === and_condition.expected_value;
+  //   }
+
+  //   // Return only if BOTH match
+  //   return mainConditionMet && andConditionMet;
+  // };
+
+  //dependentQuestionObj is object that defines the dependency logic (main_dependency and optionally and_condition
+  const isAnswerMatch = (dependentQuestionObj, answers, questionsList = []) => {
+    // Handle legacy string-based dependency logic
+    if (typeof dependentQuestionObj === "string") {
+      const conditions = dependentQuestionObj
+        .split(" OR")
+        .map((c) => c.trim().toLowerCase());
+
+      const parentAnswers = Object.values(answers).map((a) =>
+        String(a || "")
+          .toLowerCase()
+          .trim(),
+      );
+
+      return conditions.some((condition) => parentAnswers.includes(condition));
+    }
+
+    // If dependency object is not valid
     if (!dependentQuestionObj || typeof dependentQuestionObj !== "object") {
       return true;
     }
 
+    const resolveQuestionId = (id) => {
+      // Check if this is actually a sequence_id → resolve to question_id
+      const found = questionsList.find((q) => q.sequence_id === id);
+      return found?.question_id || id; // fallback to id if not found
+    };
+
     const { main_dependency, and_condition } = dependentQuestionObj;
 
-    // Validate presence of main_dependency
-    if (
-      !main_dependency?.question_id ||
-      !Array.isArray(main_dependency.expected_values)
-    ) {
-      return false; // if dependency structure is incorrect
-    }
-
-    const mainAnswer = answers[main_dependency.question_id];
-    const mainConditionMet =
-      main_dependency.expected_values.includes(mainAnswer);
+    const mainQId = resolveQuestionId(main_dependency?.question_id);
+    const mainAnswer = answers[`${mainQId}`];
+    const mainConditionMet = Array.isArray(main_dependency?.expected_values)
+      ? main_dependency.expected_values.includes(mainAnswer)
+      : false;
 
     let andConditionMet = true;
-
-    if (
-      and_condition?.question_id &&
-      and_condition?.expected_value !== undefined
-    ) {
-      const andAnswer = answers[and_condition.question_id];
+    if (and_condition?.question_id !== undefined) {
+      const andQId = resolveQuestionId(and_condition.question_id);
+      const andAnswer = answers[`${andQId}`];
       andConditionMet = andAnswer === and_condition.expected_value;
     }
 
-    // Return only if BOTH match
     return mainConditionMet && andConditionMet;
   };
 
@@ -1126,6 +1177,7 @@ const PkgDataForm = () => {
       const isDependentVisible = isAnswerMatch(
         question.dependent_question,
         pkgData.answers,
+        Object.values(pkgData.sections).flat(),
       );
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
@@ -1265,7 +1317,22 @@ const PkgDataForm = () => {
       if (response.status === 200) {
         // Clear persistent errors on successful save
         //  setPersistentValidationErrors([]);
-
+        if(pkgData.answers[24] != location.state.component_type){
+          try {
+              // Update the component type in the backend
+              await axiosInstance.put(
+                `/sku/${skuId}/components/${response.data.id}/`,
+                {
+                  component_type:pkgData.answers[24] ,
+                  pko_id: pkoId, 
+                },
+              );
+            } catch (error) {
+              console.error("Error updating component type:", error);
+              alert("Failed to update component type. Please try again.");
+            }
+        }
+      
         console.log("Save Response:", response.data);
         if (showAlert) alert("Component data saved successfully!");
 

@@ -195,14 +195,14 @@ $column-gaps: (
 }
 
 // height
-@each $h in (20, 26, 40, 42, 44, 51, 52, 72) {
+@each $h in (20, 26, 40, 42, 44, 48, 51, 52, 72, 180) {
   .h-#{$h} {
     height: unquote($h + "px !important");
   }
 }
 
 // width
-@each $w in (32, 72, 92, 165, 320, 350, 395) {
+@each $w in (32, 72, 92, 165, 180, 320, 350, 395) {
   .w-#{$w} {
     width: unquote($w + "px !important");
   }
@@ -317,7 +317,8 @@ input:focus {
   width: 12px;
 }
 
-.table-container-pko-tbl {
+.table-container-pko-tbl,
+.table-container-pko-tbl-admin {
   // flex-grow: 1;
   /* Allows table container to take up remaining space */
   // overflow-y: auto;
