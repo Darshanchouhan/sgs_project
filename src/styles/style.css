@@ -23045,6 +23045,58 @@ input[type="radio"] {
 .sideNav .btn.active {
   background-color: #FF4D3B;
 }
+.send-reminder-btn {
+  background-image: url(/assets/images/send-reminder-icon.svg) !important;
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+}
+.send-reminder-btn:hover {
+  background-image: url(/assets/images/reminder-icon-sidenav.svg) !important;
+}
+.send-reminder-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .send-reminder-modal-popup .modal-dialog {
+    max-width: 40% !important;
+    min-width: 40% !important;
+  }
+}
+.sent-reminder-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .sent-reminder-modal-popup .modal-dialog {
+    max-width: 86% !important;
+    min-width: 86% !important;
+  }
+}
+.notificationToast {
+  display: block !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+  height: max-content !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 32px !important;
+  z-index: 99;
+  background-color: #fff !important;
+}
+.notificationToast .new-notification-indicator {
+  position: absolute;
+  left: 2%;
+  top: 15%;
+}
+.notificationToast .toast-body {
+  max-height: 290px;
+  overflow-y: auto;
+}
+.notificationToast .btn-close {
+  background-image: url("/assets/images/close-icon-red-new.svg");
+  opacity: 1;
+  font-size: 16px;
+}
 /* Custom css end (Azahar) */
 
 .offcanvas {

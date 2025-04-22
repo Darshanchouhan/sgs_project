@@ -23,7 +23,7 @@ import { VendorProvider } from "./pages/VendorContext"; // Assuming you have thi
 
 // Import Redux actions
 import { login } from "./store/authSlice"; // Import login action
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 function App() {
   // Call the hook to start tracking inactivity and refreshing the token
