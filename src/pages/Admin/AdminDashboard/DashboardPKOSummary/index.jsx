@@ -1,7 +1,7 @@
 import Pko_Chart from "../../../Pko_Chart"
 
 const DashboardPKOSummary = (props) => {
-  const {pkoIncomingData} = props;
+  const {pkoIncomingData,pkopProgressSummaryIncomingData} = props;
   return (
     <div className="col-12 col-md-6 mb-3 mb-md-0">
       <div className="card border-0 rounded-3 shadow-1 px-4 py-3 h-100">
@@ -40,9 +40,9 @@ const DashboardPKOSummary = (props) => {
             <Pko_Chart
             labels={["Not Started", "In Progress", "Completed"]}
             data={[
-              10,
-              20,
-              30,
+              pkopProgressSummaryIncomingData?.['not_started'],
+              pkopProgressSummaryIncomingData?.['in_progress'],
+              pkopProgressSummaryIncomingData?.['completed'],
             ]}
           />
             </div>
@@ -55,7 +55,7 @@ const DashboardPKOSummary = (props) => {
                   </p>
                 </div>
                 <span className="fs-12 fw-700">
-                  10
+                  {pkopProgressSummaryIncomingData?.['not_started']}
                 </span>
               </li>
               <li className="d-flex align-items-center justify-content-between mb-3">
@@ -66,7 +66,7 @@ const DashboardPKOSummary = (props) => {
                   </p>
                 </div>
                 <span className="fs-12 fw-700">
-                  20
+                  {pkopProgressSummaryIncomingData?.['in_progress']}
                 </span>
               </li>
               <li className="d-flex align-items-center justify-content-between mb-3">
@@ -77,7 +77,7 @@ const DashboardPKOSummary = (props) => {
                   </p>
                 </div>
                 <span className="fs-12 fw-700">
-                  30
+                  {pkopProgressSummaryIncomingData?.['completed']}
                 </span>
               </li>
             </ul>

@@ -57,7 +57,7 @@ const AdminDashboard = () => {
           <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
             <div className="row">
               {/* PKO Summary */}
-              <DashboardPKOSummary pkoIncomingData={dasboardAPIData?.pko_summary}/>
+              <DashboardPKOSummary pkoIncomingData={dasboardAPIData?.pko_summary} pkopProgressSummaryIncomingData={dasboardAPIData?.pko_progress_summary}/>
 
               {/* SKU Summary */}
               <DashboardSKUSummary skuIncomingData={dasboardAPIData?.sku_summary}/>
