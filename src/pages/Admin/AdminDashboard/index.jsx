@@ -1,12 +1,12 @@
 import React, {useState,useEffect} from "react";
 import "../../../styles/style.scss";
-import Header from "../../../components/Header";
-import SidebarDashboard from "./DashboardSidebar";
-import DashboardSidebar from "./DashboardHeader";
+import DashboardSidebar from "./DashboardSidebar";
+import DashboardSubHeaderStrip from "./DashboardSubHeaderStrip";
 import DashboardPKOSummary from "./DashboardPKOSummary";
 import DashboardSKUSummary from "./DashboardSKUSummary";
 import DashboardPKOStatusAndTable from "./DashboardPKOStatusAndTable"
 import axiosInstance from "../../../services/axiosInstance";
+import HeaderAdmin from "./DashboardHeader";
 
 const AdminDashboard = () => { 
   const [dasboardAPIData, setDasboardAPIData] = useState();
@@ -33,7 +33,7 @@ const AdminDashboard = () => {
   return (
     <div>
       {/* Navbar */}
-      <Header></Header>
+      <HeaderAdmin />
       {loading && (
         <div className="loader">
           <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
@@ -47,12 +47,10 @@ const AdminDashboard = () => {
         </div>
       )}
       <div className="d-flex">
-        <SidebarDashboard/>
-        
+        <DashboardSidebar/>
         <div className="w-100 h-100">
-          {/* Page Header */}
-          <DashboardSidebar/>
-
+          {/* Page Sub Header */}
+          <DashboardSubHeaderStrip />
           {/* Main Section */}
           <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
             <div className="row">

@@ -22218,6 +22218,10 @@ body {
   letter-spacing: 1px;
 }
 
+.font-open-sans {
+  font-family: "Open Sans", sans-serif;
+}
+
 input:focus {
   outline: none;
 }

@@ -237,6 +237,10 @@ body {
   letter-spacing: 1px;
 }
 
+.font-open-sans {
+  font-family: $font-primary;
+}
+
 input:focus {
   outline: none;
 }

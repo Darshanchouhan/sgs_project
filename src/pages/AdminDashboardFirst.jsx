@@ -1,13 +1,13 @@
 // import React from "react";
-// import "./../styles/style.css";
-// import Header from "../components/Header";
+// import "./../../styles/style.css";
+// import HeaderAdmin from "../../components/HeaderAdmin";
 
-// const AdminDashboardFirst = () => {
+// const AdminDashboard = () => {
 
 //   return (
 //     <div>
 //       {/* Navbar */}
-//       <Header></Header>
+//       <HeaderAdmin />
 //       <div className="d-flex">
 //         <div className="sideNav bg-secondary text-white w-72 d-flex flex-column justify-content-between">
 //           <ul className="list-unstyled m-0 w-100">
@@ -21,21 +21,21 @@
 //                 <img src="/assets/images/to-do-icon.svg" alt="to-do-icon" />
 //               </button>
 //             </li>
-//             <li>
+//             {/* <li>
 //               <button type="button" className="btn py-3 w-100 text-white rounded-0 border-top border-bottom border-color-white">
 //                 <img src="/assets/images/settings-icon.svg" alt="setting-icon" />
 //               </button>
-//             </li>
+//             </li> */}
 //           </ul>
 //           <ul className="list-unstyled m-0 w-100">
 //             <li>
-//                 <button type="button" className="btn py-3 w-100 text-white rounded-0 border-top border-bottom border-color-white" data-bs-toggle="modal" data-bs-target="#sentReminderModal">
-//                   <img src="/assets/images/reminder-icon-sidenav.svg" alt="reminder-icon" />
+//                 <button type="button" className="btn py-3 w-100 text-white rounded-0 border-top border-bottom border-color-white">
+//                   <img src="/assets/images/log-out-icon.svg" alt="logout-icon" />
 //                 </button>
 //               </li>
 //               <li>
 //                 <button type="button" className="btn py-3 w-100 text-white rounded-0 border-top border-bottom border-color-white">
-//                   <img src="/assets/images/comment-icon-sidenav.svg" alt="comments-icon" />
+//                   <img src="/assets/images/user-icon-sidenav.svg" alt="user-icon-sidenav" />
 //                 </button>
 //               </li>
 //           </ul>
@@ -45,7 +45,7 @@
 //           <div className="py-3 bg-color-light-shade">
 //             <div className="container-fluid px-20 px-md-4">
 //               <div className="d-flex align-items-center justify-content-between">
-//                 <h2 className="fs-16 fw-400 text-color-close-icon-box mb-0">Welcome to <span className="fw-600">Smart Packaging Data</span></h2>
+//                 <h2 className="fs-16 fw-400 text-color-close-icon-box mb-0">Welcome <span className="fw-600">Michael John,</span></h2>
 //                 <button type="button" className="btn p-0 fs-14 fw-600 text-secondary">
 //                   <img src="/assets/images/download-icon.svg" alt="download-icon" className="me-2" />
 //                   Download
@@ -394,81 +394,8 @@
 //           </div>
 //         </div>
 //       </div>
-
-
-//       {/* Sent Reminder modal popup */}
-//       <div
-//         className="modal fade sent-reminder-modal-popup"
-//         id="sentReminderModal"
-//         tabIndex="-1"
-//         aria-labelledby="sentReminderModalLabel"
-//         aria-hidden="true"
-//       >
-//         <div className="modal-dialog modal-dialog-centered bg-transparent p-0">
-//           <div className="modal-content rounded-1">
-//             <div className="modal-header px-32 py-4 border-0">
-//               <h1
-//                 className="modal-title fs-16 fw-600 text-color-typo-primary mb-0"
-//                 id="sentReminderModalLabel"
-//               >
-//                 Sent Reminders
-//               </h1>
-//               <button
-//                 type="button"
-//                 className="btn-close"
-//                 data-bs-dismiss="modal"
-//                 aria-label="Close"
-//               ></button>
-//             </div>
-//             <div className="modal-body px-32 py-0 pb-4">
-//               <ul className="list-unstyled m-0">
-//                 <li className="border-bottom pb-20 mb-20">
-//                   <div className="d-flex align-items-center mb-10">
-//                     <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">06 Apr 2025</h2>
-//                     <span className="mx-1 lh-8">|</span>
-//                     <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-//                   </div>
-//                   <p className="fs-16 fw-400 text-color-typo-primary mb-0">The deadline to complete the PKO form is approaching! Please submit your responses soon to ensure your input is included. Thank you!</p>
-//                 </li>
-//                 <li className="border-bottom pb-20 mb-20">
-//                   <div className="d-flex align-items-center mb-10">
-//                     <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">06 Apr 2025</h2>
-//                     <span className="mx-1 lh-8">|</span>
-//                     <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-//                   </div>
-//                   <p className="fs-16 fw-400 text-color-typo-primary mb-0">The deadline to complete the PKO form is approaching! Please submit your responses soon to ensure your input is included. Thank you!</p>
-//                 </li>
-//                 <li className="border-bottom pb-20 mb-20">
-//                   <div className="d-flex align-items-center mb-10">
-//                     <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">06 Apr 2025</h2>
-//                     <span className="mx-1 lh-8">|</span>
-//                     <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-//                   </div>
-//                   <p className="fs-16 fw-400 text-color-typo-primary mb-0">The deadline to complete the PKO form is approaching! Please submit your responses soon to ensure your input is included. Thank you!</p>
-//                 </li>
-//                 <li className="border-bottom pb-20 mb-20">
-//                   <div className="d-flex align-items-center mb-10">
-//                     <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">06 Apr 2025</h2>
-//                     <span className="mx-1 lh-8">|</span>
-//                     <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-//                   </div>
-//                   <p className="fs-16 fw-400 text-color-typo-primary mb-0">The deadline to complete the PKO form is approaching! Please submit your responses soon to ensure your input is included. Thank you!</p>
-//                 </li>
-//                 <li className="border-bottom pb-20 mb-20">
-//                   <div className="d-flex align-items-center mb-10">
-//                     <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">06 Apr 2025</h2>
-//                     <span className="mx-1 lh-8">|</span>
-//                     <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-//                   </div>
-//                   <p className="fs-16 fw-400 text-color-typo-primary mb-0">The deadline to complete the PKO form is approaching! Please submit your responses soon to ensure your input is included. Thank you!</p>
-//                 </li>
-//               </ul>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
 //     </div>
 //   );
 // };
 
-// export default AdminDashboardFirst;
+// export default AdminDashboard;

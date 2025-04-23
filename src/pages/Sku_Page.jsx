@@ -58,6 +58,7 @@ const Sku_Page = () => {
   const [dropdownListComing, setDropdownListComing] = useState([]); // Store the dropdown list
   const dropdownRef = useRef(null); // Create a ref for the dropdown
   const encodedPkoId = encodeURIComponent(pkoId);
+  const [activeComponentId, setActiveComponentId] = useState(null);
 
   const handleComponentTypeChange = (e) => {
     setSelectedComponentType(e.target.value);
@@ -336,6 +337,61 @@ const Sku_Page = () => {
     return issues;
   };
 
+  const handleImportFromSku = async (
+    sourceSkuId,
+    sourcePkoId,
+    componentName,
+    activeComponentId,
+  ) => {
+    try {
+      const checkResponse = await axiosInstance.get(
+        `/skus/${sourceSkuId}/?pko_id=${encodeURIComponent(sourcePkoId)}`,
+      );
+
+      const sourceData = checkResponse.data;
+
+      const hasPackagingDetails =
+        sourceData?.primary_packaging_details &&
+        Object.keys(sourceData.primary_packaging_details).length > 0;
+
+      const hasComponents =
+        sourceData?.components && sourceData.components.length > 0;
+
+      if (!hasPackagingDetails && !hasComponents) {
+        alert("No data is filled for the selected SKU. Please choose another.");
+        return;
+      }
+
+      // Build payload conditionally based on whether componentName is present
+      const isComponentImport = !!componentName;
+
+      const payload = {
+        source_sku_id: sourceSkuId,
+        source_pko_id: sourcePkoId,
+        target_pko_id: pkoId,
+        target_sku_ids: [skuId],
+      };
+
+      if (isComponentImport) {
+        payload.component_names = [componentName];
+        payload.target_component_id = activeComponentId;
+      }
+
+      console.log("Sending import payload:", payload);
+
+      const response = await axiosInstance.post("/copy-components/", payload);
+
+      if (response.status === 201) {
+        alert("Data imported successfully!");
+        window.location.reload(); // Trigger full refresh
+      } else {
+        alert("Failed to import data. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error while importing data:", error.response || error);
+      alert("Error importing data. Please check console.");
+    }
+  };
   useEffect(() => {
     if (location.state && location.state.responses) {
       const answers = {};
@@ -1470,10 +1526,21 @@ const Sku_Page = () => {
       </div>
       <Autosave saveFunction={autosaveSkuData} dependencies={[skuData]} />
       <div className="d-flex align-items-center justify-content-end px-40 mt-2">
-        {/* <button type="button" className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#importSkuDataModal">
-          <img src="/assets/images/import-icon.svg" className="me-2" alt="import-icon" />Import data from other SKUs
-        </button> */}
+        <button
+          type="button"
+          className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center"
+          data-bs-toggle="modal"
+          data-bs-target="#importSkuDataModal"
+        >
+          <img
+            src="/assets/images/import-icon.svg"
+            className="me-2"
+            alt="import-icon"
+          />
+          Import data from other SKUs
+        </button>
       </div>
+
       <Importdata
         title="Import data from other SKUs"
         chooseComponentDrop={false}
@@ -1482,6 +1549,8 @@ const Sku_Page = () => {
         popoverTitle="All existing responses filled for this SKU will be overwritten."
         popoverConfirmTxt="Are you sure you want to proceed?"
         popoverInfoIcon="/assets/images/error-alert-triangle-icon.svg"
+        onConfirmImport={handleImportFromSku} // Pass confirm handler
+        currentPkoId={pkoId}
       />
       <Importdata
         title="Import component data"
@@ -1491,6 +1560,10 @@ const Sku_Page = () => {
         popoverTitle="All existing responses for this component will be overwritten."
         popoverConfirmTxt="Are you sure you want to proceed?"
         popoverInfoIcon="/assets/images/error-alert-triangle-icon.svg"
+        onConfirmImport={(sku, pko, componentName) =>
+          handleImportFromSku(sku, pko, componentName, activeComponentId)
+        }
+        currentPkoId={pkoId}
       />
       <div className="container-fluid px-5 d-flex flex-column container-height">
         {/* Header Section */}
@@ -1541,29 +1614,6 @@ const Sku_Page = () => {
                   </div>
                 ))}
               </div>
-              {/* Add Product Images Button */}
-              {/* <div className="d-flex align-items-center  col-3 justify-content-end">
-                <div className="d-flex align-items-center mb-4">
-                  <p className="fs-14 fw-600 text-color-typo-primary mb-0">
-                  {productImageCount} <span>images uploaded</span> {" "}
-                  <span
-                      className="ps-12 text-color-draft text-decoration-underline cursor-pointer"
-                      data-bs-toggle="offcanvas"
-                      data-bs-target="#offcanvasRight-image"
-                      aria-controls="offcanvasRight-image"
-                    >
-                      View
-                    </span>
-                  </p>
-                  <button
-                    className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
-                    onClick={handleAddProductImageClick}
-
-                 >
-                    View/+ Add images
-                  </button>
-                </div>
-              </div> */}
             </div>
           </div>
         </div>
@@ -1818,11 +1868,14 @@ const Sku_Page = () => {
                                         />
                                         Edit
                                       </button>
-                                      {/* <button
+                                      <button
                                         type="button"
                                         className="dropdown-item"
                                         data-bs-toggle="modal"
                                         data-bs-target="#importComponentDataModal"
+                                        onClick={() => {
+                                          setActiveComponentId(component.id); //  Set the component ID to be replaced
+                                        }}
                                       >
                                         <img
                                           src="/assets/images/import-icon-black.svg"
@@ -1834,7 +1887,7 @@ const Sku_Page = () => {
                                           }}
                                         />
                                         Import Data
-                                      </button> */}
+                                      </button>
                                       <button
                                         className="dropdown-item"
                                         onClick={() => {

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const Popover = ({ children, title, confirmTxt, icon }) => {
+const Popover = ({ children, title, confirmTxt, icon, onConfirm }) => {
   const [show, setShow] = useState(false);
   const popoverRef = useRef(null);
 
@@ -35,7 +35,7 @@ const Popover = ({ children, title, confirmTxt, icon }) => {
             <div>
               <div className="d-flex align-items-center p-20 border-bottom border-color-desabled-lite">
                 <p className="fs-14 fw-400 text-black text-nowrap mb-0">
-                  <span class="me-12">
+                  <span className="me-12">
                     <img src={icon} alt="error-icon" />
                   </span>
                   {title}
@@ -49,7 +49,13 @@ const Popover = ({ children, title, confirmTxt, icon }) => {
                   <button className="btn btn-outline-primary fs-14 fw-600 px-4 py-2 rounded-1 me-12">
                     No
                   </button>
-                  <button className="btn btn-primary fs-14 fw-600 px-4 py-2 rounded-1">
+                  <button
+                    className="btn btn-primary fs-14 fw-600 px-4 py-2 rounded-1"
+                    onClick={() => {
+                      onConfirm(); // ✅ call the confirm callback
+                      setShow(false); // close popover
+                    }}
+                  >
                     Yes
                   </button>
                 </div>
