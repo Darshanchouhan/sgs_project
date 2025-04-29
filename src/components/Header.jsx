@@ -96,8 +96,6 @@ const Header = () => {
                 {showToast && (
                   <NotificationToast handleCloseToast={handleHideToast} />
                 )}
-
-                
               </div>
             </li>
             <li className="nav-item d-flex align-items-center">

@@ -60,6 +60,10 @@ export const fetchUserProfile = async () => {
     // Store the 'cvs_supplier' value in localStorage for further use
     const cvsSupplier = response.data.cvs_supplier; // Assuming the 'cvs_supplier' is returned in the response
     localStorage.setItem("cvs_supplier", cvsSupplier);
+    localStorage.setItem(
+      "user_name",
+      `${response.data.first_name} ${response.data.last_name}`,
+    );
 
     return response.data; // Return the user profile data
   } catch (error) {

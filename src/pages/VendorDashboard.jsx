@@ -162,14 +162,27 @@ const VendorDashboard = () => {
           return { ...prevPkoData, skus: updatedSkus };
         });
 
-        navigate("/skus", {
-          state: {
+        localStorage.setItem(
+          "sku_page_state",
+          JSON.stringify({
             skuId: sku.sku_id,
             skuDetails: sku,
             pkoData: pkoData || null,
             duedate: pkoData?.duedate || null,
-          },
-        });
+          }),
+        );
+
+        navigate(
+          "/skus",
+          //   , {
+          //   state: {
+          //     skuId: sku.sku_id,
+          //     skuDetails: sku,
+          //     pkoData: pkoData || null,
+          //     duedate: pkoData?.duedate || null,
+          //   },
+          // }
+        );
       } else {
         console.warn(
           "Failed to update SKU status. Status code:",
@@ -417,6 +430,7 @@ const VendorDashboard = () => {
                           skuData.filter((sku) => sku.status === "Completed")
                             .length,
                         ]}
+                        chartName={"SKUs"}
                       />
                     </div>
                   </div>

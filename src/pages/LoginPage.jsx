@@ -45,16 +45,13 @@ const LoginPage = () => {
         // Fetch user profile after successful login
         const response = await fetchUserProfile(); // Fetch user profile
 
-        if(response.user_role==="admin" && response.cvs_supplier===null){
-
-        // Redirect or handle success to admin dashboard
-        navigate("/admindashboard");
-        }else{
-
-        // Redirect or handle success to vendor dashboard
-        navigate("/vendordashboard");
+        if (response.user_role === "admin" && response.cvs_supplier === null) {
+          // Redirect or handle success to admin dashboard
+          navigate("/admindashboard");
+        } else {
+          // Redirect or handle success to vendor dashboard
+          navigate("/vendordashboard");
         }
-
       }
     } catch (error) {
       setError("Email / Password is incorrect");

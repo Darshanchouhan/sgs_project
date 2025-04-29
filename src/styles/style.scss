@@ -33,6 +33,8 @@ $theme-colors: (
   "color-close-icon-box": #33312c,
   "color-active-bg": #e0f9e2,
   "color-light-gray-shade": #f5f5f5,
+  "color-blue": #155DC9,
+  "color-badge": #FED0C7,
 );
 
 // padding Config
@@ -195,14 +197,14 @@ $column-gaps: (
 }
 
 // height
-@each $h in (8, 20, 26, 40, 42, 44, 48, 51, 52, 72, 180) {
+@each $h in (8, 20, 26, 40, 42, 44, 48, 51, 52, 72, 130, 180) {
   .h-#{$h} {
     height: unquote($h + "px !important");
   }
 }
 
 // width
-@each $w in (8, 32, 72, 92, 165, 180, 320, 350, 395) {
+@each $w in (8, 32, 72, 92, 120, 130, 150, 165, 180, 320, 350, 395) {
   .w-#{$w} {
     width: unquote($w + "px !important");
   }
@@ -322,7 +324,8 @@ input:focus {
 }
 
 .table-container-pko-tbl,
-.table-container-pko-tbl-admin {
+.table-container-pko-tbl-admin,
+.table-container-skus-tbl-admin {
   // flex-grow: 1;
   /* Allows table container to take up remaining space */
   // overflow-y: auto;

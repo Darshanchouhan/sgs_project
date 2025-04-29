@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
-import TablepkoPage from "./TablepkoPage"
+import React, { useState } from "react";
+import TablepkoPage from "./TablepkoPage";
 
 const DashboardPKOStatusAndTable = (props) => {
-  const {tablepkoData} = props;
-  const [selectedStatus,setSelectedStatus] = useState("All PKOs");
+  const { tablepkoData } = props;
+  const [selectedStatus, setSelectedStatus] = useState("All PKOs");
 
   return (
     <>
@@ -20,18 +20,41 @@ const DashboardPKOStatusAndTable = (props) => {
               className="form-select border-color-labels border-0 fs-14 fw-600 ps-10 pe-40 text-secondary"
               id="inputGroupPkoStatus"
               value={selectedStatus}
-              onChange={(event)=>setSelectedStatus(event.target.value)}
+              onChange={(event) => setSelectedStatus(event.target.value)}
             >
               <option value="All PKOs">All PKOs</option>
               <option value="Active">Active</option>
               <option value="Closed">Closed</option>
             </select>
           </div>
-          <h3 className="fs-18 fw-600 text-nowrap mb-0">{selectedStatus === "All PKOs" ? tablepkoData?.length : selectedStatus === "Active" ? tablepkoData?.filter((item)=>{return item?.status === "Active"})?.length : tablepkoData?.filter((item)=>{return item?.status === "Closed"})?.length} {selectedStatus === "All PKOs" ? "Total PKOs" : selectedStatus === "Active" ? "Active PKOs" : "Closed PKOs"}</h3>
+          <h3 className="fs-18 fw-600 text-nowrap mb-0">
+            {selectedStatus === "All PKOs"
+              ? tablepkoData?.length
+              : selectedStatus === "Active"
+                ? tablepkoData?.filter((item) => {
+                    return item?.status === "Active";
+                  })?.length
+                : tablepkoData?.filter((item) => {
+                    return item?.status === "Closed";
+                  })?.length}{" "}
+            {selectedStatus === "All PKOs"
+              ? "Total PKOs"
+              : selectedStatus === "Active"
+                ? "Active PKOs"
+                : "Closed PKOs"}
+          </h3>
         </div>
         <div className="d-flex align-items-center d-none">
-          <h3 className="fs-18 fw-600 text-nowrap mb-0 me-3">3 PKOs Selected</h3>
-          <button className="send-reminder-btn btn btn-outline-secondary py-6 ps-40 pe-3 fs-14 fw-600 rounded-1 d-flex" data-bs-toggle="modal" data-bs-target="#sendReminderModal">Send Reminder</button>
+          <h3 className="fs-18 fw-600 text-nowrap mb-0 me-3">
+            3 PKOs Selected
+          </h3>
+          <button
+            className="send-reminder-btn btn btn-outline-secondary py-6 ps-40 pe-3 fs-14 fw-600 rounded-1 d-flex"
+            data-bs-toggle="modal"
+            data-bs-target="#sendReminderModal"
+          >
+            Send Reminder
+          </button>
         </div>
       </div>
 
@@ -41,7 +64,12 @@ const DashboardPKOStatusAndTable = (props) => {
           <thead>
             <tr>
               <th className="h-48 align-middle text-center">
-                <input className="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for selection" />
+                <input
+                  className="form-check-input mt-0"
+                  type="checkbox"
+                  value=""
+                  aria-label="Checkbox for selection"
+                />
               </th>
               <th className="h-48 align-middle">PKO Project ID</th>
               <th className="h-48 align-middle">Supplier</th>
@@ -53,18 +81,33 @@ const DashboardPKOStatusAndTable = (props) => {
             </tr>
           </thead>
           <tbody>
-          {(selectedStatus === "All PKOs" ? tablepkoData : selectedStatus === "Active" ? tablepkoData?.filter((item)=>{return item?.status === "Active"}) : tablepkoData?.filter((item)=>{return item?.status === "Closed"}))?.sort((a, b) => {
-            // Optional: Sort by PKO ID or any other property to maintain a consistent order
-                    return a.pko_id.localeCompare(b.pko_id); // Sort by PKO ID (string comparison)
-                  })?.map((pkoItemIncoming, index) => {
-            return(
-              <TablepkoPage key={index+1} pkoItemIncoming={pkoItemIncoming}/>
+            {(selectedStatus === "All PKOs"
+              ? tablepkoData
+              : selectedStatus === "Active"
+                ? tablepkoData?.filter((item) => {
+                    return item?.status === "Active";
+                  })
+                : tablepkoData?.filter((item) => {
+                    return item?.status === "Closed";
+                  })
             )
-          })}
+              ?.sort((a, b) => {
+                // Optional: Sort by PKO ID or any other property to maintain a consistent order
+                return a.pko_id.localeCompare(b.pko_id); // Sort by PKO ID (string comparison)
+              })
+              ?.map((pkoItemIncoming, index) => {
+                return (
+                  <TablepkoPage
+                    key={index + 1}
+                    pkoItemIncoming={pkoItemIncoming}
+                  />
+                );
+              })}
           </tbody>
         </table>
       </div>
-    </>)
-}
+    </>
+  );
+};
 
 export default DashboardPKOStatusAndTable;

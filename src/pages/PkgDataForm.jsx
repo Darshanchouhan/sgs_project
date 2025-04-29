@@ -5,7 +5,7 @@ import Breadcrumb from "./Breadcrumb";
 import "./../styles/style.css";
 import axiosInstance from "../services/axiosInstance";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PkgDataContext } from "./Pkg_DataContext"; // Import Context
 import Autosave from "./AutoSave";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -15,12 +15,14 @@ import Tooltip from "./Tooltip"; // Import Tooltip component
 import ValidationModal from "./Validation";
 
 const PkgDataForm = () => {
+  const stateIncomingComponentPage = JSON.parse(
+    localStorage.getItem("component_page_state"),
+  );
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
   const { skuData, setSkuData, setSkuDetails, setPkoData } =
     useContext(SkuContext);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
   const sectionRefs = useRef({}); // Store refs for each section
   const [isFormFilled, setIsFormFilled] = useState(false); // Track if the form is filled
   const {
@@ -28,7 +30,7 @@ const PkgDataForm = () => {
     pkoId,
     description,
     skuId: passedSkuId,
-  } = location.state || {};
+  } = stateIncomingComponentPage || {};
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [overlayImage, setOverlayImage] = useState(null);
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
@@ -505,16 +507,18 @@ const PkgDataForm = () => {
   }, [pkgData.answers, pkgData.sections, setPkgData]);
 
   useEffect(() => {
-    if (location.state) {
-      setSkuDetails((prev) => location.state.skuDetails || prev);
-      setPkoData((prev) => location.state.pkoData || prev);
+    if (stateIncomingComponentPage) {
+      setSkuDetails((prev) => stateIncomingComponentPage?.skuDetails || prev);
+      setPkoData((prev) => stateIncomingComponentPage?.pkoData || prev);
 
       setSkuData((prev) => ({
         ...prev,
-        skuId: location.state.skuId || prev.skuId,
-        componentId: location.state.componentId || prev.componentId,
-        componentName: location.state.componentName || prev.componentName,
-        formStatus: location.state.formStatus || prev.formStatus,
+        skuId: stateIncomingComponentPage?.skuId || prev.skuId,
+        componentId:
+          stateIncomingComponentPage?.componentId || prev.componentId,
+        componentName:
+          stateIncomingComponentPage?.componentName || prev.componentName,
+        formStatus: stateIncomingComponentPage?.formStatus || prev.formStatus,
       }));
 
       // Reset answers when componentId changes
@@ -524,49 +528,48 @@ const PkgDataForm = () => {
         activeSection: "Component Information", // Reset to default section
       }));
     }
-  }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
+  }, [setSkuDetails, setPkoData, setSkuData, setPkgData]);
 
   useEffect(() => {
-    if (pkgData.sections && location.state?.responses) {
+    if (pkgData.sections && stateIncomingComponentPage?.responses) {
       const answers = {};
-      if(Object.keys(location.state.responses).length > 0){
-      Object.entries(location.state.responses).forEach(
-        ([questionText, response]) => {
-          const question = Object.values(pkgData.sections)
-            .flat()
-            .find(
-              (q) =>
-                q.question_text === questionText.split("||")[0] &&
-                q.question_id == questionText.split("||")[1],
-            );
+      if (Object.keys(stateIncomingComponentPage?.responses).length > 0) {
+        Object.entries(stateIncomingComponentPage?.responses).forEach(
+          ([questionText, response]) => {
+            const question = Object.values(pkgData.sections)
+              .flat()
+              .find(
+                (q) =>
+                  q.question_text === questionText.split("||")[0] &&
+                  q.question_id == questionText.split("||")[1],
+              );
 
-          if (question) {
-            // Extract numeric value and unit if present
-            if (
-              question.question_type === "Integer + Dropdown" ||
-              question.question_type === "Float + Dropdown"
-            ) {
-              const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
-              const match = response.match(regex);
+            if (question) {
+              // Extract numeric value and unit if present
+              if (
+                question.question_type === "Integer + Dropdown" ||
+                question.question_type === "Float + Dropdown"
+              ) {
+                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
+                const match = response.match(regex);
 
-              if (match) {
-                const value = parseFloat(match[1]); // Extract numeric part (integer or float)
-                const unit = match[3]; // Extract unit part
+                if (match) {
+                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
+                  const unit = match[3]; // Extract unit part
 
-                answers[question.question_id] = value;
-                answers[`${question.question_id}_unit`] = unit;
+                  answers[question.question_id] = value;
+                  answers[`${question.question_id}_unit`] = unit;
+                } else {
+                  answers[question.question_id] = response;
+                }
               } else {
                 answers[question.question_id] = response;
               }
-            } else {
-              answers[question.question_id] = response;
             }
-          }
-        },
-      );
-    }
-      else{
-          answers[24] = location.state?.component_type;
+          },
+        );
+      } else {
+        answers[24] = stateIncomingComponentPage?.component_type;
       }
 
       setPkgData((prev) => ({
@@ -574,7 +577,7 @@ const PkgDataForm = () => {
         answers,
       }));
     }
-  }, [pkgData.sections, location.state?.responses, setPkgData,location.state.component_type]);
+  }, [pkgData.sections, setPkgData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1317,22 +1320,22 @@ const PkgDataForm = () => {
       if (response.status === 200) {
         // Clear persistent errors on successful save
         //  setPersistentValidationErrors([]);
-        if(pkgData.answers[24] != location.state.component_type){
+        if (pkgData.answers[24] != stateIncomingComponentPage?.component_type) {
           try {
-              // Update the component type in the backend
-              await axiosInstance.put(
-                `/sku/${skuId}/components/${response.data.id}/`,
-                {
-                  component_type:pkgData.answers[24] ,
-                  pko_id: pkoId, 
-                },
-              );
-            } catch (error) {
-              console.error("Error updating component type:", error);
-              alert("Failed to update component type. Please try again.");
-            }
+            // Update the component type in the backend
+            await axiosInstance.put(
+              `/sku/${skuId}/components/${response.data.id}/`,
+              {
+                component_type: pkgData.answers[24],
+                pko_id: pkoId,
+              },
+            );
+          } catch (error) {
+            console.error("Error updating component type:", error);
+            alert("Failed to update component type. Please try again.");
+          }
         }
-      
+
         console.log("Save Response:", response.data);
         if (showAlert) alert("Component data saved successfully!");
 

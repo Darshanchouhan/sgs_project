@@ -26,14 +26,23 @@ const Sku_Page = () => {
   const { updateSkuStatus } = useContext(VendorContext);
 
   const navigate = useNavigate();
+
+  const stateIcomingFromLastPage = JSON.parse(
+    localStorage.getItem("sku_page_state"),
+  );
+  const stateIncomingComponentPage = JSON.parse(
+    localStorage.getItem("component_page_state"),
+  );
+
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
   const [questionsComponent, setQuestionsComponent] = useState([]); // Store questions from API
   const [componentsData, setComponentsData] = useState([]); // Store questions from API
-  const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
+  const skuId = stateIcomingFromLastPage?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
-  const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
+  const pkoId =
+    stateIcomingFromLastPage?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
   const [productImageCount, setProductImageCount] = useState(0); // Track product image count
   const [imagesFromDB, setImagesFromDB] = useState([]); // Images fetched from database
   const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
@@ -392,11 +401,59 @@ const Sku_Page = () => {
       alert("Error importing data. Please check console.");
     }
   };
+
+  const handleImportComponentData = async (
+    sourceSkuId,
+    sourcePkoId,
+    sourceComponentName,
+    targetComponentId,
+  ) => {
+    try {
+      if (
+        !sourceSkuId ||
+        !sourcePkoId ||
+        !sourceComponentName ||
+        !targetComponentId
+      ) {
+        console.error("Missing required parameters for component import.");
+        alert("Please ensure all required fields are selected.");
+        return;
+      }
+      const payload = {
+        source_sku_id: sourceSkuId,
+        source_pko_id: sourcePkoId,
+        target_sku_id: skuId,
+        target_pko_id: pkoId,
+        source_component_name: sourceComponentName,
+        target_component_name: skuData.components.find(
+          (comp) => comp.id === targetComponentId,
+        )?.name,
+      };
+
+      console.log("Sending component import payload:", payload);
+
+      const response = await axiosInstance.post(
+        "/copy-component-data/",
+        payload,
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Component data imported successfully!");
+        window.location.reload();
+      } else {
+        alert("Failed to import component data. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error importing component data:", error.response || error);
+      alert("Error importing component data. Please check console.");
+    }
+  };
+
   useEffect(() => {
-    if (location.state && location.state.responses) {
+    if (stateIncomingComponentPage?.responses) {
       const answers = {};
 
-      Object.entries(location.state.responses).forEach(
+      Object.entries(stateIncomingComponentPage?.responses).forEach(
         ([questionText, response]) => {
           // Find the matching question based on text and ID
           const question = questions.find(
@@ -433,7 +490,7 @@ const Sku_Page = () => {
 
       console.log("Populated answers from DB:", answers);
     }
-  }, [location.state, questions, setSkuData]);
+  }, [questions, setSkuData]);
 
   useEffect(() => {
     console.log("isOverlayVisible:", isOverlayVisible); // Debug log for state changes
@@ -528,12 +585,15 @@ const Sku_Page = () => {
   }, []); // Runs only once when the component mounts
 
   useEffect(() => {
-    if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
-    if (location.state?.pkoData) setPkoData(location.state.pkoData);
-  }, [location.state, setSkuDetails, setPkoData]);
+    if (stateIcomingFromLastPage?.skuDetails)
+      setSkuDetails(stateIcomingFromLastPage?.skuDetails);
+    if (stateIcomingFromLastPage?.pkoData)
+      setPkoData(stateIcomingFromLastPage?.pkoData);
+  }, []);
 
   useEffect(() => {
-    const duedate = location.state?.duedate || pkoData?.duedate || null;
+    const duedate =
+      stateIcomingFromLastPage?.duedate || pkoData?.duedate || null;
 
     if (duedate) {
       setSubmissionLastDate(
@@ -544,7 +604,7 @@ const Sku_Page = () => {
         }),
       );
     }
-  }, [location.state, pkoData]);
+  }, [pkoData]);
 
   useEffect(() => {
     const totalMandatory = questions.filter((q) => q.mandatory).length;
@@ -585,17 +645,17 @@ const Sku_Page = () => {
     }
   }, []);
 
-  // Retrieve pkoData and skuDetails from location.state or fallback to context
+  // Retrieve pkoData and skuDetails from stateIcomingFromLastPage or fallback to context
   useEffect(() => {
-    if (location.state) {
-      if (location.state.skuDetails) {
-        setSkuDetails(location.state.skuDetails);
+    if (stateIcomingFromLastPage) {
+      if (stateIcomingFromLastPage?.skuDetails) {
+        setSkuDetails(stateIcomingFromLastPage?.skuDetails);
       }
-      if (location.state.pkoData) {
-        setPkoData(location.state.pkoData);
+      if (stateIcomingFromLastPage?.pkoData) {
+        setPkoData(stateIcomingFromLastPage?.pkoData);
       }
     }
-  }, [location.state, setSkuDetails, setPkoData]);
+  }, []);
 
   // console.log("pkoData in skupage:", pkoData);
   // Fetch the questionnaire
@@ -910,22 +970,25 @@ const Sku_Page = () => {
         if (components[index]) {
           const componentData = components[index];
 
-          // Navigate to PkgDataForm with all necessary data
-          navigate("/component", {
-            state: {
-              skuId, // Pass SKU ID
+          localStorage.setItem(
+            "component_page_state",
+            JSON.stringify({
+              skuId,
               componentId: componentData.id,
               componentName: componentData.name,
               formStatus: componentData.form_status,
               component_type: componentData.component_type,
-              responses: componentData.responses || {}, // Pass fetched responses
+              responses: componentData.responses || {},
               pkoId: pkoData?.pko_id || "N/A",
               description:
                 skuDetails?.description || "Description Not Available",
               skuDetails,
               pkoData,
-            },
-          });
+            }),
+          );
+
+          // Navigate to PkgDataForm with all necessary data
+          navigate("/component");
         } else {
           console.warn("Selected component not found in API response.");
         }
@@ -1561,7 +1624,7 @@ const Sku_Page = () => {
         popoverConfirmTxt="Are you sure you want to proceed?"
         popoverInfoIcon="/assets/images/error-alert-triangle-icon.svg"
         onConfirmImport={(sku, pko, componentName) =>
-          handleImportFromSku(sku, pko, componentName, activeComponentId)
+          handleImportComponentData(sku, pko, componentName, activeComponentId)
         }
         currentPkoId={pkoId}
       />

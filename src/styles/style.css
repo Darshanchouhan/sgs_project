@@ -22562,11 +22562,15 @@ input[type="radio"] {
 }
 
 .status-dot.in-progress {
-  background-color: #1AB1DE; /* light blue */
+  background-color: #1ab1de; /* light blue */
 }
 
 .status-dot.completed {
   background-color: #30ab30; /* Green */
+}
+
+.status-dot.in-review {
+  background-color: #feb343; /* Yellow */
 }
 
 /* Vendor Page Loader */
@@ -22663,15 +22667,31 @@ input[type="radio"] {
   color: white !important; /* White Text */
 }
 
-.active-pill {
+.active-pill,
+.completed-pill {
   color: #30ab30;
   border-color: #30ab30 !important;
-  background-color: #E0F9E2;
+  background-color: #e0f9e2;
 }
 .closed-pill {
-  color: #EB4747;
-  border-color: #EB4747 !important;
-  background-color: #F9E0E0;
+  color: #eb4747;
+  border-color: #eb4747 !important;
+  background-color: #f9e0e0;
+}
+.in-review-pill {
+  color: #feb343;
+  border-color: #feb343 !important;
+  background-color: #f9f2e0;
+}
+.not-started-pill {
+  color: #ababab;
+  border-color: #ababab !important;
+  background-color: #ededed;
+}
+.draft-pill {
+  color: #257cff;
+  border-color: #257cff !important;
+  background-color: #e0ecff;
 }
 
 .fw-400 {
@@ -23047,7 +23067,7 @@ input[type="radio"] {
   opacity: 1;
 }
 .sideNav .btn.active {
-  background-color: #FF4D3B;
+  background-color: #ff4d3b;
 }
 .send-reminder-btn {
   background-image: url(/assets/images/send-reminder-icon.svg) !important;
@@ -23100,6 +23120,9 @@ input[type="radio"] {
   background-image: url("/assets/images/close-icon-red-new.svg");
   opacity: 1;
   font-size: 16px;
+}
+.pkoSummaryCard .overall-progress-block {
+  border-color: #848383 !important;
 }
 /* Custom css end (Azahar) */
 

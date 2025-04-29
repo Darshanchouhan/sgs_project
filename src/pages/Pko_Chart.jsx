@@ -2,7 +2,7 @@ import React from "react";
 import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 
-const Pko_Chart = ({ labels, data }) => {
+const Pko_Chart = ({ labels, data, chartName }) => {
   const totalSKUs = data.reduce((a, b) => a + b, 0); // Calculate total SKUs
   const completedSKUs = data[2] || 0; // Assuming "Completed" is the third item
 
@@ -64,7 +64,9 @@ const Pko_Chart = ({ labels, data }) => {
           color: "#6C757D",
         }}
       >
-        <p style={{ margin: "0" }}>{completedSKUs} SKUs</p>
+        <p style={{ margin: "0" }}>
+          {completedSKUs} {chartName}
+        </p>
         <p style={{ margin: "0" }}>completed</p>
       </div>
     </div>
