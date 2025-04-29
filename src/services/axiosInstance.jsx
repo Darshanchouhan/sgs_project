@@ -48,7 +48,7 @@ const parseJwt = (token) => {
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8001/api/", // Replace with your Django backend URL
+  baseURL: "https://demo.gramener.com/api/", // Replace with your Django backend URL
 
   headers: {
     "Content-Type": "application/json",
