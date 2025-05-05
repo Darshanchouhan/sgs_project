@@ -35,7 +35,7 @@ const TablepkoPage = (props) => {
             </td>
             <td className="align-middle">{pkoItemIncoming?.['pko_id']}</td>
             <td className="align-middle">{pkoItemIncoming?.['supplier_name']}</td>
-            <td className="align-middle text-end">{dateConverter(pkoItemIncoming?.['due_date'])}</td>
+            <td className="align-middle text-end text-nowrap">{dateConverter(pkoItemIncoming?.['due_date'])}</td>
             <td className="align-middle">
                 <div className="d-flex align-items-center justify-content-between w-100">
                     <div className="w-50">

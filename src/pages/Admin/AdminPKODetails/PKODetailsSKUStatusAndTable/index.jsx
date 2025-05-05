@@ -31,7 +31,7 @@ const PKODetailsSKUStatusAndTable = () => {
       </div>
 
       {/* Table Section */}
-      <div className="table-container-skus-tbl-admin mt-3 table-responsive">
+      <div className="table-container-skus-tbl-admin mt-3 table-responsive mainScrollable-table">
         <table className="table table-bordered table-striped fs-14">
           <thead>
             <tr>

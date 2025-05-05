@@ -26,6 +26,7 @@ import { login } from "./store/authSlice"; // Import login action
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminPKODetails from "./pages/Admin/AdminPKODetails";
 import AdminSKUDetails from "./pages/Admin/AdminSKUDetails";
+import AdminComponent from "./pages/Admin/AdminComponent";
 
 function App() {
   // Call the hook to start tracking inactivity and refreshing the token
@@ -104,6 +105,12 @@ function App() {
               <Route
                 path="/adminskudetails"
                 element={<PrivateRoute element={<AdminSKUDetails />} />}
+              />
+
+              {/* Private Route - Admin SKU Details */}
+              <Route
+                path="/admincomponent"
+                element={<PrivateRoute element={<AdminComponent />} />}
               />
 
               {/* Other routes can go here */}

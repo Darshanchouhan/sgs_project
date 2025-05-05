@@ -1,4 +1,4 @@
-const SKUDetailsSubHeaderStrip = () => {
+const ComponentSubHeaderStrip = () => {
     return (
         <div className="py-3 bg-white">
             <div className="container-fluid px-20 px-md-4">
@@ -25,16 +25,29 @@ const SKUDetailsSubHeaderStrip = () => {
                                 <li className="breadcrumb-item">
                                     <a
                                         href="#"
-                                        className="text-decoration-none text-color-list-item fw-600 fs-14"
+                                        className="text-decoration-none text-secondary fw-600 fs-14"
                                     >
                                         CVS Ibuprofen 200mg
+                                    </a>
+                                </li>
+                                <li className="breadcrumb-item">
+                                    <a
+                                        href="#"
+                                        className="text-decoration-none text-color-list-item fw-600 fs-14"
+                                    >
+                                        Box
                                     </a>
                                 </li>
                             </ol>
                         </nav>
                         <div className="d-flex align-items-center mt-2">
-                            <h2 className="fs-24 fw-600 text-color-close-icon-box me-3 mb-0">CVS Ibuprofen 200mg</h2>
-                            <span className="fs-14 fw-600 text-nowrap px-18 py-6 d-inline-block border rounded-pill in-review-pill">In Review</span>
+                            <button type="button" className="btn p-0 border-none bg-transparent">
+                                <img src="/assets/images/back-action-icon.svg" style={{ width: "36px", height: "36px" }} alt="Back Icon" />
+                            </button>
+                            <h2 className="fs-24 fw-600 text-color-close-icon-box mx-3 mb-0">Box</h2>
+                            <button type="button" className="btn p-0 border-none bg-transparent">
+                                <img src="/assets/images/forward-action-icon.svg" style={{ width: "36px", height: "36px" }} alt="Back Icon" />
+                            </button>
                         </div>
                     </div>
                     <div className="d-flex align-items-center">
@@ -52,4 +65,4 @@ const SKUDetailsSubHeaderStrip = () => {
     )
 }
 
-export default SKUDetailsSubHeaderStrip;
+export default ComponentSubHeaderStrip;

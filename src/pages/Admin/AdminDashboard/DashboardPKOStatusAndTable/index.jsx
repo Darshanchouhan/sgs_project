@@ -85,20 +85,20 @@ const DashboardPKOStatusAndTable = (props) => {
       </div>
 
       {/* Table Section */}
-      <div className="table-container-pko-tbl-admin mt-3 table-responsive">
+      <div className="table-container-pko-tbl-admin mt-3 table-responsive mainScrollable-table">
         <table className="table table-bordered table-striped fs-14">
           <thead>
             <tr>
-              <th className="h-48 align-middle text-center">
+              <th className="h-48 align-middle text-center text-nowrap">
                 <input className="form-check-input mt-0" type="checkbox" checked={tablepkoData?.map((item) => item?.['pko_id'])?.length === selectedPKOIds?.length} aria-label="Checkbox for selection" onChange={handleSelectAllPKO}/>
               </th>
-              <th className="h-48 align-middle">PKO Project ID</th>
-              <th className="h-48 align-middle">Supplier <img className="cursor-pointer" src={filterIcon} onClick={handleSortSupplier}/></th>
-              <th className="h-48 align-middle">Due Date <img className="cursor-pointer" src={filterIcon} onClick={handleSortDate}/></th>
-              <th className="h-48 align-middle">SKU Forms submitted</th>
-              <th className="h-48 align-middle">SKU Forms Approved</th>
-              <th className="h-48 align-middle">PKO Status</th>
-              <th className="h-48 align-middle"></th>
+              <th className="h-48 align-middle text-nowrap">PKO Project ID</th>
+              <th className="h-48 align-middle text-nowrap"><div className="d-flex justify-content-between align-items-center">Supplier <img className="cursor-pointer" src={filterIcon} onClick={handleSortSupplier}/></div></th>
+              <th className="h-48 align-middle text-nowrap"><div className="d-flex justify-content-between align-items-center">Due Date <img className="cursor-pointer" src={filterIcon} onClick={handleSortDate}/></div></th>
+              <th className="h-48 align-middle text-nowrap">SKU Forms submitted</th>
+              <th className="h-48 align-middle text-nowrap">SKU Forms Approved</th>
+              <th className="h-48 align-middle text-nowrap">PKO Status</th>
+              <th className="h-48 align-middle text-nowrap"></th>
             </tr>
           </thead>
           <tbody>
@@ -107,6 +107,8 @@ const DashboardPKOStatusAndTable = (props) => {
                   <TablepkoPage
                     key={index + 1}
                     pkoItemIncoming={pkoItemIncoming}
+                    selectedPKOIds={selectedPKOIds}
+                    setSelectedPKOIds={setSelectedPKOIds}
                   />
                 );
               })}

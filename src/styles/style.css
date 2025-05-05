@@ -23124,6 +23124,34 @@ input[type="radio"] {
 .pkoSummaryCard .overall-progress-block {
   border-color: #848383 !important;
 }
+.mainContent-holder {
+  height: calc(100vh - 64px) !important;
+  overflow-y: auto !important;
+}
+.mainScrollable-table {
+  min-height: 300px !important;
+  max-height: 500px !important;
+  overflow-y: auto !important;
+
+}
+.approve-sku-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .approve-sku-modal-popup .modal-dialog {
+    max-width: 33% !important;
+    min-width: 33% !important;
+  }
+}
+.request-changes-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .request-changes-modal-popup .modal-dialog {
+    max-width: 55% !important;
+    min-width: 55% !important;
+  }
+}
 /* Custom css end (Azahar) */
 
 .offcanvas {
