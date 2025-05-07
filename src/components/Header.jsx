@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import ModalLoad from "../pages/ModalLoad";
 import useAuthentication from "../hooks/useAuthentication";
-import NotificationToast from "../pages/NotificationToast";
+import NotificationToast from "../components/notification";
+import axiosInstance from "../services/axiosInstance"; // your axios setup
 
 const Header = () => {
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
+  const [showToast, setShowToast] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const { logoutUserAction } = useAuthentication(); // Using the custom hook
 
   const handleLogout = () => {
@@ -22,14 +25,65 @@ const Header = () => {
     setIsModalVisible(false);
   };
 
-  const [showToast, setShowToast] = useState(false);
+  // const handleShowToast = async () => {
+  //   try {
+  //     const supplierId = localStorage.getItem("cvs_supplier") || "56789"; // fallback
+  //     const res = await axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`);
+  //     setNotifications(res.data || []);
+  //   } catch (err) {
+  //     console.error("Error fetching reminders:", err);
+  //     setNotifications([]);
+  //   }
+  //   setShowToast(true);
+  // };
 
-  const handleShowToast = () => {
+  const handleShowToast = async () => {
+    try {
+      const supplierId = localStorage.getItem("cvs_supplier") || "56789";
+      const res = await axiosInstance.get(
+        `/reminders/?cvs_supplier=${supplierId}`,
+      );
+      const reminders = res.data || [];
+
+      // Patch unseen ones to "Seen"
+      const unseenReminders = reminders.filter((r) => r.status === "Unseen");
+
+      await Promise.all(
+        unseenReminders.map((r) =>
+          axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
+        ),
+      );
+
+      // Refetch updated list after marking seen
+      const refreshed = await axiosInstance.get(
+        `/reminders/?cvs_supplier=${supplierId}`,
+      );
+      setNotifications(refreshed.data || []);
+    } catch (err) {
+      console.error("Error handling reminders:", err);
+      setNotifications([]);
+    }
+
     setShowToast(true);
   };
 
-  const handleHideToast = () => {
-    setShowToast(false);
+  const handleHideToast = () => setShowToast(false);
+
+  const handleMarkAsSeen = async (reminderId) => {
+    try {
+      await axiosInstance.patch("/reminders/", {
+        id: reminderId,
+        status: "Seen",
+      });
+      // Refresh notifications after marking as seen
+      const supplierId = localStorage.getItem("cvs_supplier") || "56789";
+      const res = await axiosInstance.get(
+        `/reminders/?cvs_supplier=${supplierId}`,
+      );
+      setNotifications(res.data || []);
+    } catch (err) {
+      console.error(`Failed to mark reminder ${reminderId} as seen`, err);
+    }
   };
 
   return (
@@ -94,7 +148,11 @@ const Header = () => {
                 </button>
 
                 {showToast && (
-                  <NotificationToast handleCloseToast={handleHideToast} />
+                  <NotificationToast
+                    handleCloseToast={handleHideToast}
+                    reminders={notifications}
+                    onMarkAsSeen={handleMarkAsSeen}
+                  />
                 )}
               </div>
             </li>

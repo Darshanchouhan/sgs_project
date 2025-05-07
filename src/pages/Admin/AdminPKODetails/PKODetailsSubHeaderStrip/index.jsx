@@ -1,4 +1,12 @@
+import { useNavigate } from "react-router-dom";
+
 const PKODetailsSubHeaderStrip = () => {
+  const navigate = useNavigate();
+
+  const navigateToHome = () => {
+    navigate("/admindashboard");
+  };
+
   return (
     <div className="py-3 bg-white">
       <div className="container-fluid px-20 px-md-4">
@@ -8,8 +16,8 @@ const PKODetailsSubHeaderStrip = () => {
               <ol className="breadcrumb mb-0">
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
-                    className="text-decoration-none text-secondary fw-600 fs-14"
+                    onClick={navigateToHome}
+                    className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
                     Home
                   </a>

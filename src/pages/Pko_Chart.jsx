@@ -11,8 +11,8 @@ const Pko_Chart = ({ labels, data, chartName }) => {
     datasets: [
       {
         data,
-        backgroundColor: ["#EDEDED", "#257CFF", "#FEB343", "#28a745"], // Not Started, Draft, Inreview, Approved
-        hoverBackgroundColor: ["#8C8C8C", "#1A5FD3", "#e09a21", "#1e7e34"],
+        backgroundColor: chartName === "PKOs" ? ["#EDEDED", "#257CFF", "#28a745"] : ["#EDEDED", "#257CFF", "#FEB343", "#28a745"], // Not Started, Draft, Inreview, Approved
+        hoverBackgroundColor: chartName === "PKOs" ? ["#8C8C8C", "#1A5FD3", "#1e7e34"] : ["#8C8C8C", "#1A5FD3", "#e09a21", "#1e7e34"],
         borderWidth: 1, // Add slight border for better segmentation
         cutout: "68%", // Adjust thickness for a cleaner look
       },
@@ -67,7 +67,7 @@ const Pko_Chart = ({ labels, data, chartName }) => {
         <p style={{ margin: "0" }}>
           {inReviewSKUs} {chartName}
         </p>
-        <p style={{ margin: "0" }}>Inreview</p>
+        <p style={{ margin: "0" }}> {chartName === "PKOs" ? "Approved" : "In Review"}</p>
       </div>
     </div>
   );

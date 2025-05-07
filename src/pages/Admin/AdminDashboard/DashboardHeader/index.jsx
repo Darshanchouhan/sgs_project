@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
-import NotificationToast from "../../../../pages/NotificationToast";
+import NotificationToast from "../../../../components/notification";
 import SentReminderModal from "./SentReminderModal";
 import CommentPanel from "./CommentPanel";
+import axiosInstance from "../../../../services/axiosInstance";
 
 const HeaderAdmin = () => {
   const [showToast, setShowToast] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [reminderData, setReminderData] = React.useState([]);
 
   const handleShowToast = () => {
     setShowToast(true);
@@ -14,6 +18,24 @@ const HeaderAdmin = () => {
   const handleHideToast = () => {
     setShowToast(false);
   };
+
+  const reminderAPICall = async() => {
+      try{
+         const response = await axiosInstance.get(`/reminders/`);
+         if(response?.status === 200){
+           setReminderData(response?.data);    
+           setIsModalOpen(true);
+         }
+      }
+      catch(err){
+        console.log(err,"reminder get error");
+      }
+     }
+
+  const handleModalReminder = () => {
+    setReminderData([]);
+    reminderAPICall();
+  }
 
   return (
     <>
@@ -60,6 +82,7 @@ const HeaderAdmin = () => {
                   className="btn p-0 border-none bg-transparent"
                   data-bs-toggle="modal"
                   data-bs-target="#sentReminderModal"
+                  onClick={handleModalReminder}
                 >
                   <img
                     src="/assets/images/sent-reminders-icon.svg"
@@ -104,8 +127,12 @@ const HeaderAdmin = () => {
           </div>
         </div>
       </nav>
+      {/* Modal for Sent Reminder */}
+      <SentReminderModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        reminderData={reminderData}/>
 
-      <SentReminderModal />
       <CommentPanel />
     </>
   );

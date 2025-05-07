@@ -100,7 +100,7 @@ const PKODetailsPKOSummary = () => {
                       <div className="d-flex align-items-center gap-2">
                         <span className="status-dot completed"></span>
                         <p className="fs-12 text-color-typo-primary mb-0">
-                          Completed
+                          Approved
                         </p>
                       </div>
                       <span className="fs-12 fw-700">6</span>

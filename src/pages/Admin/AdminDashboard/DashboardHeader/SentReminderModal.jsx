@@ -1,31 +1,29 @@
-import React, { useEffect } from "react";
-import axiosInstance from "../../../../services/axiosInstance";
+import React from "react";
+import {useRef} from 'react';
 
-const SentReminderModal = () => {
-  const [reminderData, setReminderData] = React.useState([]);
+const SentReminderModal = ({isOpen,onClose,reminderData}) => { 
+  
+  const backdropRef = useRef(null);
 
-  const reminderAPICall = async () => {
-    try {
-      const response = await axiosInstance.get(`/reminders/`);
-      if (response?.status === 200) {
-        setReminderData(response?.data);
-      }
-    } catch (err) {
-      console.log(err, "reminder get error");
+  const handleBackdropClick = (e) => {
+    // Only close if user clicked on the backdrop, not inside modal content
+    if (e.target === backdropRef.current) {
+       onClose();
     }
   };
 
-  useEffect(() => {
-    reminderAPICall();
-  }, [window.location.pathname]);
+  if (!isOpen) return null;
 
   return (
     <div
-      className="modal fade sent-reminder-modal-popup"
-      id="sentReminderModal"
+      ref={backdropRef}
+      className="modal fade show d-block sent-reminder-modal-popup"
       tabIndex="-1"
       aria-labelledby="sentReminderModalLabel"
-      aria-hidden="true"
+      aria-modal="true"
+      role="dialog"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      onClick={handleBackdropClick}
     >
       <div className="modal-dialog modal-dialog-centered bg-transparent p-0">
         <div className="modal-content rounded-1">
@@ -41,6 +39,7 @@ const SentReminderModal = () => {
               className="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"
+              onClick={onClose}
             ></button>
           </div>
           <div className="modal-body px-32 py-0 pb-4">

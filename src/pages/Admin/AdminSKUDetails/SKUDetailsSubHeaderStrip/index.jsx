@@ -1,4 +1,16 @@
+import { useNavigate } from "react-router-dom";
+
 const SKUDetailsSubHeaderStrip = () => {
+  const navigate = useNavigate();
+
+  const navigateToHome = () => {
+    navigate("/admindashboard");
+  };
+
+  const navigateToPKOpage = () => {
+    navigate("/adminpkodetails");
+  };
+
   return (
     <div className="py-3 bg-white">
       <div className="container-fluid px-20 px-md-4">
@@ -8,16 +20,16 @@ const SKUDetailsSubHeaderStrip = () => {
               <ol className="breadcrumb mb-0">
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
-                    className="text-decoration-none text-secondary fw-600 fs-14"
+                    onClick={navigateToHome}
+                    className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
                     Home
                   </a>
                 </li>
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
-                    className="text-decoration-none text-secondary fw-600 fs-14"
+                    onClick={navigateToPKOpage}
+                    className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
                     PRJ1188
                   </a>

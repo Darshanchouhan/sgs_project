@@ -437,7 +437,7 @@ const VendorDashboard = () => {
                         labels={[
                           "Not Started",
                           "Draft",
-                          "Inreview",
+                          "In Review",
                           "Approved",
                         ]}
                         data={[
@@ -492,7 +492,7 @@ const VendorDashboard = () => {
                         <div className="d-flex align-items-center gap-2">
                           <span className="status-dot in-review"></span>
                           <p className="fs-12 text-color-typo-primary mb-0">
-                            Inreview
+                            In Review
                           </p>
                         </div>
                         {/* Dynamically display the count of "Completed" SKUs */}
@@ -544,7 +544,7 @@ const VendorDashboard = () => {
                 <option value="All">All SKUs ({skuData.length})</option>
                 <option value="Not Started">Not Started</option>
                 <option value="Draft">Draft</option>
-                <option value="Inreview">Inreview</option>
+                <option value="Inreview">In Review</option>
                 <option value="Approved">Approved</option>
               </select>
             </div>
@@ -606,7 +606,7 @@ const VendorDashboard = () => {
                                     : "bg-color-light-border text-color-typo-secondary"
                             }`}
                           >
-                            {status}
+                            {status === "Inreview" ? "In Review" : status}
                           </span>
                         </td>
                         <td className="align-middle text-center">

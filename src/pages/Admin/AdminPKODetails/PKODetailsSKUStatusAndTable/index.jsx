@@ -73,7 +73,7 @@ const PKODetailsSKUStatusAndTable = () => {
               </td>
               <td className="align-middle text-center">
                 <span className="fs-14 fw-600 text-nowrap px-12 py-6 d-inline-block border rounded-pill completed-pill w-120">
-                  Completed
+                  Approved
                 </span>
               </td>
               <td className="align-middle text-center">

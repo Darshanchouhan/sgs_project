@@ -34,7 +34,7 @@ const DashboardPKOSummary = (props) => {
           <div className="d-flex align-items-center justify-content-between w-60 h-100 gap-4">
             <div className="position-relative w-180 h-180">
               <Pko_Chart
-                labels={["Not Started", "In Progress", "Completed"]}
+                labels={["Not Started", "In Progress", "Approved"]}
                 data={[
                   pkopProgressSummaryIncomingData?.["not_started"],
                   pkopProgressSummaryIncomingData?.["in_progress"],
@@ -70,7 +70,7 @@ const DashboardPKOSummary = (props) => {
                 <div className="d-flex align-items-center gap-2">
                   <span className="status-dot completed"></span>
                   <p className="fs-12 text-color-typo-primary mb-0">
-                    Completed
+                    Approved
                   </p>
                 </div>
                 <span className="fs-12 fw-700">
