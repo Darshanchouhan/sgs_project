@@ -8,34 +8,32 @@ import ComponentForm from "./ComponentForm";
 import AdminApproveSKUModal from "../AdminApproveSKUModal";
 import AdminRequestChangesModal from "../AdminRequestChangesModal";
 
-
 const AdminComponent = () => {
-
-    return (
-        <div>
-            {/* Navbar */}
-            <HeaderAdmin />
-            <div className="d-flex">
-                <DashboardSidebar />
-                <div className="mainContent-holder w-100 h-100 bg-color-light-gray-shade">
-                    <ComponentSubHeaderStrip />
-                    {/* Main Section */}
-                    <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
-                        <div className="row">
-                            <ComponentSidePanel />
-                            <ComponentForm />
-                        </div>
-                    </div>
-                </div>
+  return (
+    <div>
+      {/* Navbar */}
+      <HeaderAdmin />
+      <div className="d-flex">
+        <DashboardSidebar />
+        <div className="mainContent-holder w-100 h-100 bg-color-light-gray-shade">
+          <ComponentSubHeaderStrip />
+          {/* Main Section */}
+          <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
+            <div className="row">
+              <ComponentSidePanel />
+              <ComponentForm />
             </div>
-
-            {/* Approve SKU Modal Popup */}
-            <AdminApproveSKUModal />
-
-            {/* Request Changes Modal Popup */}
-            <AdminRequestChangesModal />
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Approve SKU Modal Popup */}
+      <AdminApproveSKUModal />
+
+      {/* Request Changes Modal Popup */}
+      <AdminRequestChangesModal />
+    </div>
+  );
 };
 
 export default AdminComponent;

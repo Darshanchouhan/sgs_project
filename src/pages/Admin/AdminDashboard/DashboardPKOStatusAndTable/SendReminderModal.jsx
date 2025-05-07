@@ -1,21 +1,23 @@
-import {useRef} from 'react';
+import { useRef } from "react";
 
 const SendReminderModal = ({
-    selectedPKOIds,
-    text,
-    handleChange,
-    handleSubmitReminder,
-    wordCount,
-    isOpen,
-    onClose,
-    setText
-  }) => {
-    const backdropRef = useRef(null);
+  selectedPKOIds,
+  text,
+  handleChange,
+  handleSubmitReminder,
+  wordCount,
+  isOpen,
+  onClose,
+  setText,
+}) => {
+  const backdropRef = useRef(null);
 
   const handleBackdropClick = (e) => {
     // Only close if user clicked on the backdrop, not inside modal content
     if (e.target === backdropRef.current) {
-      setText("The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!");
+      setText(
+        "The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!",
+      );
       onClose();
     }
   };
@@ -30,7 +32,7 @@ const SendReminderModal = ({
       aria-labelledby="sendReminderModalLabel"
       aria-modal="true"
       role="dialog"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       onClick={handleBackdropClick}
     >
       <div className="modal-dialog modal-dialog-centered bg-transparent p-0">
@@ -66,7 +68,7 @@ const SendReminderModal = ({
                 id="reminderMessageTextarea"
                 value={text}
                 onChange={handleChange}
-                style={{ height: '130px' }}
+                style={{ height: "130px" }}
               ></textarea>
             </div>
             <div className="text-end pt-2 fs-12">
@@ -95,7 +97,6 @@ const SendReminderModal = ({
       </div>
     </div>
   );
-}
+};
 
-  export default SendReminderModal
-  
+export default SendReminderModal;

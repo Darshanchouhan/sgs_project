@@ -4,8 +4,8 @@ const PKODetailsSKUStatusAndTable = () => {
   const navigate = useNavigate();
 
   const handleForwardClick = () => {
-    navigate('/adminskudetails')
-  }
+    navigate("/adminskudetails");
+  };
   return (
     <>
       <div className="d-flex align-items-center justify-content-between mt-30">
@@ -77,7 +77,10 @@ const PKODetailsSKUStatusAndTable = () => {
                 </span>
               </td>
               <td className="align-middle text-center">
-                <button className="btn p-0 border-0 shadow-none" onClick={handleForwardClick}>
+                <button
+                  className="btn p-0 border-0 shadow-none"
+                  onClick={handleForwardClick}
+                >
                   <img
                     src="/assets/images/forward-arrow-img.png"
                     alt="Forward"
@@ -118,7 +121,10 @@ const PKODetailsSKUStatusAndTable = () => {
                 </span>
               </td>
               <td className="align-middle text-center">
-                <button className="btn p-0 border-0 shadow-none" onClick={handleForwardClick}>
+                <button
+                  className="btn p-0 border-0 shadow-none"
+                  onClick={handleForwardClick}
+                >
                   <img
                     src="/assets/images/forward-arrow-img.png"
                     alt="Forward"
@@ -159,7 +165,10 @@ const PKODetailsSKUStatusAndTable = () => {
                 </span>
               </td>
               <td className="align-middle text-center">
-                <button className="btn p-0 border-0 shadow-none" onClick={handleForwardClick}>
+                <button
+                  className="btn p-0 border-0 shadow-none"
+                  onClick={handleForwardClick}
+                >
                   <img
                     src="/assets/images/forward-arrow-img.png"
                     alt="Forward"
@@ -200,7 +209,10 @@ const PKODetailsSKUStatusAndTable = () => {
                 </span>
               </td>
               <td className="align-middle text-center">
-                <button className="btn p-0 border-0 shadow-none" onClick={handleForwardClick}>
+                <button
+                  className="btn p-0 border-0 shadow-none"
+                  onClick={handleForwardClick}
+                >
                   <img
                     src="/assets/images/forward-arrow-img.png"
                     alt="Forward"

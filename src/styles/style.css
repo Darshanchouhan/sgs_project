@@ -22691,6 +22691,11 @@ input[type="radio"] {
   border-color: #feb343 !important;
   background-color: #f9f2e0;
 }
+.in-review-sku-status-pill {
+  color: #feb343;
+  border-color: #feb343 !important;
+  background-color: #feb343;
+}
 .not-started-pill {
   color: #ababab;
   border-color: #ababab !important;
@@ -22750,7 +22755,7 @@ input[type="radio"] {
     padding-bottom: 1.5rem;
   }
 
-  .admin-dashboard-container-height{
+  .admin-dashboard-container-height {
     height: 100% !important;
     padding-bottom: 1.5rem;
   }
@@ -23149,7 +23154,6 @@ input[type="radio"] {
   min-height: 300px !important;
   max-height: 500px !important;
   overflow-y: auto !important;
-
 }
 .approve-sku-modal-popup .modal-dialog {
   max-width: 97%;

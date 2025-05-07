@@ -507,7 +507,7 @@ const Sku_Page = () => {
       // Update SKU Status in Database**
       await axiosInstance.put(`/skus/${skuId}/update_status/`, {
         pko_id: pkoId,
-        status: "Completed",
+        status: "Inreview",
       });
 
       // Update Local State**
@@ -820,10 +820,10 @@ const Sku_Page = () => {
       payload["status"] = isBackClick
         ? combinedProgress != 100
           ? "Draft"
-          : "Completed"
+          : "Inreview"
         : isDraft
           ? "Draft"
-          : "Completed";
+          : "Inreview";
       questions.forEach((question) => {
         const answer = skuData.dimensionsAndWeights[question.question_id];
         let unit =

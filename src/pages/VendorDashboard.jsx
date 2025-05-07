@@ -151,10 +151,9 @@ const VendorDashboard = () => {
             skuDetails: sku,
             pkoData: pkoData || null,
             duedate: pkoData?.duedate || null,
-          }));
-          navigate(
-            "/skus"
-          );
+          }),
+        );
+        navigate("/skus");
         return;
       }
 
@@ -435,13 +434,20 @@ const VendorDashboard = () => {
                   <div className="graph w-60 h-100">
                     <div className="mt-3">
                       <Pko_Chart
-                        labels={["Not Started", "Draft", "Completed"]}
+                        labels={[
+                          "Not Started",
+                          "Draft",
+                          "Inreview",
+                          "Approved",
+                        ]}
                         data={[
                           skuData.filter((sku) => sku.status === "Not Started")
                             .length,
                           skuData.filter((sku) => sku.status === "Draft")
                             .length,
-                          skuData.filter((sku) => sku.status === "Completed")
+                          skuData.filter((sku) => sku.status === "Inreview")
+                            .length,
+                          skuData.filter((sku) => sku.status === "Approved")
                             .length,
                         ]}
                         chartName={"SKUs"}
@@ -484,15 +490,29 @@ const VendorDashboard = () => {
                       </li>
                       <li className="d-flex align-items-center justify-content-between mb-3">
                         <div className="d-flex align-items-center gap-2">
-                          <span className="status-dot completed"></span>
+                          <span className="status-dot in-review"></span>
                           <p className="fs-12 text-color-typo-primary mb-0">
-                            Completed
+                            Inreview
                           </p>
                         </div>
                         {/* Dynamically display the count of "Completed" SKUs */}
                         <span className="fs-12 fw-700">
                           {
-                            skuData.filter((sku) => sku.status === "Completed")
+                            skuData.filter((sku) => sku.status === "Inreview")
+                              .length
+                          }
+                        </span>
+                      </li>
+                      <li className="d-flex align-items-center justify-content-between mb-3">
+                        <div className="d-flex align-items-center gap-2">
+                          <span className="status-dot completed"></span>
+                          <p className="fs-12 text-color-typo-primary mb-0">
+                            Approved
+                          </p>
+                        </div>
+                        <span className="fs-12 fw-700">
+                          {
+                            skuData.filter((sku) => sku.status === "Approved")
                               .length
                           }
                         </span>
@@ -524,7 +544,8 @@ const VendorDashboard = () => {
                 <option value="All">All SKUs ({skuData.length})</option>
                 <option value="Not Started">Not Started</option>
                 <option value="Draft">Draft</option>
-                <option value="Completed">Completed</option>
+                <option value="Inreview">Inreview</option>
+                <option value="Approved">Approved</option>
               </select>
             </div>
           </div>
@@ -576,11 +597,13 @@ const VendorDashboard = () => {
                         <td className="align-middle">
                           <span
                             className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
-                              status === "Completed"
-                                ? "bg-color-completed text-white"
-                                : status === "Draft"
-                                  ? "bg-color-draft text-white"
-                                  : "bg-color-light-border text-color-typo-secondary"
+                              status === "Inreview"
+                                ? "in-review-sku-status-pill text-white"
+                                : status === "Approved"
+                                  ? "bg-color-completed text-white"
+                                  : status === "Draft"
+                                    ? "bg-color-draft text-white"
+                                    : "bg-color-light-border text-color-typo-secondary"
                             }`}
                           >
                             {status}

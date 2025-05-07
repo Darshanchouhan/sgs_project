@@ -90,18 +90,21 @@ const HeaderAdmin = () => {
                 <button
                   type="button"
                   className="btn p-0 border-none bg-transparent"
-                  // data-bs-toggle="offcanvas" 
-                  // data-bs-target="#offcanvasCommentPanel" 
+                  // data-bs-toggle="offcanvas"
+                  // data-bs-target="#offcanvasCommentPanel"
                   // aria-controls="offcanvasCommentPanel"
                 >
-                  <img src="/assets/images/comment-icon.svg" alt="comment-icon" />
+                  <img
+                    src="/assets/images/comment-icon.svg"
+                    alt="comment-icon"
+                  />
                 </button>
               </li>
             </ul>
           </div>
         </div>
       </nav>
-      
+
       <SentReminderModal />
       <CommentPanel />
     </>
