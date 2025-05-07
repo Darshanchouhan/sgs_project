@@ -16,7 +16,7 @@ const AdminPKODetails = () => {
         <div className="mainContent-holder w-100 h-100 bg-color-light-gray-shade">
           <PKODetailsSubHeaderStrip />
           {/* Main Section */}
-          <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
+          <div className="container-fluid px-20 px-md-4 pt-30 admin-container-height d-flex flex-column">
             <PKODetailsPKOSummary />
             <PKODetailsSKUStatusAndTable />
           </div>

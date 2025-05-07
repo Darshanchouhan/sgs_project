@@ -31,7 +31,7 @@ const AdminDashboard = () => {
     dasboardAPICall();
   }, []);
   return (
-    <div>
+    <>
       {/* Navbar */}
       <HeaderAdmin />
       {loading && (
@@ -52,8 +52,8 @@ const AdminDashboard = () => {
           {/* Page Sub Header */}
           <DashboardSubHeaderStrip />
           {/* Main Section */}
-          <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
-            <div className="row">
+          <div className="container-fluid px-20 px-md-4 pt-30 admin-dashboard-container-height d-flex flex-column">
+            <div className="row h-100">
               {/* PKO Summary */}
               <DashboardPKOSummary
                 pkoIncomingData={dasboardAPIData?.pko_summary}
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

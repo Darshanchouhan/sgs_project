@@ -22301,6 +22301,14 @@ input:focus {
   height: calc(100vh - 144px);
 } /*# sourceMappingURL=style.css.map */
 
+.admin-container-height {
+  height: calc(100vh - 164px);
+}
+
+.admin-dashboard-container-height {
+  height: calc(100vh - 124px);
+}
+
 /* Form Section Styles */
 
 .form-title {
@@ -22734,6 +22742,15 @@ input[type="radio"] {
 /* Media Query */
 @media (max-width: 1365px) {
   .container-height {
+    height: 100% !important;
+    padding-bottom: 1.5rem;
+  }
+  .admin-container-height {
+    height: 100% !important;
+    padding-bottom: 1.5rem;
+  }
+
+  .admin-dashboard-container-height{
     height: 100% !important;
     padding-bottom: 1.5rem;
   }

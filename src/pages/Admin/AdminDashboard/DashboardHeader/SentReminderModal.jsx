@@ -1,6 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
+import axiosInstance from "../../../../services/axiosInstance";
 
 const SentReminderModal = () => {
+  const [reminderData, setReminderData] = React.useState([]);
+
+  const reminderAPICall = async() => {
+    try{
+       const response = await axiosInstance.get(`/reminders/`);
+       if(response?.status === 200){
+         setReminderData(response?.data);
+       }
+    }
+    catch(err){
+      console.log(err,"reminder get error");
+    }
+   }
+
+  useEffect(()=>{
+    reminderAPICall();
+  },[window.location.pathname]);
+
   return (
     <div
       className="modal fade sent-reminder-modal-popup"
@@ -27,76 +46,22 @@ const SentReminderModal = () => {
           </div>
           <div className="modal-body px-32 py-0 pb-4">
             <ul className="list-unstyled m-0">
+            {reminderData && reminderData?.map((item)=>{
+              return(
               <li className="border-bottom pb-20 mb-20">
                 <div className="d-flex align-items-center mb-10">
                   <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">
-                    06 Apr 2025
+                    {item?.created_date}
                   </h2>
                   <span className="mx-1 lh-8">|</span>
-                  <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
+                  <h3 className="fs-18 fw-600 text-primary mb-0" title={item?.pko_ids}>{item?.pko_ids?.length} PKOs</h3>
                 </div>
                 <p className="fs-16 fw-400 text-color-typo-primary mb-0">
-                  The deadline to complete the PKO form is approaching! Please
-                  submit your responses soon to ensure your input is included.
-                  Thank you!
+                  {item?.message}
                 </p>
               </li>
-              <li className="border-bottom pb-20 mb-20">
-                <div className="d-flex align-items-center mb-10">
-                  <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">
-                    06 Apr 2025
-                  </h2>
-                  <span className="mx-1 lh-8">|</span>
-                  <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-                </div>
-                <p className="fs-16 fw-400 text-color-typo-primary mb-0">
-                  The deadline to complete the PKO form is approaching! Please
-                  submit your responses soon to ensure your input is included.
-                  Thank you!
-                </p>
-              </li>
-              <li className="border-bottom pb-20 mb-20">
-                <div className="d-flex align-items-center mb-10">
-                  <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">
-                    06 Apr 2025
-                  </h2>
-                  <span className="mx-1 lh-8">|</span>
-                  <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-                </div>
-                <p className="fs-16 fw-400 text-color-typo-primary mb-0">
-                  The deadline to complete the PKO form is approaching! Please
-                  submit your responses soon to ensure your input is included.
-                  Thank you!
-                </p>
-              </li>
-              <li className="border-bottom pb-20 mb-20">
-                <div className="d-flex align-items-center mb-10">
-                  <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">
-                    06 Apr 2025
-                  </h2>
-                  <span className="mx-1 lh-8">|</span>
-                  <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-                </div>
-                <p className="fs-16 fw-400 text-color-typo-primary mb-0">
-                  The deadline to complete the PKO form is approaching! Please
-                  submit your responses soon to ensure your input is included.
-                  Thank you!
-                </p>
-              </li>
-              <li className="border-bottom pb-20 mb-20">
-                <div className="d-flex align-items-center mb-10">
-                  <h2 className="fs-18 fw-600 text-color-typo-primary mb-0">
-                    06 Apr 2025
-                  </h2>
-                  <span className="mx-1 lh-8">|</span>
-                  <h3 className="fs-18 fw-600 text-primary mb-0">3 PKOs</h3>
-                </div>
-                <p className="fs-16 fw-400 text-color-typo-primary mb-0">
-                  The deadline to complete the PKO form is approaching! Please
-                  submit your responses soon to ensure your input is included.
-                  Thank you!
-                </p>
-              </li>
+              )
+            })}
             </ul>
           </div>
         </div>

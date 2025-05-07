@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import TablepkoPage from "./TablepkoPage";
 import filterIcon from "../../../../../public/assets/images/Filter_icon.svg";
+import axiosInstance from "../../../../services/axiosInstance";
+import SendReminderModal from "./SendReminderModal";
 
 const DashboardPKOStatusAndTable = (props) => {
   const {tablepkoData} = props;
   const [selectedStatus,setSelectedStatus] = useState("All PKOs");
   const [selectedPKOIds,setSelectedPKOIds] = useState([]);
   const [filterTablepkoData, setFilterTablepkoData] = useState(tablepkoData);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [text, setText] = useState(
+    "The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!"
+  );
 
   useEffect(() => {
     setFilterTablepkoData(tablepkoData)
@@ -38,7 +44,43 @@ const DashboardPKOStatusAndTable = (props) => {
       });
       setFilterTablepkoData(sortedData);
     }
+  }
+
+  const wordCount = (str) => {
+    return str.trim().split(/\s+/).filter(word => word.length > 0).length;
+  }
+
+  const handleChange = (e) => {
+    const input = e.target.value;
+    const words = wordCount(input);
+
+    if (words <= 50) {
+      console.log("inside")
+      setText(input);
     }
+  };
+
+  const handleSubmitReminder = async() => {
+    try{
+     const response = await axiosInstance.post(`/reminders/`, {
+        pko_ids: selectedPKOIds,
+        message: text
+     })
+    if(response?.status === 200){
+      setText("The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!");
+      setIsModalOpen(false);
+      setSelectedPKOIds([]);
+    }
+    }
+    catch(err){
+      console.log(err,"error in sending reminder");
+    }
+  }
+
+  const handleOpenReminderPopUp = () => {
+    setIsModalOpen(true);
+  }
+
   return (
     <>
       <div className="d-flex align-items-center justify-content-between mt-30">
@@ -80,7 +122,7 @@ const DashboardPKOStatusAndTable = (props) => {
         </div>
         <div className= {`${selectedPKOIds?.length < 1 ? "d-flex align-items-center d-none" : "d-flex align-items-center"}`}>
           <h3 className="fs-18 fw-600 text-nowrap mb-0 me-3">{selectedPKOIds?.length} PKOs Selected</h3>
-          <button className="send-reminder-btn btn btn-outline-secondary py-6 ps-40 pe-3 fs-14 fw-600 rounded-1 d-flex" data-bs-toggle="modal" data-bs-target="#sendReminderModal">Send Reminder</button>
+          <button className="send-reminder-btn btn btn-outline-secondary py-6 ps-40 pe-3 fs-14 fw-600 rounded-1 d-flex" data-bs-toggle="modal" data-bs-target="#sendReminderModal" onClick={handleOpenReminderPopUp}>Send Reminder</button>
         </div>
       </div>
 
@@ -115,52 +157,16 @@ const DashboardPKOStatusAndTable = (props) => {
           </tbody>
         </table>
       </div>
-     {/* Send Reminder modal popup */}
-       <div
-        className="modal fade send-reminder-modal-popup"
-        id="sendReminderModal"
-        tabIndex="-1"
-        aria-labelledby="sendReminderModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered bg-transparent p-0">
-          <div className="modal-content rounded-1">
-            <div className="modal-header px-32 pt-4 pb-20 border-0">
-              <h1
-                className="modal-title fs-16 fw-600 text-color-typo-primary mb-0"
-                id="sendReminderModalLabel"
-              >
-                Send Reminder
-              </h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body px-32 py-0">
-              <h2 className="fs-16 fw-600 text-primary mb-3">{selectedPKOIds?.length} PKOs selected</h2>
-              <label for="reminderMessageTextarea" className="fs-14 fw-400 text-color-typo-primary">Your Message</label>
-              <div className="form-floating">
-                <textarea className="form-control px-12 py-2" placeholder="Leave a comment here" id="reminderMessageTextarea" defaultValue="The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!" style={{ height: '130px'}}></textarea>
-              </div>
-            </div>
-            <div className="modal-footer d-flex align-items-center justify-content-end flex-nowrap px-32 py-4 border-0">
-              <button
-                type="button"
-                className="btn btn-outline-primary fs-14 fw-600 px-4 py-10 rounded-1 me-3"
-                data-bs-dismiss="modal"
-              >
-                Cancel
-              </button>
-              <button className="btn btn-primary fs-14 fw-600 px-4 py-10 rounded-1">
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SendReminderModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        selectedPKOIds={selectedPKOIds}
+        text={text}
+        handleChange={handleChange}
+        handleSubmitReminder={handleSubmitReminder}
+        wordCount={wordCount}
+        setText={setText}
+      />
     </>)
 }
 

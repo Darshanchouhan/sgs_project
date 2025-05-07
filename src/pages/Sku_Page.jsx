@@ -839,6 +839,44 @@ const Sku_Page = () => {
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
+      try {
+        const response = await axiosInstance.get("pkos/");
+        const allPkoData = response.data;
+        const currentPko = allPkoData[pkoId];
+
+        if (!currentPko) {
+          console.warn("No matching PKO found for ID:", pkoId);
+          return;
+        }
+
+        const skus = currentPko.skus || [];
+        const progressValues = skus
+          .map((sku) => sku.sku_progress)
+          .filter((p) => typeof p === "number");
+
+        const total = progressValues.reduce((sum, val) => sum + val, 0);
+        const overallProgress =
+          progressValues.length > 0
+            ? Math.round(total / progressValues.length)
+            : 0;
+
+        // await axiosInstance.put(`/update-pko-progress/`, {
+        //   pko_id: pkoId,
+        //   pko_progress: overallProgress,
+        // });
+        // console.log("PKO progress updated:", overallProgress);
+        const res = await axiosInstance.put(`/update-pko-progress/`, {
+          pko_id: pkoId,
+          pko_progress: overallProgress,
+        });
+        console.log(
+          "PKO progress updated:",
+          res.data.message || overallProgress,
+        );
+      } catch (error) {
+        console.error("Error updating PKO progress:", error);
+      }
+
       // Show alert only when saving as a draft, not during submission
       if (isDraft && showAlert) {
         alert("SKU data saved successfully in Draft mode!");

@@ -82,20 +82,31 @@ const VendorDashboard = () => {
           setPkoData(pkoDetails);
 
           // Calculate the average progress
-          const skus = pkoDetails.skus || [];
-          console.log("SKUs for this PKO:", skus);
+          // const skus = pkoDetails.skus || [];
+          // console.log("SKUs for this PKO:", skus);
 
-          const totalProgress = skus.reduce(
-            (acc, sku) => acc + (sku.sku_progress || 0),
-            0,
-          );
-          console.log("Total Progress of all SKUs:", totalProgress);
+          // const totalProgress = skus.reduce(
+          //   (acc, sku) => acc + (sku.sku_progress || 0),
+          //   0
+          // );
+          // console.log("Total Progress of all SKUs:", totalProgress);
 
-          const averageProgress =
-            skus.length > 0 ? totalProgress / skus.length : 0;
-          console.log("Calculated Average Progress:", averageProgress);
+          // const averageProgress =
+          //   skus.length > 0 ? totalProgress / skus.length : 0;
+          // console.log("Calculated Average Progress:", averageProgress);
 
-          setOverallProgress(averageProgress);
+          // setOverallProgress(averageProgress);
+          //Fetch actual PKO progress from backend
+          try {
+            const progressRes = await axiosInstance.get(
+              `/update-pko-progress/?pko_id=${selectedPkoId}`,
+            );
+            const fetchedProgress = progressRes?.data?.pko_progress || 0;
+            setOverallProgress(fetchedProgress);
+          } catch (progressErr) {
+            console.error("Error fetching PKO progress:", progressErr);
+            setOverallProgress(0);
+          }
         } else {
           console.log("No PKO details found for selected PKO ID.");
         }
@@ -133,14 +144,17 @@ const VendorDashboard = () => {
       if (currentStatus === "Completed") {
         console.log("SKU is already completed. No status change needed.");
         // Navigate directly to the SKU page without changing status
-        navigate("/skus", {
-          state: {
+        localStorage.setItem(
+          "sku_page_state",
+          JSON.stringify({
             skuId: sku.sku_id,
             skuDetails: sku,
             pkoData: pkoData || null,
             duedate: pkoData?.duedate || null,
-          },
-        });
+          }));
+          navigate(
+            "/skus"
+          );
         return;
       }
 
@@ -546,10 +560,6 @@ const VendorDashboard = () => {
                     if (selectedSkuStatus === "All") return true;
                     const status = sku.status || "Not Started";
                     return status === selectedSkuStatus;
-                  })
-                  .sort((a, b) => {
-                    // Optional: Sort by SKU ID or any other property to maintain a consistent order
-                    return a.sku_id.localeCompare(b.sku_id); // Sort by SKU ID (string comparison)
                   })
                   .map((sku) => {
                     const status = sku.status || "Not Started"; // Fetch updated status

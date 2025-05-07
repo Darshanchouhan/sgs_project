@@ -21,7 +21,7 @@ const AdminSKUDetails = () => {
                 <div className="mainContent-holder w-100 h-100 bg-color-light-gray-shade">
                     <SKUDetailsSubHeaderStrip />
                     {/* Main Section */}
-                    <div className="container-fluid px-20 px-md-4 pt-30 container-height d-flex flex-column">
+                    <div className="container-fluid px-20 px-md-4 pt-30 admin-container-height d-flex flex-column">
                         <SKUDetailsInfoBox />
                         <div className="row h-100">
                             {/* Primary Packaging Details */}

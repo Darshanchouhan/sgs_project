@@ -157,9 +157,72 @@ const PkgDataForm = () => {
     }
   };
 
-  const handleSaveDraft = () => {
-    setIsPreviousValidation(false); // Reset Previous validation flag
-    handleSave(); // Directly save without validation
+  // const handleSaveDraft = () => {
+  //   setIsPreviousValidation(false); // Reset Previous validation flag
+  //   handleSave(); // Directly save without validation
+
+  // };
+  // const handleSaveDraft = async () => {
+  //   setIsPreviousValidation(false);
+  //   await handleSave();
+  //   await updateSkuProgress();        // Save component data
+  //   await updatePkoProgress();    // Then update PKO progress using above logic
+  // };
+
+  const handleSaveDraft = async () => {
+    try {
+      setIsPreviousValidation(false);
+
+      // Step 1: Fetch old component progress before saving
+      const oldComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const oldProgress = oldComponentProgressRes.data?.component_progress || 0;
+
+      // Step 2: Save updated component
+      await handleSave();
+
+      // Step 3: Fetch new component progress after save
+      const newComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const newProgress = newComponentProgressRes.data?.component_progress || 0;
+
+      // Step 4: Update SKU progress using delta logic
+      await updateSkuProgress(oldProgress, newProgress);
+
+      // Step 5: Update PKO progress
+      await updatePkoProgress();
+    } catch (error) {
+      console.error(" Error in handleSaveDraft:", error);
+    }
+  };
+
+  const handleBackSavePkoProgress = async () => {
+    try {
+      // Step 1: Fetch old component progress before saving
+      const oldComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const oldProgress = oldComponentProgressRes.data?.component_progress || 0;
+
+      // Step 2: Save updated component
+      await handleSave(false);
+
+      // Step 3: Fetch new component progress after save
+      const newComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const newProgress = newComponentProgressRes.data?.component_progress || 0;
+
+      // Step 4: Update SKU progress using delta logic
+      await updateSkuProgress(oldProgress, newProgress);
+
+      // Step 5: Update PKO progress
+      await updatePkoProgress();
+    } catch (error) {
+      console.error(" Error in handleSaveDraft:", error);
+    }
   };
 
   const validateAllSections = () => {
@@ -651,8 +714,95 @@ const PkgDataForm = () => {
     fetchData();
   }, []);
 
+  console.log(" SKU ID used in updateSkuProgress:", skuId);
+
+  const updateSkuProgress = async (oldProgress, newProgress) => {
+    try {
+      if (!skuId || skuId === "N/A") {
+        console.warn(" Invalid SKU ID. Skipping updateSkuProgress.");
+        return;
+      }
+
+      const res = await axiosInstance.get(`/skus/${skuId}/?pko_id=${pkoId}`);
+      const data = res.data;
+      const totalComponents = (data.components || []).length;
+      const oldSkuProgress = data.sku_progress || 0;
+
+      if (totalComponents === 0) {
+        console.warn("⚠️ No components found. Cannot update SKU progress.");
+        return;
+      }
+
+      const delta = ((newProgress - oldProgress) * 0.9) / totalComponents;
+      let updatedSkuProgress = Math.round(oldSkuProgress + delta);
+      updatedSkuProgress = Math.max(0, Math.min(100, updatedSkuProgress)); // Clamp to 0–100
+
+      await axiosInstance.put(`/skus/${skuId}/`, {
+        sku_id: skuId,
+        pko_id: pkoId,
+        sku_progress: updatedSkuProgress,
+      });
+
+      //  Fix: Update status separately
+      // await updateSkuStatus(
+      //   skuId,
+      //   updatedSkuProgress === 100 ? "Completed" : "Draft"
+      // );
+
+      console.log(
+        " SKU progress updated incrementally to:",
+        updatedSkuProgress,
+      );
+    } catch (error) {
+      console.error("Error updating SKU progress:", error);
+    }
+  };
+
+  const updatePkoProgress = async () => {
+    if (!pkoId) {
+      console.warn("Cannot update PKO progress: Missing pkoId.");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get("pkos/");
+      const allPkoData = response.data;
+      const currentPko = allPkoData[pkoId];
+
+      if (!currentPko) {
+        console.warn("No matching PKO found for ID:", pkoId);
+        return;
+      }
+
+      const skus = currentPko.skus || [];
+      const progressValues = skus
+        .map((sku) => sku.sku_progress)
+        .filter((p) => typeof p === "number");
+
+      const total = progressValues.reduce((sum, val) => sum + val, 0);
+      const overallProgress =
+        progressValues.length > 0
+          ? Math.round(total / progressValues.length)
+          : 0;
+
+      const res = await axiosInstance.put(`/update-pko-progress/`, {
+        pko_id: pkoId,
+        pko_progress: overallProgress,
+      });
+
+      console.log("PKO progress updated:", res.data.message || overallProgress);
+    } catch (error) {
+      console.error("Error updating PKO progress:", error);
+    }
+  };
+
+  // const handleBackClick = async () => {
+  //   await handleSave(false); // Call save function with false flag to skip alert
+  //   navigate("/skus"); // Navigate back after saving
+  // };
+
   const handleBackClick = async () => {
-    await handleSave(false); // Call save function with false flag to skip alert
+    await handleBackSavePkoProgress(); // Call save function with false flag to skip alert
     navigate("/skus"); // Navigate back after saving
   };
 
