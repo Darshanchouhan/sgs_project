@@ -22,6 +22,13 @@ const SendReminderModal = ({
     }
   };
 
+  const handleClosePopUp = () => {
+    setText(
+      "The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!",
+    );
+    onClose();
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -48,7 +55,7 @@ const SendReminderModal = ({
               type="button"
               className="btn-close"
               aria-label="Close"
-              onClick={onClose}
+              onClick={handleClosePopUp}
             ></button>
           </div>
           <div className="modal-body px-32 py-0">
@@ -79,7 +86,7 @@ const SendReminderModal = ({
             <button
               type="button"
               className="btn btn-outline-primary fs-14 fw-600 px-4 py-10 rounded-1 me-3"
-              onClick={onClose}
+              onClick={handleClosePopUp}
             >
               Cancel
             </button>
@@ -87,7 +94,7 @@ const SendReminderModal = ({
               className="btn btn-primary fs-14 fw-600 px-4 py-10 rounded-1"
               onClick={() => {
                 handleSubmitReminder();
-                onClose();
+                handleClosePopUp();
               }}
             >
               Send

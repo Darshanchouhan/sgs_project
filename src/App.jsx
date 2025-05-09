@@ -97,13 +97,13 @@ function App() {
 
               {/* Private Route - Admin PKO Details */}
               <Route
-                path="/adminpkodetails"
+                path="/adminpkodetails/:pkoId"
                 element={<PrivateRoute element={<AdminPKODetails />} />}
               />
 
               {/* Private Route - Admin SKU Details */}
               <Route
-                path="/adminskudetails"
+                path="/adminskudetails/:pkoId/:skuId"
                 element={<PrivateRoute element={<AdminSKUDetails />} />}
               />
 

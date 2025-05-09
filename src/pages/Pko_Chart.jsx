@@ -11,8 +11,14 @@ const Pko_Chart = ({ labels, data, chartName }) => {
     datasets: [
       {
         data,
-        backgroundColor: chartName === "PKOs" ? ["#EDEDED", "#257CFF", "#28a745"] : ["#EDEDED", "#257CFF", "#FEB343", "#28a745"], // Not Started, Draft, Inreview, Approved
-        hoverBackgroundColor: chartName === "PKOs" ? ["#8C8C8C", "#1A5FD3", "#1e7e34"] : ["#8C8C8C", "#1A5FD3", "#e09a21", "#1e7e34"],
+        backgroundColor:
+          chartName === "PKOs"
+            ? ["#EDEDED", "#257CFF", "#28a745"]
+            : ["#EDEDED", "#257CFF", "#FEB343", "#28a745"], // Not Started, Draft, Inreview, Approved
+        hoverBackgroundColor:
+          chartName === "PKOs"
+            ? ["#8C8C8C", "#1A5FD3", "#1e7e34"]
+            : ["#8C8C8C", "#1A5FD3", "#e09a21", "#1e7e34"],
         borderWidth: 1, // Add slight border for better segmentation
         cutout: "68%", // Adjust thickness for a cleaner look
       },
@@ -45,8 +51,8 @@ const Pko_Chart = ({ labels, data, chartName }) => {
     <div
       style={{
         position: "relative",
-        width: "180px",
-        height: "180px",
+        width: chartName === "SKU" ? "130px" : "180px",
+        height: chartName === "SKU" ? "130px" : "180px",
         margin: "0 auto",
       }}
     >
@@ -65,9 +71,9 @@ const Pko_Chart = ({ labels, data, chartName }) => {
         }}
       >
         <p style={{ margin: "0" }}>
-          {inReviewSKUs} {chartName}
+          {chartName === "PKOs" ? data[2] || 0 : chartName === "SKU" ? data[3] || 0 : inReviewSKUs} {chartName}
         </p>
-        <p style={{ margin: "0" }}> {chartName === "PKOs" ? "Approved" : "In Review"}</p>
+        <p style={{ margin: "0" }}> {chartName === "PKOs" || chartName === "SKU" ? "Approved" : "In Review"}</p>
       </div>
     </div>
   );

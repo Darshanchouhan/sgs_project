@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const SKUDetailsSubHeaderStrip = () => {
   const navigate = useNavigate();
+
+  const {pkoId} = useParams();
 
   const navigateToHome = () => {
     navigate("/admindashboard");
   };
 
   const navigateToPKOpage = () => {
-    navigate("/adminpkodetails");
+    navigate(`/adminpkodetails/${pkoId}`);
   };
 
   return (
@@ -31,7 +34,7 @@ const SKUDetailsSubHeaderStrip = () => {
                     onClick={navigateToPKOpage}
                     className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
-                    PRJ1188
+                    {pkoId}
                   </a>
                 </li>
                 <li className="breadcrumb-item">

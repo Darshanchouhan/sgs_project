@@ -69,9 +69,7 @@ const DashboardPKOSummary = (props) => {
               <li className="d-flex align-items-center justify-content-between mb-3">
                 <div className="d-flex align-items-center gap-2">
                   <span className="status-dot completed"></span>
-                  <p className="fs-12 text-color-typo-primary mb-0">
-                    Approved
-                  </p>
+                  <p className="fs-12 text-color-typo-primary mb-0">Approved</p>
                 </div>
                 <span className="fs-12 fw-700">
                   {pkopProgressSummaryIncomingData?.["completed"]}

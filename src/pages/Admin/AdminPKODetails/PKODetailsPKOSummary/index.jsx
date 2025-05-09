@@ -1,4 +1,7 @@
-const PKODetailsPKOSummary = () => {
+import ProgressLoader from "../../../ProgressLoader";
+import Pko_Chart from "../../../Pko_Chart";
+
+const PKODetailsPKOSummary = ({pkoDataIncoming}) => {
   return (
     <div className="pkoSummaryCard card border-0 rounded-3 shadow-1 px-32 py-3">
       <div className="card-body p-0 border-0">
@@ -13,13 +16,13 @@ const PKODetailsPKOSummary = () => {
                   Supplier Name
                 </p>
                 <span className="fs-14 fw-600 text-color-typo-primary">
-                  Perrigo Company Inc.
+                  {pkoDataIncoming?.supplier?.name}
                 </span>
               </li>
               <li className="d-flex align-items-center mb-3">
                 <p className="fs-14 text-color-labels mb-0 w-50">Supplier ID</p>
                 <span className="fs-14 fw-600 text-color-typo-primary">
-                  18249
+                {pkoDataIncoming?.supplier?.id}
                 </span>
               </li>
               <li className="d-flex align-items-center mb-3">
@@ -27,33 +30,34 @@ const PKODetailsPKOSummary = () => {
                   Supplier Contact
                 </p>
                 <span className="fs-14 fw-600 text-color-typo-primary">
-                  supplier@gmail.com
+                {pkoDataIncoming?.supplier?.contact_email}
                 </span>
               </li>
               <li className="d-flex align-items-center mb-3">
                 <p className="fs-14 text-color-labels mb-0 w-50">Start Date</p>
                 <span className="fs-14 fw-600 text-color-typo-primary">
-                  12/07/2024
+                  {pkoDataIncoming?.start_date}
                 </span>
               </li>
               <li className="d-flex align-items-center mb-3">
                 <p className="fs-14 text-color-labels mb-0 w-50">Due Date</p>
                 <span className="fs-14 fw-600 text-color-typo-primary">
-                  12/10/2024 (5 days left)
+                  {pkoDataIncoming?.due_date} ({pkoDataIncoming?.days_left} days left)
                 </span>
               </li>
             </ul>
           </div>
           <div className="col-12 col-md-6 d-flex align-items-center">
             <div className="d-flex align-items-center justify-content-between w-100">
-              <div className="overall-progress-block text-center pe-60 border-end">
+              <div className="overall-progress-block text-center pe-115 border-end">
                 <h3 className="fs-16 fw-600 text-color-typo-primary mb-3">
                   Overall Progress
                 </h3>
                 <div className="position-relative w-130 h-130">
-                  <img
-                    src="https://dummyimage.com/130x130/c2c2c2/000000&text=Donut+chart"
-                    alt="dummy-image"
+                  <ProgressLoader
+                    percentage={pkoDataIncoming?.overall_progress_percent ? Math.round(parseInt(pkoDataIncoming?.overall_progress_percent, 10)) : 0} // Display calculated average progress
+                    size={130}
+                    isVendorPage={true}
                   />
                 </div>
               </div>
@@ -63,10 +67,16 @@ const PKODetailsPKOSummary = () => {
                 </h3>
                 <div className="d-flex align-items-center justify-content-between h-100 gap-4">
                   <div className="position-relative w-130 h-130">
-                    <img
-                      src="https://dummyimage.com/130x130/c2c2c2/000000&text=Donut+chart"
-                      alt="dummy-image"
-                    />
+                  <Pko_Chart
+                    labels={["Not Started", "Draft", "In Review", "Approved"]}
+                    data={[
+                      pkoDataIncoming?.sku_progress?.not_started,
+                      pkoDataIncoming?.sku_progress?.draft,
+                      pkoDataIncoming?.sku_progress?.in_review,
+                      pkoDataIncoming?.sku_progress?.completed,
+                    ]}
+                    chartName={"SKU"}
+                  />
                   </div>
                   <ul className="list-unstyled w-100 mb-0">
                     <li className="d-flex align-items-center justify-content-between mb-12">
@@ -76,7 +86,7 @@ const PKODetailsPKOSummary = () => {
                           Not Started
                         </p>
                       </div>
-                      <span className="fs-12 fw-700">5</span>
+                      <span className="fs-12 fw-700">{pkoDataIncoming?.sku_progress?.not_started}</span>
                     </li>
                     <li className="d-flex align-items-center justify-content-between mb-12">
                       <div className="d-flex align-items-center gap-2">
@@ -85,7 +95,7 @@ const PKODetailsPKOSummary = () => {
                           Draft
                         </p>
                       </div>
-                      <span className="fs-12 fw-700">2</span>
+                      <span className="fs-12 fw-700">{pkoDataIncoming?.sku_progress?.draft}</span>
                     </li>
                     <li className="d-flex align-items-center justify-content-between mb-12">
                       <div className="d-flex align-items-center gap-2">
@@ -94,7 +104,7 @@ const PKODetailsPKOSummary = () => {
                           In Review
                         </p>
                       </div>
-                      <span className="fs-12 fw-700">4</span>
+                      <span className="fs-12 fw-700">{pkoDataIncoming?.sku_progress?.in_review}</span>
                     </li>
                     <li className="d-flex align-items-center justify-content-between mb-12">
                       <div className="d-flex align-items-center gap-2">
@@ -103,7 +113,7 @@ const PKODetailsPKOSummary = () => {
                           Approved
                         </p>
                       </div>
-                      <span className="fs-12 fw-700">6</span>
+                      <span className="fs-12 fw-700">{pkoDataIncoming?.sku_progress?.completed}</span>
                     </li>
                   </ul>
                 </div>

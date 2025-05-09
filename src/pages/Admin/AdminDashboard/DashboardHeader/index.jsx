@@ -8,7 +8,7 @@ import axiosInstance from "../../../../services/axiosInstance";
 const HeaderAdmin = () => {
   const [showToast, setShowToast] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const [reminderData, setReminderData] = React.useState([]);
 
   const handleShowToast = () => {
@@ -19,23 +19,22 @@ const HeaderAdmin = () => {
     setShowToast(false);
   };
 
-  const reminderAPICall = async() => {
-      try{
-         const response = await axiosInstance.get(`/reminders/`);
-         if(response?.status === 200){
-           setReminderData(response?.data);    
-           setIsModalOpen(true);
-         }
+  const reminderAPICall = async () => {
+    try {
+      const response = await axiosInstance.get(`/reminders/`);
+      if (response?.status === 200) {
+        setReminderData(response?.data);
+        setIsModalOpen(true);
       }
-      catch(err){
-        console.log(err,"reminder get error");
-      }
-     }
+    } catch (err) {
+      console.log(err, "reminder get error");
+    }
+  };
 
   const handleModalReminder = () => {
     setReminderData([]);
     reminderAPICall();
-  }
+  };
 
   return (
     <>
@@ -128,10 +127,11 @@ const HeaderAdmin = () => {
         </div>
       </nav>
       {/* Modal for Sent Reminder */}
-      <SentReminderModal 
+      <SentReminderModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        reminderData={reminderData}/>
+        reminderData={reminderData}
+      />
 
       <CommentPanel />
     </>

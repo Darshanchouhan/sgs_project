@@ -25,18 +25,6 @@ const Header = () => {
     setIsModalVisible(false);
   };
 
-  // const handleShowToast = async () => {
-  //   try {
-  //     const supplierId = localStorage.getItem("cvs_supplier") || "56789"; // fallback
-  //     const res = await axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`);
-  //     setNotifications(res.data || []);
-  //   } catch (err) {
-  //     console.error("Error fetching reminders:", err);
-  //     setNotifications([]);
-  //   }
-  //   setShowToast(true);
-  // };
-
   const handleShowToast = async () => {
     try {
       const supplierId = localStorage.getItem("cvs_supplier") || "56789";
@@ -44,27 +32,29 @@ const Header = () => {
         `/reminders/?cvs_supplier=${supplierId}`,
       );
       const reminders = res.data || [];
+      setNotifications(reminders);
 
-      // Patch unseen ones to "Seen"
       const unseenReminders = reminders.filter((r) => r.status === "Unseen");
 
-      await Promise.all(
-        unseenReminders.map((r) =>
-          axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
-        ),
-      );
+      if (unseenReminders.length > 0) {
+        await Promise.all(
+          unseenReminders.map((r) =>
+            axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
+          ),
+        );
 
-      // Refetch updated list after marking seen
-      const refreshed = await axiosInstance.get(
-        `/reminders/?cvs_supplier=${supplierId}`,
-      );
-      setNotifications(refreshed.data || []);
+        const refreshed = await axiosInstance.get(
+          `/reminders/?cvs_supplier=${supplierId}`,
+        );
+        setNotifications(refreshed.data || []);
+      }
+
+      setShowToast(true); // Move here: after data is ready
     } catch (err) {
       console.error("Error handling reminders:", err);
       setNotifications([]);
+      setShowToast(true); // Still show it even if there's an error
     }
-
-    setShowToast(true);
   };
 
   const handleHideToast = () => setShowToast(false);

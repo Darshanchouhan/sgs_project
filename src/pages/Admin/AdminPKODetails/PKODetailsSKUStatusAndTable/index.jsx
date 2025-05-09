@@ -1,11 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import PKODetailsSKUTableRow from "./PKODetailsSKUTableRow";
 
-const PKODetailsSKUStatusAndTable = () => {
-  const navigate = useNavigate();
+const PKODetailsSKUStatusAndTable = ({skuDataIncoming}) => {
+  const [selectedSkuStatus, setSelectedSkuStatus] = useState("All SKUs");
 
-  const handleForwardClick = () => {
-    navigate("/adminskudetails");
-  };
   return (
     <>
       <div className="d-flex align-items-center justify-content-between mt-30">
@@ -20,13 +18,17 @@ const PKODetailsSKUStatusAndTable = () => {
             <select
               className="form-select border-color-labels border-0 fs-14 fw-600 ps-10 pe-40 text-secondary"
               id="inputGroupSkuStatus"
-              value="All SKUs"
+              value={selectedSkuStatus}
+              onChange={(e) => setSelectedSkuStatus(e.target.value)}
             >
               <option value="All SKUs">All SKUs</option>
-              <option value="Completed">Completed</option>
+              <option value="Completed">Approved</option>
+              <option value="Not Started">Not Started</option>
+              <option value="Draft">Draft</option>
+              <option value="In Review">In Review</option>
             </select>
           </div>
-          <h3 className="fs-18 fw-600 text-nowrap mb-0">10 Total SKUs</h3>
+          <h3 className="fs-18 fw-600 text-nowrap mb-0">{skuDataIncoming && (selectedSkuStatus === "All SKUs" ? skuDataIncoming : skuDataIncoming?.filter((item)=>item?.status === selectedSkuStatus))?.length} Total SKUs</h3>
         </div>
       </div>
 
@@ -43,183 +45,10 @@ const PKODetailsSKUStatusAndTable = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="align-middle">277197</td>
-              <td className="align-middle">
-                <span className="text-truncate d-inline-block w-50">
-                  CVS Miconazole3 Vaginal Antifungal CVS Miconazole3 Vaginal
-                  Antifungal
-                </span>
-              </td>
-              <td className="align-middle">
-                <div className="d-flex align-items-center justify-content-between w-100">
-                  <div className="w-50">
-                    <div
-                      className="progress"
-                      role="progressbar"
-                      aria-label="Basic example"
-                      aria-valuenow="100"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      <div
-                        className="progress-bar"
-                        style={{ width: "100%", background: "#155DC9" }}
-                      ></div>
-                    </div>
-                  </div>
-                  <span>100%</span>
-                </div>
-              </td>
-              <td className="align-middle text-center">
-                <span className="fs-14 fw-600 text-nowrap px-12 py-6 d-inline-block border rounded-pill completed-pill w-120">
-                  Approved
-                </span>
-              </td>
-              <td className="align-middle text-center">
-                <button
-                  className="btn p-0 border-0 shadow-none"
-                  onClick={handleForwardClick}
-                >
-                  <img
-                    src="/assets/images/forward-arrow-img.png"
-                    alt="Forward"
-                  />
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td className="align-middle">271541</td>
-              <td className="align-middle">
-                <span className="text-truncate d-inline-block w-50">
-                  CVS HEALTH OMPRZLE MINI
-                </span>
-              </td>
-              <td className="align-middle">
-                <div className="d-flex align-items-center justify-content-between w-100">
-                  <div className="w-50">
-                    <div
-                      className="progress"
-                      role="progressbar"
-                      aria-label="Basic example"
-                      aria-valuenow="100"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      <div
-                        className="progress-bar"
-                        style={{ width: "100%", background: "#155DC9" }}
-                      ></div>
-                    </div>
-                  </div>
-                  <span>100%</span>
-                </div>
-              </td>
-              <td className="align-middle text-center">
-                <span className="fs-14 fw-600 text-nowrap px-12 py-6 d-inline-block border rounded-pill in-review-pill w-120">
-                  In Review
-                </span>
-              </td>
-              <td className="align-middle text-center">
-                <button
-                  className="btn p-0 border-0 shadow-none"
-                  onClick={handleForwardClick}
-                >
-                  <img
-                    src="/assets/images/forward-arrow-img.png"
-                    alt="Forward"
-                  />
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td className="align-middle">277197</td>
-              <td className="align-middle">
-                <span className="text-truncate d-inline-block w-50">
-                  CVS Miconazole3 Vaginal Antifungal
-                </span>
-              </td>
-              <td className="align-middle">
-                <div className="d-flex align-items-center justify-content-between w-100">
-                  <div className="w-50">
-                    <div
-                      className="progress"
-                      role="progressbar"
-                      aria-label="Basic example"
-                      aria-valuenow="0"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      <div
-                        className="progress-bar"
-                        style={{ width: "0%", background: "#155DC9" }}
-                      ></div>
-                    </div>
-                  </div>
-                  <span>0%</span>
-                </div>
-              </td>
-              <td className="align-middle text-center">
-                <span className="fs-14 fw-600 text-nowrap px-12 py-6 d-inline-block border rounded-pill not-started-pill w-120">
-                  Not Started
-                </span>
-              </td>
-              <td className="align-middle text-center">
-                <button
-                  className="btn p-0 border-0 shadow-none"
-                  onClick={handleForwardClick}
-                >
-                  <img
-                    src="/assets/images/forward-arrow-img.png"
-                    alt="Forward"
-                  />
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td className="align-middle">423103</td>
-              <td className="align-middle">
-                <span className="text-truncate d-inline-block w-50">
-                  CVS HEALTH OMPRZLE MINI
-                </span>
-              </td>
-              <td className="align-middle">
-                <div className="d-flex align-items-center justify-content-between w-100">
-                  <div className="w-50">
-                    <div
-                      className="progress"
-                      role="progressbar"
-                      aria-label="Basic example"
-                      aria-valuenow="20"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      <div
-                        className="progress-bar"
-                        style={{ width: "20%", background: "#155DC9" }}
-                      ></div>
-                    </div>
-                  </div>
-                  <span>20%</span>
-                </div>
-              </td>
-              <td className="align-middle text-center">
-                <span className="fs-14 fw-600 text-nowrap px-12 py-6 d-inline-block border rounded-pill draft-pill w-120">
-                  Draft
-                </span>
-              </td>
-              <td className="align-middle text-center">
-                <button
-                  className="btn p-0 border-0 shadow-none"
-                  onClick={handleForwardClick}
-                >
-                  <img
-                    src="/assets/images/forward-arrow-img.png"
-                    alt="Forward"
-                  />
-                </button>
-              </td>
-            </tr>
+          {skuDataIncoming && (selectedSkuStatus === "All SKUs" ? skuDataIncoming : skuDataIncoming?.filter((item)=>item?.status === selectedSkuStatus))?.map((skuRowData, index) => {
+            return(
+             <PKODetailsSKUTableRow key={index+1} skuRowData={skuRowData}/>
+            )})}
           </tbody>
         </table>
       </div>

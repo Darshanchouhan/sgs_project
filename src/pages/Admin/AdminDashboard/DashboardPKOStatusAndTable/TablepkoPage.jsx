@@ -12,7 +12,7 @@ const TablepkoPage = (props) => {
   };
 
   const navigateToPkoDetails = () => {
-    navigate("/adminpkodetails");
+    navigate(`/adminpkodetails/${pkoItemIncoming?.["pko_id"]}`);
   };
 
   const handleCheckboxSelect = () => {

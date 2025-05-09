@@ -1,14 +1,13 @@
 import React from "react";
-import {useRef} from 'react';
+import { useRef } from "react";
 
-const SentReminderModal = ({isOpen,onClose,reminderData}) => { 
-  
+const SentReminderModal = ({ isOpen, onClose, reminderData }) => {
   const backdropRef = useRef(null);
 
   const handleBackdropClick = (e) => {
     // Only close if user clicked on the backdrop, not inside modal content
     if (e.target === backdropRef.current) {
-       onClose();
+      onClose();
     }
   };
 
@@ -22,7 +21,7 @@ const SentReminderModal = ({isOpen,onClose,reminderData}) => {
       aria-labelledby="sentReminderModalLabel"
       aria-modal="true"
       role="dialog"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
       onClick={handleBackdropClick}
     >
       <div className="modal-dialog modal-dialog-centered bg-transparent p-0">

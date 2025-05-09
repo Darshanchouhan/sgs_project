@@ -125,10 +125,24 @@ const DashboardPKOStatusAndTable = (props) => {
                 : "Closed PKOs"}
           </h3>
         </div>
-        <div className={`${selectedPKOIds?.length < 1 ? "d-none" : "align-items-center me-14 ms-14"}`} style={{ borderLeft: '2px solid #ccc', height: '20px' }}></div>
-        <div className= {`${selectedPKOIds?.length < 1 ? "d-flex align-items-center d-none" : "d-flex align-items-center"}`}>
-          <h3 className="fs-18 fw-600 text-nowrap mb-0 me-3">{selectedPKOIds?.length} PKOs Selected</h3>
-          <button className="send-reminder-btn btn btn-outline-secondary py-6 ps-40 pe-3 fs-14 fw-600 rounded-1 d-flex" data-bs-toggle="modal" data-bs-target="#sendReminderModal" onClick={handleOpenReminderPopUp}>Send Reminder</button>
+        <div
+          className={`${selectedPKOIds?.length < 1 ? "d-none" : "align-items-center me-14 ms-14"}`}
+          style={{ borderLeft: "2px solid #ccc", height: "20px" }}
+        ></div>
+        <div
+          className={`${selectedPKOIds?.length < 1 ? "d-flex align-items-center d-none" : "d-flex align-items-center"}`}
+        >
+          <h3 className="fs-18 fw-600 text-nowrap mb-0 me-3">
+            {selectedPKOIds?.length} PKOs Selected
+          </h3>
+          <button
+            className="send-reminder-btn btn btn-outline-secondary py-6 ps-40 pe-3 fs-14 fw-600 rounded-1 d-flex"
+            data-bs-toggle="modal"
+            data-bs-target="#sendReminderModal"
+            onClick={handleOpenReminderPopUp}
+          >
+            Send Reminder
+          </button>
         </div>
       </div>
 
