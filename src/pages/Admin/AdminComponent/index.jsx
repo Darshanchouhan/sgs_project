@@ -8,7 +8,7 @@ import ComponentForm from "./ComponentForm";
 import AdminApproveSKUModal from "../AdminApproveSKUModal";
 import AdminRequestChangesModal from "../AdminRequestChangesModal";
 
-const AdminComponent = () => {
+const AdminComponentPage = () => {
   return (
     <div>
       {/* Navbar */}
@@ -36,4 +36,4 @@ const AdminComponent = () => {
   );
 };
 
-export default AdminComponent;
+export default AdminComponentPage;

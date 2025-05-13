@@ -26,7 +26,9 @@ import { login } from "./store/authSlice"; // Import login action
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminPKODetails from "./pages/Admin/AdminPKODetails";
 import AdminSKUDetails from "./pages/Admin/AdminSKUDetails";
-import AdminComponent from "./pages/Admin/AdminComponent";
+import AdminComponentPage from "./pages/Admin/AdminComponent";
+import AdminPKOManager from "./pages/Admin/AdminPKOManager";
+import AdminPKOManagerPreview from "./pages/Admin/AdminPKOManagerPreview";
 
 function App() {
   // Call the hook to start tracking inactivity and refreshing the token
@@ -107,10 +109,22 @@ function App() {
                 element={<PrivateRoute element={<AdminSKUDetails />} />}
               />
 
-              {/* Private Route - Admin SKU Details */}
+              {/* Private Route - Admin SKU component Details */}
               <Route
-                path="/admincomponent"
-                element={<PrivateRoute element={<AdminComponent />} />}
+                path="/admincomponent/:pkoId/:skuId/:componentId"
+                element={<PrivateRoute element={<AdminComponentPage />} />}
+              />
+
+              {/* Private Route - Admin PKO Manager */}
+              <Route
+                path="/adminpkomanager"
+                element={<PrivateRoute element={<AdminPKOManager />} />}
+              />
+
+              {/* Private Route - Admin PKO Manager Preview */}
+              <Route
+                path="/adminpkomanagerpreview"
+                element={<PrivateRoute element={<AdminPKOManagerPreview />} />}
               />
 
               {/* Other routes can go here */}

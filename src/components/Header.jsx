@@ -142,6 +142,7 @@ const Header = () => {
                     handleCloseToast={handleHideToast}
                     reminders={notifications}
                     onMarkAsSeen={handleMarkAsSeen}
+                    typeOfNotification={"vendor"}
                   />
                 )}
               </div>

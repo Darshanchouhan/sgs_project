@@ -55,7 +55,7 @@ const PKODetailsPKOSummary = ({pkoDataIncoming}) => {
                 </h3>
                 <div className="position-relative w-130 h-130">
                   <ProgressLoader
-                    percentage={pkoDataIncoming?.overall_progress_percent ? Math.round(parseInt(pkoDataIncoming?.overall_progress_percent, 10)) : 0} // Display calculated average progress
+                    percentage={pkoDataIncoming?.overall_progress_percent ? Math.round(pkoDataIncoming?.pko_progress) : 0} // Display calculated average progress
                     size={130}
                     isVendorPage={true}
                   />

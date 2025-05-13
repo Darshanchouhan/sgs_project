@@ -1,4 +1,10 @@
+import { useNavigate, useParams } from "react-router-dom";
+
 const ComponentSubHeaderStrip = () => {
+
+  const navigate = useNavigate();
+  const {pkoId, skuId} = useParams(); // Assuming you are using react-router-dom for routing
+
   return (
     <div className="py-3 bg-white">
       <div className="container-fluid px-20 px-md-4">
@@ -8,31 +14,30 @@ const ComponentSubHeaderStrip = () => {
               <ol className="breadcrumb mb-0">
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
-                    className="text-decoration-none text-secondary fw-600 fs-14"
+                    onClick={() => navigate(`/`)}
+                    className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
                     Home
                   </a>
                 </li>
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
-                    className="text-decoration-none text-secondary fw-600 fs-14"
+                    onClick={() => navigate(`/adminpkodetails/${pkoId}`)}
+                    className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
-                    PRJ1188
+                    {pkoId}
                   </a>
                 </li>
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
-                    className="text-decoration-none text-secondary fw-600 fs-14"
+                    onClick={() => navigate(`/adminskudetails/${pkoId}/${skuId}`)}
+                    className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
                     CVS Ibuprofen 200mg
                   </a>
                 </li>
                 <li className="breadcrumb-item">
                   <a
-                    href="#"
                     className="text-decoration-none text-color-list-item fw-600 fs-14"
                   >
                     Box

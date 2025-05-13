@@ -80,7 +80,7 @@
 }
 
 .fs-12 {
-  font-size: 0.75rem;
+  font-size: 0.75rem !important;
 }
 
 .fs-13 {
@@ -3627,7 +3627,8 @@ progress {
   opacity: 1;
 }
 .form-control:disabled {
-  background-color: var(--bs-secondary-bg);
+  /* background-color: var(--bs-secondary-bg); */
+  background-color: white !important;
   opacity: 1;
 }
 .form-control::file-selector-button {
@@ -23172,6 +23173,20 @@ input[type="radio"] {
     max-width: 55% !important;
     min-width: 55% !important;
   }
+}
+.template-uploading-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .template-uploading-modal-popup .modal-dialog {
+    max-width: 46% !important;
+    min-width: 46% !important;
+  }
+}
+.pkoManagerMainTable-holder {
+  min-height: 20vh !important;
+  max-height: 40vh !important;
+  overflow-y: auto !important;
 }
 /* Custom css end (Azahar) */
 

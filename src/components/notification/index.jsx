@@ -5,6 +5,7 @@ const NotificationToast = ({
   handleCloseToast,
   reminders = [],
   onMarkAsSeen,
+  typeOfNotification,
 }) => {
   const formatHeaderDate = (isoString) => {
     const date = new Date(isoString);
@@ -111,36 +112,109 @@ const NotificationToast = ({
                   key={reminder.id}
                   className="ps-28 pe-2 py-12 border-bottom position-relative cursor-pointer"
                   onClick={() =>
-                    reminder.status === "Unseen" && onMarkAsSeen(reminder.id)
+                    typeOfNotification === "admin"
+                      ? reminder.adminseenstatus === "Unseen" &&
+                        onMarkAsSeen(reminder.id)
+                      : reminder.status === "Unseen" &&
+                        onMarkAsSeen(reminder.id)
                   }
                 >
-                  {reminder.status === "Unseen" && (
+                  {(typeOfNotification === "admin"
+                    ? reminder.adminseenstatus === "Unseen"
+                    : reminder.status === "Unseen") && (
                     <span className="new-notification-indicator w-8 h-8 rounded-circle bg-color-responce-pending"></span>
                   )}
                   <h4 className="fs-14 fw-600 text-color-labels mb-2">
-                    <span className="text-color-typo-primary">
-                      {reminder.created_by.first_name}{" "}
-                      {reminder.created_by.last_name}
-                    </span>{" "}
-                    {reminder.message}
+                    {!(typeOfNotification === "admin") && (
+                      <span className="text-color-typo-primary">
+                        {reminder.created_by.first_name}{" "}
+                        {reminder.created_by.last_name}
+                      </span>
+                    )}{" "}
+                    <>
+                      {typeOfNotification === "admin" ? (
+                        reminder.status_change === "InreviewToApproved" ? (
+                          <>
+                            You have Approved the form for {" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.skuid}
+                            </span>{" "}
+                            for{" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.cvs_supplier}
+                            </span>
+                            . Status updated to Approved.
+                          </>
+                        ) : reminder.status_change === "InreviewToDraft" ? (
+                          <>
+                            You have sent back the form to Draft for changes to{" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.cvs_supplier}
+                            </span>{" "}
+                            for {" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.skuid}
+                            </span>
+                            .
+                          </>
+                        ) : (
+                          <>
+                            New submission for {" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.skuid}
+                            </span>{" "}
+                            :{" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.cvs_supplier}
+                            </span>{" "}
+                            has been submitted and it's in Review.
+                          </>
+                        )
+                      ) : (
+                        reminder.message
+                      )}
+                    </>
                   </h4>
                   <div className="d-flex align-items-center justify-content-between">
                     <span className="fs-10 fw-600 text-color-typo-primary d-flex align-items-center">
+                      {typeOfNotification === "admin" && (
+                        <span
+                          className="px-2 py-1 rounded-pill me-2"
+                          style={{
+                            color: "#155DC9",
+                            backgroundColor: "#E0ECFF",
+                          }}
+                        >
+                          {reminder.skuid}
+                        </span>
+                      )}
                       <span
                         className="px-2 py-1 rounded-pill me-2"
+                        title={typeOfNotification === "admin" ? reminder.pkoid : reminder.pko_id}
                         style={{
                           color: "#155DC9",
                           backgroundColor: "#E0ECFF",
+                          width: `${(typeOfNotification === "admin") ? "145px" :""}`,
+                          whiteSpace: `${(typeOfNotification === "admin") ? "nowrap" :""}`,
+                          overflow: `${(typeOfNotification === "admin") ? "hidden" :""}`,
+                          textOverflow: `${(typeOfNotification === "admin") ? "ellipsis" :""}`
                         }}
                       >
-                        PKO ID | {reminder.pko_id}
+                        PKO ID |{" "}
+                        {typeOfNotification === "admin"
+                          ? reminder.pkoid
+                          : reminder.pko_id}
                       </span>
-                      <img
-                        src="/assets/images/error-alert-circle.svg"
-                        className="me-1"
-                        alt="reminder-icon"
-                      />
-                      Reminder
+                      {!(typeOfNotification === "admin") && (
+                        <>
+                          <img
+                            src="/assets/images/error-alert-circle.svg"
+                            className="me-1"
+                            alt="reminder-icon"
+                          />
+                          Reminder{" "}
+                        </>
+                      )}
                     </span>
                     <p className="fs-10 fw-600 text-color-typo-secondary mb-0">
                       {formatTimeAgo(reminder.created_date)}

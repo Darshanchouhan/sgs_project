@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import NotificationToast from "../../../../components/notification";
 import SentReminderModal from "./SentReminderModal";
@@ -9,9 +9,27 @@ const HeaderAdmin = () => {
   const [showToast, setShowToast] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [reminderData, setReminderData] = React.useState([]);
+  const [reminderData, setReminderData] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  const notificationAPICall = async () => {
+    try{
+       const response = await axiosInstance.get("notifications/");
+        if (response?.status === 200) {
+          setNotifications(response?.data);
+        }
+    }
+    catch (err) {
+      console.log(err, "notification get error");
+    }
+  }
+
+  useEffect(()=>{
+    notificationAPICall();
+  },[window.location.pathname]);
 
   const handleShowToast = () => {
+    notificationAPICall();
     setShowToast(true);
   };
 
@@ -34,6 +52,21 @@ const HeaderAdmin = () => {
   const handleModalReminder = () => {
     setReminderData([]);
     reminderAPICall();
+  };
+
+  const handleMarkAsSeen = async (reminderId) => {
+    try {
+      const response = await axiosInstance.patch("/notifications/", {
+        ids: [reminderId],
+        role: "admin",
+      });
+      // Refresh notifications after marking as seen
+      if(response?.status === 200) {
+        notificationAPICall();
+      }
+    } catch (err) {
+      console.error(`Failed to mark reminder ${reminderId} as seen`, err);
+    }
   };
 
   return (
@@ -104,7 +137,12 @@ const HeaderAdmin = () => {
                   </button>
 
                   {showToast && (
-                    <NotificationToast handleCloseToast={handleHideToast} />
+                      <NotificationToast
+                        handleCloseToast={handleHideToast}
+                        reminders={notifications}
+                        onMarkAsSeen={handleMarkAsSeen}
+                        typeOfNotification={"admin"}
+                      />
                   )}
                 </div>
               </li>
