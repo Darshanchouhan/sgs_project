@@ -4,10 +4,10 @@ const ValidationModal = ({
   unansweredQuestions = [],
   onBack,
   onProceed,
-  // onSaveDraft,
   onPrevious,
-  // showSaveAsDraftButton,
   isPreviousValidation,
+  isAllSectionsValidation = false,
+  onBackToSku,
 }) => {
   return (
     <div
@@ -39,6 +39,11 @@ const ValidationModal = ({
             <table className="table table-bordered analysisTable fs-14 fw-400 text-color-typo-primary mb-0">
               <thead>
                 <tr>
+                  {isAllSectionsValidation && (
+                    <th scope="col" className="text-nowrap p-12 fw-600">
+                      Section
+                    </th>
+                  )}
                   <th scope="col" className="text-nowrap p-12 fw-600">
                     Field Name
                   </th>
@@ -50,6 +55,9 @@ const ValidationModal = ({
               <tbody>
                 {unansweredQuestions.map((question, index) => (
                   <tr key={index}>
+                    {isAllSectionsValidation && (
+                      <td className="p-12">{question.section}</td>
+                    )}
                     <td className="p-12">{question.fieldName}</td>
                     <td className="p-12">
                       <div className="d-flex justify-content-between align-items-center">
@@ -67,7 +75,7 @@ const ValidationModal = ({
               className="btn btn-outline-secondary rounded-1 fs-14 fw-600 px-3 py-10 m-0 mx-2 my-0"
               onClick={onBack}
             >
-              Back to the Current Section
+              Stay in Current Section
             </button>
 
             {/* Save as Draft/previous section/next section (conditionally rendered) */}
@@ -78,6 +86,14 @@ const ValidationModal = ({
                 onClick={onPrevious}
               >
                 Proceed to Previous Section
+              </button>
+            ) : isAllSectionsValidation ? (
+              <button
+                type="button"
+                className="btn btn-primary rounded-1 fs-14 fw-600 px-3 py-10 m-0 mx-2 my-0"
+                onClick={onBackToSku}
+              >
+                Continue to SKU Page
               </button>
             ) : (
               <button

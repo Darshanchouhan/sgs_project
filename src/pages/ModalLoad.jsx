@@ -5,9 +5,9 @@ const ModalLoad = ({ count, isVisible, closeModal }) => {
   const [currentStep, setCurrentStep] = useState(0); // State to track the current step
 
   // Save the updated count back to localStorage
-  useEffect(() => {
-    localStorage.setItem("loadCount", 1);
-  }, []);
+  // useEffect(() => {
+  //   localStorage.setItem("loadCount", 1);
+  // }, []);
 
   // Auto-close the modal after 5 minutes (optional, adjust as needed)
   useEffect(() => {

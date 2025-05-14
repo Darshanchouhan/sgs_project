@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Offcanvas } from "bootstrap";
 import "./../styles/style.css";
+import imagePackaging from "../../public/assets/images/sku_dimension.png";
 
 const Dimen_ImageOverlay = ({ onClose }) => {
   useEffect(() => {
@@ -48,7 +49,7 @@ const Dimen_ImageOverlay = ({ onClose }) => {
       {/* Image Content */}
       <div className="offcanvas-body p-32 d-flex justify-content-center align-items-center h-100">
         <img
-          src="assets/images/sku_dimension.png"
+          src={imagePackaging}
           alt="SKU Dimension Guide"
           className="w-100"
         />

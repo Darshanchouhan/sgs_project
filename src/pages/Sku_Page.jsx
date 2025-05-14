@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import Header from "../components/Header";
 import "./../styles/style.css";
 import axiosInstance from "../services/axiosInstance";
@@ -12,6 +12,7 @@ import { Offcanvas } from "bootstrap";
 import { VendorContext } from "./VendorContext";
 import SkuValidation from "./SkuValidation";
 import Dimen_ImageOverlay from "./Dimen_ImageOverlay"; // Import Overlay Component
+import Importdata from "./ImportData";
 
 const Sku_Page = () => {
   const {
@@ -25,12 +26,23 @@ const Sku_Page = () => {
   const { updateSkuStatus } = useContext(VendorContext);
 
   const navigate = useNavigate();
+
+  const stateIcomingFromLastPage = JSON.parse(
+    localStorage.getItem("sku_page_state"),
+  );
+  const stateIncomingComponentPage = JSON.parse(
+    localStorage.getItem("component_page_state"),
+  );
+
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const [questions, setQuestions] = useState([]); // Store questions from API
   const [questionsComponent, setQuestionsComponent] = useState([]); // Store questions from API
-  const skuId = location.state?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
+  const [componentsData, setComponentsData] = useState([]); // Store questions from API
+  const skuId = stateIcomingFromLastPage?.skuId || skuData?.skuId; // Retrieve SKU ID from navigation
   const [submissionLastDate, setSubmissionLastDate] = useState("N/A");
-  const pkoId = location.state?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
+  const pkoId =
+    stateIcomingFromLastPage?.pkoData?.pko_id || pkoData?.pko_id || "N/A";
   const [productImageCount, setProductImageCount] = useState(0); // Track product image count
   const [imagesFromDB, setImagesFromDB] = useState([]); // Images fetched from database
   const [imagesToUpload, setImagesToUpload] = useState([]); // Images to upload
@@ -43,70 +55,92 @@ const Sku_Page = () => {
   const [proceedToEnable, setProceedToEnable] = useState([]); // Store validation errors
   const [showValidationModal, setShowValidationModal] = useState(false); // Modal visibility
   const [componentValidationIssues, setComponentValidationIssues] = useState(
-    []
+    [],
   );
+  const [selectedComponentType, setSelectedComponentType] = useState("");
+  const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [componentToDelete, setComponentToDelete] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null); // Track which component is being edited
+  const [editedComponentName, setEditedComponentName] = useState(""); // Store the edited name
+  const [dropdownListComing, setDropdownListComing] = useState([]); // Store the dropdown list
+  const dropdownRef = useRef(null); // Create a ref for the dropdown
+  const encodedPkoId = encodeURIComponent(pkoId);
+  const [activeComponentId, setActiveComponentId] = useState(null);
+
+  const handleComponentTypeChange = (e) => {
+    setSelectedComponentType(e.target.value);
+  };
+
   const handleInstructionClick = () => {
     setOverlayVisible(true); // Show the overlay
   };
   const handleOverlayClose = () => {
     setOverlayVisible(false); // Hide the overlay
   };
-  const encodedPkoId = encodeURIComponent(pkoId);
+
+  // Function to handle clicks outside the dropdown
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setOpenDropdownIndex(null); // Close the dropdown if clicked outside
+    }
+  };
+
+  // add dropdown list call
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get(`component-type-options/`);
+        setDropdownListComing(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    // Add event listener for clicks outside
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const fetchAndValidateComponentData = async () => {
     let issues = [];
-
-    if (!skuId || !pkoId) {
-      console.warn(
-        "SKU ID or PKO ID is missing. Cannot fetch component details."
-      );
-      return issues;
-    }
-
     try {
-      console.log(
-        "Fetching components for SKU ID:",
-        skuId,
-        "and PKO ID:",
-        pkoId
-      );
+      const components = componentsData || [];
+      console.log("Fetched Components:", components);
 
-      const response = await axiosInstance.get(
-        `/sku/${skuId}/components/?pko_id=${encodedPkoId}`,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      for (let component of components) {
+        console.log("Fetching details for component:", component.id);
+        const componentResponse = component["responses"];
 
-      if (response.status === 200) {
-        const components = response.data || [];
-        console.log("Fetched Components:", components);
+        // Apply validation rules from PkgDataForm
+        const componentIssues = validateComponentResponses(
+          component,
+          componentResponse,
+        );
+        console.log(
+          "Component Issues for",
+          component.name,
+          ":",
+          componentIssues,
+        );
 
-        for (let component of components) {
-          console.log("Fetching details for component:", component.id);
-          const componentResponse = component["responses"];
-
-          // Apply validation rules from PkgDataForm
-          const componentIssues = validateComponentResponses(
-            component,
-            componentResponse
-          );
-          console.log(
-            "Component Issues for",
-            component.name,
-            ":",
-            componentIssues
-          );
-
-          if (componentIssues.length > 0) {
-            issues = [...issues, ...componentIssues];
-          }
+        if (componentIssues.length > 0) {
+          issues = [...issues, ...componentIssues];
         }
       }
     } catch (error) {
       console.error("Error fetching component details:", error);
     }
-
     console.log("Final Component Validation Issues:", issues);
     return issues;
   };
@@ -123,8 +157,8 @@ const Sku_Page = () => {
     return conditions.some((condition) =>
       parentAnswers.some(
         (parentAnswer) =>
-          (parentAnswer || "").trim().toLowerCase() === condition
-      )
+          (parentAnswer || "").trim().toLowerCase() === condition,
+      ),
     );
   };
 
@@ -152,13 +186,13 @@ const Sku_Page = () => {
           question.field_dependency,
           Array.isArray(question.dependent_question)
             ? question.dependent_question.map((qId) =>
-                Object.keys(responses).find((key) => key.endsWith(`||${qId}`))
+                Object.keys(responses).find((key) => key.endsWith(`||${qId}`)),
               )
             : [
                 Object.keys(responses).find((key) =>
-                  key.endsWith(`||${question.dependent_question}`)
+                  key.endsWith(`||${question.dependent_question}`),
                 ),
-              ]
+              ],
         );
 
       // **Check Mandatory Fields**
@@ -183,7 +217,7 @@ const Sku_Page = () => {
         const validationRules = question.validation_dropdown?.find(
           (rule) =>
             rule.name?.toLowerCase() === selectedComponentType?.toLowerCase() &&
-            rule.unit?.toLowerCase() === unit?.toLowerCase()
+            rule.unit?.toLowerCase() === unit?.toLowerCase(),
         );
 
         if (validationRules) {
@@ -244,19 +278,19 @@ const Sku_Page = () => {
       // Check if at least one component is added
       if (skuData.components.length === 0) {
         alert(
-          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission"
+          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission",
         );
         return;
       }
 
       // Check if any component is still in Pending status
       const hasPendingComponent = skuData.components.some(
-        (component) => component.form_status !== "Completed"
+        (component) => component.form_status !== "Completed",
       );
 
       if (hasPendingComponent) {
         alert(
-          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission"
+          "Please ensure at least 1 component is added, and all mandatory questions in component forms are answered before submission",
         );
         return;
       }
@@ -287,6 +321,17 @@ const Sku_Page = () => {
     let issues = [];
 
     questions.forEach((question) => {
+      // Check if the value is 0 for numeric fields
+      if (
+        (question.question_type === "Integer" ||
+          question.question_type === "Float + Dropdown") &&
+        skuData.dimensionsAndWeights[question.question_id] === "0"
+      ) {
+        issues.push({
+          issue: `${question.question_text} should be greater than zero.`,
+        });
+      }
+      //check mandatory fields
       if (
         question.mandatory &&
         (!skuData.dimensionsAndWeights[question.question_id] ||
@@ -301,17 +346,120 @@ const Sku_Page = () => {
     return issues;
   };
 
+  const handleImportFromSku = async (
+    sourceSkuId,
+    sourcePkoId,
+    componentName,
+    activeComponentId,
+  ) => {
+    try {
+      const checkResponse = await axiosInstance.get(
+        `/skus/${sourceSkuId}/?pko_id=${encodeURIComponent(sourcePkoId)}`,
+      );
+
+      const sourceData = checkResponse.data;
+
+      const hasPackagingDetails =
+        sourceData?.primary_packaging_details &&
+        Object.keys(sourceData.primary_packaging_details).length > 0;
+
+      const hasComponents =
+        sourceData?.components && sourceData.components.length > 0;
+
+      if (!hasPackagingDetails && !hasComponents) {
+        alert("No data is filled for the selected SKU. Please choose another.");
+        return;
+      }
+
+      // Build payload conditionally based on whether componentName is present
+      const isComponentImport = !!componentName;
+
+      const payload = {
+        source_sku_id: sourceSkuId,
+        source_pko_id: sourcePkoId,
+        target_pko_id: pkoId,
+        target_sku_ids: [skuId],
+      };
+
+      if (isComponentImport) {
+        payload.component_names = [componentName];
+        payload.target_component_id = activeComponentId;
+      }
+
+      console.log("Sending import payload:", payload);
+
+      const response = await axiosInstance.post("/copy-components/", payload);
+
+      if (response.status === 201) {
+        alert("Data imported successfully!");
+        window.location.reload(); // Trigger full refresh
+      } else {
+        alert("Failed to import data. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error while importing data:", error.response || error);
+      alert("Error importing data. Please check console.");
+    }
+  };
+
+  const handleImportComponentData = async (
+    sourceSkuId,
+    sourcePkoId,
+    sourceComponentName,
+    targetComponentId,
+  ) => {
+    try {
+      if (
+        !sourceSkuId ||
+        !sourcePkoId ||
+        !sourceComponentName ||
+        !targetComponentId
+      ) {
+        console.error("Missing required parameters for component import.");
+        alert("Please ensure all required fields are selected.");
+        return;
+      }
+      const payload = {
+        source_sku_id: sourceSkuId,
+        source_pko_id: sourcePkoId,
+        target_sku_id: skuId,
+        target_pko_id: pkoId,
+        source_component_name: sourceComponentName,
+        target_component_name: skuData.components.find(
+          (comp) => comp.id === targetComponentId,
+        )?.name,
+      };
+
+      console.log("Sending component import payload:", payload);
+
+      const response = await axiosInstance.post(
+        "/copy-component-data/",
+        payload,
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Component data imported successfully!");
+        window.location.reload();
+      } else {
+        alert("Failed to import component data. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error importing component data:", error.response || error);
+      alert("Error importing component data. Please check console.");
+    }
+  };
+
   useEffect(() => {
-    if (location.state && location.state.responses) {
+    if (stateIncomingComponentPage?.responses) {
       const answers = {};
 
-      Object.entries(location.state.responses).forEach(
+      Object.entries(stateIncomingComponentPage?.responses).forEach(
         ([questionText, response]) => {
           // Find the matching question based on text and ID
           const question = questions.find(
             (q) =>
               questionText.startsWith(q.question_text) &&
-              questionText.endsWith(`||${q.question_id}`)
+              questionText.endsWith(`||${q.question_id}`),
           );
 
           if (question) {
@@ -331,7 +479,7 @@ const Sku_Page = () => {
               answers[question.question_id] = response;
             }
           }
-        }
+        },
       );
 
       // Update SKU state with formatted answers
@@ -342,7 +490,7 @@ const Sku_Page = () => {
 
       console.log("Populated answers from DB:", answers);
     }
-  }, [location.state, questions, setSkuData]);
+  }, [questions, setSkuData]);
 
   useEffect(() => {
     console.log("isOverlayVisible:", isOverlayVisible); // Debug log for state changes
@@ -359,7 +507,7 @@ const Sku_Page = () => {
       // Update SKU Status in Database**
       await axiosInstance.put(`/skus/${skuId}/update_status/`, {
         pko_id: pkoId,
-        status: "Completed",
+        status: "Inreview",
       });
 
       // Update Local State**
@@ -368,7 +516,7 @@ const Sku_Page = () => {
       setPkoData((prevPkoData) => ({
         ...prevPkoData,
         skus: prevPkoData.skus.map((sku) =>
-          sku.sku_id === skuId ? { ...sku, status: "Completed" } : sku
+          sku.sku_id === skuId ? { ...sku, status: "Completed" } : sku,
         ),
       }));
 
@@ -385,12 +533,13 @@ const Sku_Page = () => {
   const handleAddProductImageClick = async () => {
     const offcanvasElement = document.getElementById("offcanvasRight-image");
     if (offcanvasElement) {
+      setLoading(true);
       try {
         // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
         setLoadingImages(true);
 
         const response = await axiosInstance.get(
-          `skus/${skuId}/images/?pko_id=${encodedPkoId}`
+          `skus/${skuId}/images/?pko_id=${encodedPkoId}`,
         );
 
         if (response.data && response.data.images) {
@@ -403,6 +552,7 @@ const Sku_Page = () => {
       } catch (error) {
         console.error("Error fetching images:", error);
       } finally {
+        setLoading(false);
         setLoadingImages(false);
         const offcanvas = new Offcanvas(offcanvasElement);
         offcanvas.show();
@@ -415,7 +565,7 @@ const Sku_Page = () => {
       // console.log("Fetching images for SKU ID:", skuId, "and PKO ID:", pkoId);
 
       const response = await axiosInstance.get(
-        `skus/${skuId}/images/?pko_id=${encodedPkoId}`
+        `skus/${skuId}/images/?pko_id=${encodedPkoId}`,
       );
 
       if (response.data && response.data.images) {
@@ -435,12 +585,15 @@ const Sku_Page = () => {
   }, []); // Runs only once when the component mounts
 
   useEffect(() => {
-    if (location.state?.skuDetails) setSkuDetails(location.state.skuDetails);
-    if (location.state?.pkoData) setPkoData(location.state.pkoData);
-  }, [location.state, setSkuDetails, setPkoData]);
+    if (stateIcomingFromLastPage?.skuDetails)
+      setSkuDetails(stateIcomingFromLastPage?.skuDetails);
+    if (stateIcomingFromLastPage?.pkoData)
+      setPkoData(stateIcomingFromLastPage?.pkoData);
+  }, []);
 
   useEffect(() => {
-    const duedate = location.state?.duedate || pkoData?.duedate || null;
+    const duedate =
+      stateIcomingFromLastPage?.duedate || pkoData?.duedate || null;
 
     if (duedate) {
       setSubmissionLastDate(
@@ -448,10 +601,10 @@ const Sku_Page = () => {
           day: "2-digit",
           month: "short",
           year: "numeric",
-        })
+        }),
       );
     }
-  }, [location.state, pkoData]);
+  }, [pkoData]);
 
   useEffect(() => {
     const totalMandatory = questions.filter((q) => q.mandatory).length;
@@ -460,7 +613,7 @@ const Sku_Page = () => {
       (q) =>
         q.mandatory &&
         skuData.dimensionsAndWeights[q.question_id] !== undefined &&
-        skuData.dimensionsAndWeights[q.question_id] !== ""
+        skuData.dimensionsAndWeights[q.question_id] !== "",
     ).length;
 
     // Calculate progress as 10% of answered mandatory questions
@@ -492,94 +645,20 @@ const Sku_Page = () => {
     }
   }, []);
 
-  // Retrieve pkoData and skuDetails from location.state or fallback to context
+  // Retrieve pkoData and skuDetails from stateIcomingFromLastPage or fallback to context
   useEffect(() => {
-    if (location.state) {
-      if (location.state.skuDetails) {
-        setSkuDetails(location.state.skuDetails);
+    if (stateIcomingFromLastPage) {
+      if (stateIcomingFromLastPage?.skuDetails) {
+        setSkuDetails(stateIcomingFromLastPage?.skuDetails);
       }
-      if (location.state.pkoData) {
-        setPkoData(location.state.pkoData);
+      if (stateIcomingFromLastPage?.pkoData) {
+        setPkoData(stateIcomingFromLastPage?.pkoData);
       }
     }
-  }, [location.state, setSkuDetails, setPkoData]);
+  }, []);
 
   // console.log("pkoData in skupage:", pkoData);
-
-  //fetch SKU Details
-  useEffect(() => {
-    const fetchSkuDetails = async () => {
-      if (!skuId || !pkoId) {
-        console.warn("SKU ID or PKO ID is missing. Skipping fetch.");
-        return;
-      }
-
-      try {
-        const response = await axiosInstance.get(
-          `/skus/${skuId}/?pko_id=${encodedPkoId}`
-        );
-        const data = response.data;
-
-        console.log("Fetched SKU Details:", data);
-
-        // Prevent overwriting status if already submitted
-        if (hasSubmitted && data.status === "Draft") {
-          console.log(
-            "Skipping status update since form is already submitted."
-          );
-          return;
-        }
-
-        if (data.primary_packaging_details) {
-          const answers = {};
-
-          Object.entries(data.primary_packaging_details).forEach(
-            ([questionText, response]) => {
-              // Find the matching question using text and ID
-              const question = questions.find(
-                (q) =>
-                  questionText.startsWith(q.question_text) &&
-                  questionText.endsWith(`||${q.question_id}`)
-              );
-
-              if (question) {
-                // If the field contains both value and unit, extract them
-                if (
-                  question.question_type.includes("Dropdown") ||
-                  question.question_type.includes("Float")
-                ) {
-                  const match = response.match(/^(\d+(\.\d+)?)([a-zA-Z]+)$/);
-                  if (match) {
-                    answers[question.question_id] = parseFloat(match[1]); // Extract value
-                    answers[`${question.question_id}_unit`] = match[3]; // Extract unit
-                  } else {
-                    answers[question.question_id] = response;
-                  }
-                } else {
-                  answers[question.question_id] = response;
-                }
-              }
-            }
-          );
-
-          // Set the SKU data properly
-          setSkuData((prev) => ({
-            ...prev,
-            dimensionsAndWeights: answers,
-            components: data.components || [],
-          }));
-
-          console.log("Populated answers from DB:", answers);
-        }
-      } catch (error) {
-        console.error("Error fetching SKU details:", error);
-      }
-    };
-
-    fetchSkuDetails();
-  }, [skuId, pkoId, questions, setSkuData]);
-
-  //
+  // Fetch the questionnaire
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -595,37 +674,25 @@ const Sku_Page = () => {
     fetchQuestions();
   }, []);
 
-  // Match dependent question visibility based on parent's answer and field dependency
-  const isAnswerMatch = (fieldDependency, parentAnswer) => {
-    if (!fieldDependency) return true; // No dependency, always visible
-
-    const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
-    const conditions = fieldDependency
-      .split(/OR/i)
-      .map((dep) => dep.trim().toLowerCase());
-
-    return conditions.includes(normalizedParentAnswer);
-  };
-
+  //fetch SKU Details
   useEffect(() => {
-    const fetchComponentDetails = async () => {
-      if (!skuId || !pkoId) {
-        console.warn("SKU ID or PKO ID is missing. Skipping fetch.");
-        return;
-      }
+    if (questions.length > 0) {
+      const fetchSkuDetails = async () => {
+        if (!skuId || !pkoId) {
+          console.warn("SKU ID or PKO ID is missing. Skipping fetch.");
+          return;
+        }
+        // setLoading(true);
+        try {
+          const response = await axiosInstance.get(
+            `/skus/${skuId}/?pko_id=${encodedPkoId}`,
+          );
+          const data = response.data;
 
-      try {
-        const response = await axiosInstance.get(
-          `/sku/${skuId}/components/?pko_id=${encodedPkoId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+          const components = data.components;
 
-        if (response.status === 200) {
-          const components = response.data; // Array of components
+          // set the Component Data
+          setComponentsData(components);
 
           // Extract `component_progress` values
           const progressValues =
@@ -643,26 +710,82 @@ const Sku_Page = () => {
           // Update the state with the average
           setComponentProgressAverage(averageProgress);
 
-          console.log("Average Component Progress:", averageProgress);
-        } else {
-          console.error(
-            "Failed to fetch component details. Status:",
-            response.status
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching component details:", error);
-      }
-    };
+          // Prevent overwriting status if already submitted
+          if (hasSubmitted && data.status === "Draft") {
+            console.log(
+              "Skipping status update since form is already submitted.",
+            );
+            return;
+          }
 
-    fetchComponentDetails();
-  }, [skuId, pkoId]);
+          if (data.primary_packaging_details) {
+            const answers = {};
+
+            Object.entries(data.primary_packaging_details).forEach(
+              ([questionText, response]) => {
+                // Find the matching question using text and ID
+                const question = questions.find(
+                  (q) =>
+                    questionText.startsWith(q.question_text) &&
+                    questionText.endsWith(`||${q.question_id}`),
+                );
+
+                if (question) {
+                  // If the field contains both value and unit, extract them
+                  if (
+                    question.question_type.includes("Dropdown") ||
+                    question.question_type.includes("Float")
+                  ) {
+                    const match = response.match(/^(\d+(\.\d+)?)([a-zA-Z]+)$/);
+                    if (match) {
+                      answers[question.question_id] = parseFloat(match[1]); // Extract value
+                      answers[`${question.question_id}_unit`] = match[3]; // Extract unit
+                    } else {
+                      answers[question.question_id] = response;
+                    }
+                  } else {
+                    answers[question.question_id] = response;
+                  }
+                }
+              },
+            );
+
+            // Set the SKU data properly
+            setSkuData((prev) => ({
+              ...prev,
+              dimensionsAndWeights: answers,
+              components: data.components || [],
+            }));
+
+            console.log("Populated answers from DB:", answers);
+          }
+        } catch (error) {
+          console.error("Error fetching SKU details:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchSkuDetails();
+    }
+  }, [skuId, pkoId, questions, setSkuData]);
+
+  // Match dependent question visibility based on parent's answer and field dependency
+  const isAnswerMatch = (fieldDependency, parentAnswer) => {
+    if (!fieldDependency) return true; // No dependency, always visible
+
+    const normalizedParentAnswer = parentAnswer?.trim().toLowerCase() || "";
+    const conditions = fieldDependency
+      .split(/OR/i)
+      .map((dep) => dep.trim().toLowerCase());
+
+    return conditions.includes(normalizedParentAnswer);
+  };
 
   //Save the Response
   const saveSkuData = async (
     isDraft = true,
     showAlert = true,
-    isBackClick = false
+    isBackClick = false,
   ) => {
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
@@ -675,7 +798,7 @@ const Sku_Page = () => {
     const combinedProgress = Math.round(
       (Math.round(mandatoryProgress * 10) +
         parseFloat((componentProgressAverage * 90).toFixed(2))) /
-        100
+        100,
     );
     // setIsSubmitting(true);
     try {
@@ -697,10 +820,10 @@ const Sku_Page = () => {
       payload["status"] = isBackClick
         ? combinedProgress != 100
           ? "Draft"
-          : "Completed"
+          : "Inreview"
         : isDraft
-        ? "Draft"
-        : "Completed";
+          ? "Draft"
+          : "Inreview";
       questions.forEach((question) => {
         const answer = skuData.dimensionsAndWeights[question.question_id];
         let unit =
@@ -716,6 +839,44 @@ const Sku_Page = () => {
       await axiosInstance.put(`/skus/${skuId}/`, payload, {
         headers: { "Content-Type": "application/json" },
       });
+      try {
+        const response = await axiosInstance.get("pkos/");
+        const allPkoData = response.data;
+        const currentPko = allPkoData[pkoId];
+
+        if (!currentPko) {
+          console.warn("No matching PKO found for ID:", pkoId);
+          return;
+        }
+
+        const skus = currentPko.skus || [];
+        const progressValues = skus
+          .map((sku) => sku.sku_progress)
+          .filter((p) => typeof p === "number");
+
+        const total = progressValues.reduce((sum, val) => sum + val, 0);
+        const overallProgress =
+          progressValues.length > 0
+            ? Math.round(total / progressValues.length)
+            : 0;
+
+        // await axiosInstance.put(`/update-pko-progress/`, {
+        //   pko_id: pkoId,
+        //   pko_progress: overallProgress,
+        // });
+        // console.log("PKO progress updated:", overallProgress);
+        const res = await axiosInstance.put(`/update-pko-progress/`, {
+          pko_id: pkoId,
+          pko_progress: overallProgress,
+        });
+        console.log(
+          "PKO progress updated:",
+          res.data.message || overallProgress,
+        );
+      } catch (error) {
+        console.error("Error updating PKO progress:", error);
+      }
+
       // Show alert only when saving as a draft, not during submission
       if (isDraft && showAlert) {
         alert("SKU data saved successfully in Draft mode!");
@@ -764,11 +925,17 @@ const Sku_Page = () => {
       return; // Exit early without modifying the state
     }
 
+    if (selectedComponentType === "") {
+      alert("Component type cannot be empty!");
+      return; // Exit early without modifying the state
+    }
+
     try {
       const payload = {
         pko_id: pkoId,
         name: skuData.newComponent,
         form_status: "Pending",
+        component_type: selectedComponentType,
       };
 
       if (!skuId) {
@@ -783,7 +950,7 @@ const Sku_Page = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       // Update the components list in the state
@@ -795,12 +962,16 @@ const Sku_Page = () => {
             id: response.data?.id || null,
             name: skuData.newComponent,
             formStatus: response.data?.form_status || "",
+            component_type: selectedComponentType,
           },
         ],
         newComponent: "", // Clear the input field
         showInput: false, // Hide input field after adding the component
         isCancelDisabled: false, // Enable the cancel button for subsequent adds
       }));
+
+      // Reset selected component type
+      setSelectedComponentType("");
 
       alert("Component added successfully!");
     } catch (error) {
@@ -812,7 +983,7 @@ const Sku_Page = () => {
   const handleForwardClick = async (index) => {
     if (!skuId || !pkoId) {
       console.error(
-        "SKU ID or PKO ID is missing. Cannot fetch component details."
+        "SKU ID or PKO ID is missing. Cannot fetch component details.",
       );
       return;
     }
@@ -828,7 +999,7 @@ const Sku_Page = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -837,21 +1008,25 @@ const Sku_Page = () => {
         if (components[index]) {
           const componentData = components[index];
 
-          // Navigate to PkgDataForm with all necessary data
-          navigate("/component", {
-            state: {
-              skuId, // Pass SKU ID
+          localStorage.setItem(
+            "component_page_state",
+            JSON.stringify({
+              skuId,
               componentId: componentData.id,
               componentName: componentData.name,
               formStatus: componentData.form_status,
-              responses: componentData.responses || {}, // Pass fetched responses
+              component_type: componentData.component_type,
+              responses: componentData.responses || {},
               pkoId: pkoData?.pko_id || "N/A",
               description:
                 skuDetails?.description || "Description Not Available",
               skuDetails,
               pkoData,
-            },
-          });
+            }),
+          );
+
+          // Navigate to PkgDataForm with all necessary data
+          navigate("/component");
         } else {
           console.warn("Selected component not found in API response.");
         }
@@ -863,6 +1038,119 @@ const Sku_Page = () => {
       console.error("Error fetching component details:", error);
       alert("An error occurred while fetching component details.");
     }
+  };
+
+  const handleDeleteComponent = async () => {
+    if (!componentToDelete) return;
+
+    try {
+      await axiosInstance.delete(
+        `/sku/${skuId}/components/${componentToDelete.id}/`,
+        {
+          data: { pko_id: pkoId }, //pass pko_id
+        },
+      );
+      // Update the state to remove the deleted component
+      setSkuData((prev) => ({
+        ...prev,
+        components: prev.components.filter(
+          (comp) => comp.id !== componentToDelete.id,
+        ),
+      }));
+
+      alert(`Component "${componentToDelete.name}" deleted successfully!`);
+    } catch (error) {
+      console.error("Error deleting component:", error);
+      alert("Failed to delete component. Please try again.");
+    } finally {
+      setShowDeletePopup(false); // Close the popup after deletion
+      setComponentToDelete(null); // Reset the component to delete
+      setOpenDropdownIndex(null); // Close the dropdown
+    }
+  };
+
+  const handleEditComponent = (index) => {
+    setEditingIndex(index);
+    setEditedComponentName(skuData.components[index].name);
+    setOpenDropdownIndex(null); // Close the dropdown
+  };
+
+  const handleSaveEdit = async (index) => {
+    const updatedComponents = [...skuData.components];
+    updatedComponents[index].name = editedComponentName;
+
+    try {
+      // Update the component name in the backend
+      await axiosInstance.put(
+        `/sku/${skuId}/components/${updatedComponents[index].id}/`,
+        {
+          name: editedComponentName,
+          pko_id: pkoId,
+        },
+      );
+
+      setSkuData((prev) => ({
+        ...prev,
+        components: updatedComponents,
+      }));
+
+      setEditingIndex(null); // Exit editing mode
+      setOpenDropdownIndex(null); // Close the dropdown
+      alert("Component name updated successfully!");
+    } catch (error) {
+      console.error("Error updating component name:", error);
+      alert("Failed to update component name. Please try again.");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditedComponentName("");
+    setOpenDropdownIndex(null); // Close the dropdown
+  };
+
+  const renderDeleteConfirmation = () => {
+    if (!showDeletePopup || !componentToDelete) return null;
+
+    return (
+      <div
+        className="modal d-block show fade"
+        id="deleteModal"
+        tabIndex="-1"
+        aria-labelledby="deleteModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-md modal-dialog-centered p-0">
+          <div className="modal-content">
+            <div className="modal-body text-center px-4 py-5">
+              <h5 className="fs-22 fw-600 mb-0">
+                Are you sure you want to delete the component{" "}
+                {componentToDelete.name}?
+              </h5>
+            </div>
+            <div className="modal-footer justify-content-center px-4 pt-0 pb-5 border-0">
+              <button
+                type="button"
+                className="btn btn-outline-secondary px-4 py-12 fs-14 fw-600"
+                onClick={() => {
+                  setShowDeletePopup(false);
+                  setOpenDropdownIndex(null);
+                }}
+              >
+                No
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary px-4 py-12 fs-14 fw-600"
+                onClick={handleDeleteComponent}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const dynamicFields = [
@@ -901,7 +1189,22 @@ const Sku_Page = () => {
         "ArrowRight",
         "Delete",
         "Tab",
+        "a", // Allow 'a' for select all (Command + A)
+        "c", // Allow 'c' for copy (Command + C)
+        "v", // Allow 'v' for paste (Command + V)
+        "x", // Allow 'x' for cut (Command + X)
       ];
+      // Check if the key is a meta key (Command on Mac, Ctrl on Windows)
+      const isMetaKey = e.metaKey || e.ctrlKey;
+
+      // Allow copy, paste, and cut commands
+      if (
+        isMetaKey &&
+        (e.key === "c" || e.key === "v" || e.key === "x" || e.key === "a")
+      ) {
+        return; // Allow the default behavior for these key combinations
+      }
+
       if (
         e.key === "-" ||
         (!allowedKeys.includes(e.key) && !/^\d$/.test(e.key))
@@ -912,7 +1215,7 @@ const Sku_Page = () => {
 
     // Check if the question is related to height, width, or depth
     const showOverlayForDimension = /height|width|depth/i.test(
-      question.question_text
+      question.question_text,
     );
 
     switch (question.question_type) {
@@ -927,6 +1230,7 @@ const Sku_Page = () => {
               onChange={(e) =>
                 handleInputChange(question.question_id, e.target.value)
               }
+              tabIndex={0} // Make the input focusable
             />
             {question.instructions && (
               <Tooltip
@@ -949,6 +1253,7 @@ const Sku_Page = () => {
               onChange={handleChange}
               onWheel={(e) => e.target.blur()}
               onKeyDown={handleKeyDown} // Restrict invalid key presses
+              tabIndex={0} // Make the input focusable
             />
             {question.instructions && (
               <Tooltip
@@ -1021,7 +1326,7 @@ const Sku_Page = () => {
 
         return (
           <div className="d-flex align-items-center gap-2">
-            <div className="d-flex align-items-center border border-color-typo-secondary rounded-2">
+            <div className="d-flex align-items-center border border-color-typo-secondary rounded-2 ">
               {/* Input Field */}
               <input
                 type="number"
@@ -1046,7 +1351,9 @@ const Sku_Page = () => {
                     e.key !== "Backspace" &&
                     e.key !== "Delete" &&
                     e.key !== "ArrowLeft" &&
-                    e.key !== "ArrowRight"
+                    e.key !== "ArrowRight" &&
+                    e.key !== "Tab" &&
+                    !(e.ctrlKey || e.metaKey) // Allow Ctrl (Windows) / Cmd
                   ) {
                     e.preventDefault();
                   }
@@ -1054,7 +1361,21 @@ const Sku_Page = () => {
                   if (e.key === "." && e.target.value.includes(".")) {
                     e.preventDefault();
                   }
+                  if (e.key === "Tab" && !e.shiftKey) {
+                    // Remove preventDefault() so Tab works naturally
+                    document
+                      .getElementById(`dropdown-${question.question_id}`)
+                      ?.focus();
+                  }
                 }}
+                onPaste={(e) => {
+                  // Prevent pasting non-numeric values
+                  const pasteData = e.clipboardData.getData("text");
+                  if (!/^\d*\.?\d*$/.test(pasteData)) {
+                    e.preventDefault();
+                  }
+                }}
+                tabIndex={0} // Make the input focusable
               />
 
               {/* Unit Dropdown */}
@@ -1097,6 +1418,8 @@ const Sku_Page = () => {
                   // Update the specific question's unit
                   handleInputChange(`${question.question_id}_unit`, newUnit);
                 }}
+                tabIndex={0} // Make the dropdown focusable
+                onFocus={() => console.log("Dropdown focused!")} // Debugging: Check if focus works
               >
                 {question.dropdown_options.map((option, index) => (
                   <option key={index} value={option}>
@@ -1137,6 +1460,7 @@ const Sku_Page = () => {
               className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14"
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
               onChange={handleChange}
+              tabIndex={0} // Make the dropdown focusable
             >
               <option value="">
                 {question.placeholder || "Select an option"}
@@ -1158,25 +1482,27 @@ const Sku_Page = () => {
           </div>
         );
 
+      case "No Input Required":
+        return (
+          <div className="d-flex align-items-center gap-2">
+            <span className="fs-14 text-color-typo-primary">
+              {question.question_text}
+            </span>
+            {question.instructions && (
+              <Tooltip
+                id={question.question_id}
+                instructions={question.instructions}
+                activeTooltipId={activeTooltipId}
+                setActiveTooltipId={setActiveTooltipId}
+              />
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
   };
-  // const renderFollowUpQuestions = (followUps) => {
-  //   return followUps.map((followUp) => (
-  //     <div
-  //       key={followUp.question_id}
-  //       className={`col-12 ${
-  //         followUp.question_type === "Float + Dropdown" ? "col-md-6" : "col-12"
-  //       } mb-3`}
-  //     >
-  //       <label className="fs-14 text-color-typo-primary mb-2 d-block">
-  //         {followUp.question_text}
-  //       </label>
-  //       {renderField(followUp)}
-  //     </div>
-  //   ));
-  // };
 
   // Render Questions with Dependent Logic
   const renderQuestions = (questions) => {
@@ -1185,7 +1511,7 @@ const Sku_Page = () => {
         skuData.dimensionsAndWeights[question.dependent_question];
       const isDependentVisible = isAnswerMatch(
         question.field_dependency,
-        parentAnswer
+        parentAnswer,
       );
 
       if (question.dependent_question && !isDependentVisible) {
@@ -1196,15 +1522,18 @@ const Sku_Page = () => {
           key={question.question_id}
           className={`col-12 ${
             question.question_type === "Float + Dropdown" ||
-            question.question_type === "Dropdown"
+            question.question_type === "Dropdown" ||
+            question.question_type === "No Input Required"
               ? "col-md-6"
               : "col-12"
           } mb-3`}
         >
-          <label className="fs-14 text-color-typo-primary mb-2 d-block">
-            {question.question_text}
-            {question.mandatory && <span> *</span>}
-          </label>
+          {question.question_type !== "No Input Required" && (
+            <label className="fs-14 text-color-typo-primary mb-2 d-block">
+              {question.question_text}
+              {question.mandatory && <span> *</span>}
+            </label>
+          )}
           {renderField(question)}
         </div>
       );
@@ -1212,6 +1541,18 @@ const Sku_Page = () => {
   };
   return (
     <>
+      {loading && (
+        <div className="loader">
+          <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
+            <img
+              src="/assets/images/loading_gif.gif"
+              alt="Loading..."
+              width="120px"
+              height="120px"
+            />
+          </div>
+        </div>
+      )}
       <Header></Header>
       {/* Breadcrumb (Directly integrated here) */}
       <div className="py-10 bg-color-light-shade">
@@ -1262,7 +1603,7 @@ const Sku_Page = () => {
                 className={`save-button px-4 py-12 fs-14 fw-600 border-0 ${
                   skuData.components.length > 0 &&
                   skuData.components.every(
-                    (comp) => comp.form_status === "Completed"
+                    (comp) => comp.form_status === "Completed",
                   )
                     ? "bg-secondary text-white" // Apply "Save as Draft" button color
                     : ""
@@ -1285,6 +1626,46 @@ const Sku_Page = () => {
         </div>
       </div>
       <Autosave saveFunction={autosaveSkuData} dependencies={[skuData]} />
+      <div className="d-flex align-items-center justify-content-end px-40 mt-2">
+        <button
+          type="button"
+          className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center"
+          data-bs-toggle="modal"
+          data-bs-target="#importSkuDataModal"
+        >
+          <img
+            src="/assets/images/import-icon.svg"
+            className="me-2"
+            alt="import-icon"
+          />
+          Import data from other SKUs
+        </button>
+      </div>
+
+      <Importdata
+        title="Import data from other SKUs"
+        chooseComponentDrop={false}
+        openModal="importSkuDataModal"
+        infoTxt="This action will import primary packaging details and all component form data into the current SKU form."
+        popoverTitle="All existing responses filled for this SKU will be overwritten."
+        popoverConfirmTxt="Are you sure you want to proceed?"
+        popoverInfoIcon="/assets/images/error-alert-triangle-icon.svg"
+        onConfirmImport={handleImportFromSku} // Pass confirm handler
+        currentPkoId={pkoId}
+      />
+      <Importdata
+        title="Import component data"
+        chooseComponentDrop
+        openModal="importComponentDataModal"
+        infoTxt="This action will import compnent data into the current component form."
+        popoverTitle="All existing responses for this component will be overwritten."
+        popoverConfirmTxt="Are you sure you want to proceed?"
+        popoverInfoIcon="/assets/images/error-alert-triangle-icon.svg"
+        onConfirmImport={(sku, pko, componentName) =>
+          handleImportComponentData(sku, pko, componentName, activeComponentId)
+        }
+        currentPkoId={pkoId}
+      />
       <div className="container-fluid px-5 d-flex flex-column container-height">
         {/* Header Section */}
         <div className="d-flex align-items-center justify-content-between py-3">
@@ -1334,29 +1715,6 @@ const Sku_Page = () => {
                   </div>
                 ))}
               </div>
-              {/* Add Product Images Button */}
-              {/* <div className="d-flex align-items-center  col-3 justify-content-end">
-                <div className="d-flex align-items-center mb-4">
-                  <p className="fs-14 fw-600 text-color-typo-primary mb-0">
-                  {productImageCount} <span>images uploaded</span> {" "}
-                  <span
-                      className="ps-12 text-color-draft text-decoration-underline cursor-pointer"
-                      data-bs-toggle="offcanvas"
-                      data-bs-target="#offcanvasRight-image"
-                      aria-controls="offcanvasRight-image"
-                    >
-                      View
-                    </span>
-                  </p>
-                  <button
-                    className="bg-transparent shadow-none border-0 fs-14 d-flex py-0  fw-600 text-secondary px-0"
-                    onClick={handleAddProductImageClick}
-
-                 >
-                    View/+ Add images
-                  </button>
-                </div>
-              </div> */}
             </div>
           </div>
         </div>
@@ -1389,27 +1747,6 @@ const Sku_Page = () => {
                   Provide all relevant primary packaging details for the SKU
                 </p>
 
-                {/* <div className="row">
-                  {questions.map((question) => (
-                    <React.Fragment key={question.question_id}>
-                      <div
-                        className={`col-12 ${
-                          question.question_type === "Float + Dropdown" ||
-                          question.question_type === "Dropdown"
-                            ? "col-md-6"
-                            : "col-12"
-                        } mb-3`}
-                      >
-                        <label className="fs-14 text-color-typo-primary mb-2 d-block">
-                          {question.question_text}
-                        </label>
-                        {renderField(question)}
-
-                      </div>
-
-                    </React.Fragment>
-                  ))}
-                </div> */}
                 <div className="row">{renderQuestions(questions)}</div>
               </div>
             </div>
@@ -1512,6 +1849,7 @@ const Sku_Page = () => {
                     <table className="table table-bordered fs-14 w-100 bg-transparent table-striped component-tbl mt-4">
                       <thead>
                         <tr>
+                          <th scope="col">Component Type</th>
                           <th scope="col">Component Name</th>
                           <th className="text-center w-25" scope="col">
                             Form Status
@@ -1524,13 +1862,24 @@ const Sku_Page = () => {
                       <tbody>
                         {skuData.components.map((component, index) => (
                           <tr key={index}>
-                            <td className="align-middle">{component.name}</td>
-                            {/* <td className="text-center align-middle">
-                              <span className="d-inline-flex align-items-center bg-color-padding-label py-2 px-12 rounded-pill text-secondary fw-600">
-                                <span className="circle me-2"></span>
-                                {component.form_status || "Pending"}
-                              </span>
-                            </td> */}
+                            <td className="text-start align-middle">
+                              {component?.component_type || "Not Available"}
+                            </td>
+                            <td className="align-middle">
+                              {" "}
+                              {editingIndex === index ? (
+                                <input
+                                  type="text"
+                                  value={editedComponentName}
+                                  onChange={(e) =>
+                                    setEditedComponentName(e.target.value)
+                                  }
+                                  className="form-control"
+                                />
+                              ) : (
+                                component.name
+                              )}
+                            </td>
                             <td className="text-start align-middle">
                               <span
                                 className={`fs-14 d-inline-flex align-items-center py-6 px-2 rounded-pill fw-600 ${
@@ -1550,22 +1899,124 @@ const Sku_Page = () => {
                               </span>
                             </td>
                             <td className="text-center align-middle">
-                              <img
-                                src="/assets/images/forward-arrow-img.png"
-                                alt="Forward"
-                                className="ms-2"
-                                style={{
-                                  cursor: "pointer",
-                                  width: "24px",
-                                  height: "24px",
-                                }}
-                                onClick={() => handleForwardClick(index)}
-                              />
+                              {editingIndex === index ? (
+                                <>
+                                  <button
+                                    className="btn btn-success btn-sm me-2"
+                                    onClick={() => handleSaveEdit(index)}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <img
+                                    src="/assets/images/forward-arrow-img.png"
+                                    alt="Forward"
+                                    className="ms-2"
+                                    style={{
+                                      cursor: "pointer",
+                                      width: "24px",
+                                      height: "24px",
+                                    }}
+                                    onClick={() => handleForwardClick(index)}
+                                  />
+                                  <span>
+                                    {" "}
+                                    <img
+                                      src="/assets/images/action-icon-img.png"
+                                      alt="Action"
+                                      className="ms-2"
+                                      style={{
+                                        cursor: "pointer",
+                                        width: "24px",
+                                        height: "24px",
+                                      }}
+                                      onClick={() =>
+                                        setOpenDropdownIndex(
+                                          openDropdownIndex === index
+                                            ? null
+                                            : index,
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                  {openDropdownIndex === index && (
+                                    <div
+                                      className="dropdown-menu show"
+                                      ref={dropdownRef} // Attach ref to the dropdown
+                                    >
+                                      <button
+                                        className="dropdown-item"
+                                        onClick={() =>
+                                          handleEditComponent(index)
+                                        }
+                                      >
+                                        <img
+                                          src="/assets/images/Edit.svg"
+                                          alt="edit"
+                                          className="me-2"
+                                          style={{
+                                            width: "16px",
+                                            height: "16px",
+                                          }}
+                                        />
+                                        Edit
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="dropdown-item"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#importComponentDataModal"
+                                        onClick={() => {
+                                          setActiveComponentId(component.id); //  Set the component ID to be replaced
+                                        }}
+                                      >
+                                        <img
+                                          src="/assets/images/import-icon-black.svg"
+                                          alt="import"
+                                          className="me-2"
+                                          style={{
+                                            width: "16px",
+                                            height: "16px",
+                                          }}
+                                        />
+                                        Import Data
+                                      </button>
+                                      <button
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                          setComponentToDelete(component);
+                                          setShowDeletePopup(true);
+                                        }}
+                                      >
+                                        <img
+                                          src="/assets/images/delete-bin.svg"
+                                          alt="delete"
+                                          className="me-2"
+                                          style={{
+                                            width: "16px",
+                                            height: "16px",
+                                          }}
+                                        />
+                                        Delete
+                                      </button>
+                                    </div>
+                                  )}
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                    {renderDeleteConfirmation()}
 
                     {/* Add Component Input Section */}
                     {skuData.showInput && (
@@ -1573,6 +2024,20 @@ const Sku_Page = () => {
                         className="d-flex align-items-center gap-3 mt-3"
                         id="addSkuComponentBlock"
                       >
+                        <select
+                          className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14 w-25"
+                          id="dropdown"
+                          value={selectedComponentType}
+                          onChange={handleComponentTypeChange}
+                        >
+                          <option value="" disabled>
+                            Component Type
+                          </option>
+                          {dropdownListComing &&
+                            dropdownListComing?.options?.map((item) => {
+                              return <option value={`${item}`}>{item}</option>;
+                            })}
+                        </select>
                         <input
                           type="text"
                           className="form-control border border-color-typo-secondary rounded-2 h-44 w-280"

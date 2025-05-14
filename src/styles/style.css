@@ -80,7 +80,7 @@
 }
 
 .fs-12 {
-  font-size: 0.75rem;
+  font-size: 0.75rem !important;
 }
 
 .fs-13 {
@@ -3627,7 +3627,8 @@ progress {
   opacity: 1;
 }
 .form-control:disabled {
-  background-color: var(--bs-secondary-bg);
+  /* background-color: var(--bs-secondary-bg); */
+  background-color: white !important;
   opacity: 1;
 }
 .form-control::file-selector-button {
@@ -11764,6 +11765,10 @@ fieldset:disabled .btn {
 
 .ps-30 {
   padding-left: 1.875rem !important;
+}
+
+.ps-35 {
+  padding-left: 2.188rem !important;
 }
 
 .ps-40 {
@@ -22214,6 +22219,10 @@ body {
   letter-spacing: 1px;
 }
 
+.font-open-sans {
+  font-family: "Open Sans", sans-serif;
+}
+
 input:focus {
   outline: none;
 }
@@ -22265,7 +22274,7 @@ input:focus {
 }
 
 .entire-login-block {
-  max-width: 70%;
+  width: 67%;
 }
 .entire-login-block input[value=""] {
   letter-spacing: 1px;
@@ -22279,6 +22288,11 @@ input:focus {
 .cvs-logo-login {
   max-width: 45%;
 }
+@media (max-width: 991.98px) {
+  .loginPage-holder .col-12 {
+    height: 50% !important;
+  }
+}
 
 .gap-70 {
   gap: 4.375rem;
@@ -22287,6 +22301,14 @@ input:focus {
 .container-height {
   height: calc(100vh - 144px);
 } /*# sourceMappingURL=style.css.map */
+
+.admin-container-height {
+  height: calc(100vh - 164px);
+}
+
+.admin-dashboard-container-height {
+  height: calc(100vh - 124px);
+}
 
 /* Form Section Styles */
 
@@ -22319,7 +22341,7 @@ input,
 textarea,
 select {
   padding: 10px;
-  border: 1px solid #A9A9A9;
+  border: 1px solid #a9a9a9;
   border-radius: 4px;
   font-size: 14px;
   color: black;
@@ -22548,8 +22570,16 @@ input[type="radio"] {
   background-color: #257cff; /* blue */
 }
 
+.status-dot.in-progress {
+  background-color: #1ab1de; /* light blue */
+}
+
 .status-dot.completed {
   background-color: #30ab30; /* Green */
+}
+
+.status-dot.in-review {
+  background-color: #feb343; /* Yellow */
 }
 
 /* Vendor Page Loader */
@@ -22634,6 +22664,9 @@ input[type="radio"] {
 .w-60 {
   width: 60%;
 }
+.w-30 {
+  width: 30%;
+}
 .w-40 {
   width: 40%;
 }
@@ -22641,6 +22674,38 @@ input[type="radio"] {
 .bg-color-draft {
   background-color: #007bff !important; /* Blue Background */
   color: white !important; /* White Text */
+}
+
+.active-pill,
+.completed-pill {
+  color: #30ab30;
+  border-color: #30ab30 !important;
+  background-color: #e0f9e2;
+}
+.closed-pill {
+  color: #eb4747;
+  border-color: #eb4747 !important;
+  background-color: #f9e0e0;
+}
+.in-review-pill {
+  color: #feb343;
+  border-color: #feb343 !important;
+  background-color: #f9f2e0;
+}
+.in-review-sku-status-pill {
+  color: #feb343;
+  border-color: #feb343 !important;
+  background-color: #feb343;
+}
+.not-started-pill {
+  color: #ababab;
+  border-color: #ababab !important;
+  background-color: #ededed;
+}
+.draft-pill {
+  color: #257cff;
+  border-color: #257cff !important;
+  background-color: #e0ecff;
 }
 
 .fw-400 {
@@ -22683,6 +22748,15 @@ input[type="radio"] {
 /* Media Query */
 @media (max-width: 1365px) {
   .container-height {
+    height: 100% !important;
+    padding-bottom: 1.5rem;
+  }
+  .admin-container-height {
+    height: 100% !important;
+    padding-bottom: 1.5rem;
+  }
+
+  .admin-dashboard-container-height {
     height: 100% !important;
     padding-bottom: 1.5rem;
   }
@@ -22886,12 +22960,27 @@ input[type="radio"] {
     max-height: 400px;
   }
 }
+@media (min-width: 1280px) and (min-height: 800px) {
+  .vendorOnboarding-modal .modal-dialog {
+    height: calc(100% - 18.75rem) !important;
+  }
+}
 @media (min-width: 1400px) {
   .vendorOnboarding-modal .modal-dialog {
-    height: calc(100% - 14.75rem) !important;
+    height: calc(100% - 12.75rem) !important;
   }
 }
 @media (min-width: 1600px) {
+  .vendorOnboarding-modal .modal-dialog {
+    height: calc(100% - 13.75rem) !important;
+  }
+}
+@media (min-width: 1680px) {
+  .vendorOnboarding-modal .modal-dialog {
+    height: calc(100% - 20.75rem) !important;
+  }
+}
+@media (min-width: 1800px) {
   .vendorOnboarding-modal .modal-dialog {
     height: calc(100% - 18.75rem) !important;
   }
@@ -22965,6 +23054,140 @@ input[type="radio"] {
 .table-striped > tbody > tr:nth-of-type(even) > * {
   background-color: #fafafa !important;
 }
+#deleteModal {
+  background: rgba(0, 0, 0, 0.5);
+}
+#deleteModal .modal-dialog {
+  background: transparent !important;
+  box-shadow: none !important;
+  width: max-content !important;
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  #deleteModal .modal-dialog {
+    max-width: 500px !important;
+    min-width: 500px !important;
+  }
+}
+.import-data-modal-popup .border-color-list-item {
+  border-color: var(--bs-color-list-item) !important;
+}
+.import-data-modal-popup .modal-dialog {
+  max-width: 53%;
+}
+@media (max-width: 575.98px) {
+  .import-data-modal-popup .modal-dialog {
+    max-width: 97%;
+  }
+}
+.import-data-modal-popup .popover {
+  max-width: max-content;
+  box-shadow: 0px 2px 10px 0px #00000033;
+}
+.import-data-modal-popup .btn-close {
+  background-image: url("/assets/images/close-icon-red-new.svg");
+  background-size: 24px;
+  opacity: 1;
+}
+.sideNav .btn.active {
+  background-color: #ff4d3b;
+}
+.send-reminder-btn {
+  background-image: url(/assets/images/send-reminder-icon.svg) !important;
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+}
+.send-reminder-btn:hover {
+  background-image: url(/assets/images/reminder-icon-sidenav.svg) !important;
+}
+.send-reminder-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .send-reminder-modal-popup .modal-dialog {
+    max-width: 40% !important;
+    min-width: 40% !important;
+  }
+}
+.sent-reminder-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .sent-reminder-modal-popup .modal-dialog {
+    max-width: 86% !important;
+    min-width: 86% !important;
+  }
+}
+.notificationToast {
+  display: block !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+  height: max-content !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 32px !important;
+  z-index: 99;
+  background-color: #fff !important;
+}
+.notificationToast .new-notification-indicator {
+  position: absolute;
+  left: 2%;
+  top: 15%;
+}
+.notificationToast .toast-body {
+  max-height: 290px;
+  overflow-y: auto;
+}
+.notificationToast .btn-close {
+  background-image: url("/assets/images/close-icon-red-new.svg");
+  opacity: 1;
+  font-size: 16px;
+}
+.pkoSummaryCard .overall-progress-block {
+  border-color: #848383 !important;
+}
+.mainContent-holder {
+  height: calc(100vh - 64px) !important;
+  overflow-y: auto !important;
+}
+.mainScrollable-table {
+  min-height: 300px !important;
+  max-height: 500px !important;
+  overflow-y: auto !important;
+}
+.approve-sku-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .approve-sku-modal-popup .modal-dialog {
+    max-width: 33% !important;
+    min-width: 33% !important;
+  }
+}
+.request-changes-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .request-changes-modal-popup .modal-dialog {
+    max-width: 55% !important;
+    min-width: 55% !important;
+  }
+}
+.template-uploading-modal-popup .modal-dialog {
+  max-width: 97%;
+}
+@media (min-width: 576px) {
+  .template-uploading-modal-popup .modal-dialog {
+    max-width: 46% !important;
+    min-width: 46% !important;
+  }
+}
+.pkoManagerMainTable-holder {
+  min-height: 20vh !important;
+  max-height: 40vh !important;
+  overflow-y: auto !important;
+}
 /* Custom css end (Azahar) */
 
 .offcanvas {
@@ -22996,14 +23219,36 @@ input[type="radio"] {
   text-align: left !important;
 }
 
-/* Add this to your CSS or CSS module */
+/* Loader CSS */
 .loaderOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.loader {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
-  backdrop-filter: blur(5px); /* Apply blur to the background */
-  z-index: 9999; /* Make sure it's on top of everything */
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+}
+/* .input-error {
+  border-color: red;
+}
+
+.label-error {
+  color: red;
+} */
+
+.input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5 !important;
+}
+
+.label-error {
+  color: #dc3545 !important;
 }

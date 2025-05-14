@@ -23,6 +23,12 @@ import { VendorProvider } from "./pages/VendorContext"; // Assuming you have thi
 
 // Import Redux actions
 import { login } from "./store/authSlice"; // Import login action
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminPKODetails from "./pages/Admin/AdminPKODetails";
+import AdminSKUDetails from "./pages/Admin/AdminSKUDetails";
+import AdminComponentPage from "./pages/Admin/AdminComponent";
+import AdminPKOManager from "./pages/Admin/AdminPKOManager";
+import AdminPKOManagerPreview from "./pages/Admin/AdminPKOManagerPreview";
 
 function App() {
   // Call the hook to start tracking inactivity and refreshing the token
@@ -83,6 +89,42 @@ function App() {
               <Route
                 path="/component"
                 element={<PrivateRoute element={<PkgDataForm />} />}
+              />
+
+              {/* Private Route - Admin Dashboard */}
+              <Route
+                path="/admindashboard"
+                element={<PrivateRoute element={<AdminDashboard />} />}
+              />
+
+              {/* Private Route - Admin PKO Details */}
+              <Route
+                path="/adminpkodetails/:pkoId"
+                element={<PrivateRoute element={<AdminPKODetails />} />}
+              />
+
+              {/* Private Route - Admin SKU Details */}
+              <Route
+                path="/adminskudetails/:pkoId/:skuId"
+                element={<PrivateRoute element={<AdminSKUDetails />} />}
+              />
+
+              {/* Private Route - Admin SKU component Details */}
+              <Route
+                path="/admincomponent/:pkoId/:skuId/:componentId"
+                element={<PrivateRoute element={<AdminComponentPage />} />}
+              />
+
+              {/* Private Route - Admin PKO Manager */}
+              <Route
+                path="/adminpkomanager"
+                element={<PrivateRoute element={<AdminPKOManager />} />}
+              />
+
+              {/* Private Route - Admin PKO Manager Preview */}
+              <Route
+                path="/adminpkomanagerpreview"
+                element={<PrivateRoute element={<AdminPKOManagerPreview />} />}
               />
 
               {/* Other routes can go here */}

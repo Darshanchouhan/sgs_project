@@ -5,7 +5,7 @@ import Breadcrumb from "./Breadcrumb";
 import "./../styles/style.css";
 import axiosInstance from "../services/axiosInstance";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PkgDataContext } from "./Pkg_DataContext"; // Import Context
 import Autosave from "./AutoSave";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -15,17 +15,14 @@ import Tooltip from "./Tooltip"; // Import Tooltip component
 import ValidationModal from "./Validation";
 
 const PkgDataForm = () => {
+  const stateIncomingComponentPage = JSON.parse(
+    localStorage.getItem("component_page_state"),
+  );
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
-  const {
-    skuData,
-    setSkuData,
-    skuDetails,
-    setSkuDetails,
-    pkoData,
-    setPkoData,
-  } = useContext(SkuContext);
+  const { skuData, setSkuData, setSkuDetails, setPkoData } =
+    useContext(SkuContext);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
   const sectionRefs = useRef({}); // Store refs for each section
   const [isFormFilled, setIsFormFilled] = useState(false); // Track if the form is filled
   const {
@@ -33,18 +30,20 @@ const PkgDataForm = () => {
     pkoId,
     description,
     skuId: passedSkuId,
-  } = location.state || {};
+  } = stateIncomingComponentPage || {};
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [overlayImage, setOverlayImage] = useState(null);
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
   const [showValidationModal, setShowValidationModal] = useState(false);
-  const [nextSection, setNextSection] = useState(null); // To track the next section
   const [unansweredQuestions, setUnansweredQuestions] = useState([]);
-  const [isSaveAsDraft, setIsSaveAsDraft] = useState(false);
   const [isPreviousValidation, setIsPreviousValidation] = useState(false);
+  const [persistentValidationErrors, setPersistentValidationErrors] = useState(
+    [],
+  );
+
+  const [isFullValidation, setIsFullValidation] = useState(false); // Step 1: Create a flag
 
   const handleNextClick = () => {
-    setIsSaveAsDraft(false);
     setIsPreviousValidation(false);
     const sectionKeys = Object.keys(pkgData.sections);
     const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
@@ -68,14 +67,15 @@ const PkgDataForm = () => {
 
   const handlePreviousClick = () => {
     setIsPreviousValidation(true); // Indicate this is a Previous operation
-    setIsSaveAsDraft(false); // Reset Save as Draft flag
     const validationResults = validateCurrentSection(); // Validate current section
     setUnansweredQuestions(validationResults); // Update unanswered questions state
 
     if (validationResults.length > 0) {
-      setShowValidationModal(true); // Show the validation modal
+      // Show the validation modal if there are unanswered questions
+      setShowValidationModal(true);
     } else {
-      proceedToPreviousSection(); // Proceed directly if no validation issues
+      // If no validation issues, proceed to the previous section
+      proceedToPreviousSection();
     }
   };
 
@@ -108,6 +108,10 @@ const PkgDataForm = () => {
     if (currentIndex < sectionKeys.length - 1) {
       const nextSectionKey = sectionKeys[currentIndex + 1]; // Determine the next section key
       setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey })); // Update the active section
+      //Update persistent errors with unanswered questions
+      setPersistentValidationErrors(
+        unansweredQuestions.map((q) => q.question_id),
+      );
 
       // Scroll to the next section
       sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
@@ -125,61 +129,222 @@ const PkgDataForm = () => {
 
     if (currentIndex > 0) {
       const previousSection = sectionKeys[currentIndex - 1];
+
+      // Validate current section before proceeding
+      const validationResults = validateCurrentSection();
+
+      // Update persistent errors with current section's validation results
+      setPersistentValidationErrors((prev) => {
+        const currentSectionErrors = validationResults.map(
+          (q) => q.question_id,
+        );
+        return [...new Set([...prev, ...currentSectionErrors])];
+      });
+
+      // Set the active section to the previous section
       setPkgData((prev) => ({
         ...prev,
         activeSection: previousSection,
       }));
+
+      // Scroll to the previous section
       sectionRefs.current[previousSection]?.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-      setShowValidationModal(false); // Close modal after navigation
+
+      setShowValidationModal(false);
     }
   };
 
-  // const onSaveDraft = () => {
-  //   // Call the existing handleSave function to save the data to the database
-  //   handleSave();
-  //   setShowValidationModal(false); // Close the modal
-  //   setIsSaveAsDraft(false); // Reset the Save as Draft flag
+  // const handleSaveDraft = () => {
+  //   setIsPreviousValidation(false); // Reset Previous validation flag
+  //   handleSave(); // Directly save without validation
+
+  // };
+  // const handleSaveDraft = async () => {
+  //   setIsPreviousValidation(false);
+  //   await handleSave();
+  //   await updateSkuProgress();        // Save component data
+  //   await updatePkoProgress();    // Then update PKO progress using above logic
   // };
 
-  const handleSaveDraft = () => {
-    setIsSaveAsDraft(true); // Show Save as Draft button
-    setIsPreviousValidation(false); // Reset Previous validation flag
-    handleSave(); // Directly save without validation
+  const handleSaveDraft = async () => {
+    try {
+      setIsPreviousValidation(false);
+
+      // Step 1: Fetch old component progress before saving
+      const oldComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const oldProgress = oldComponentProgressRes.data?.component_progress || 0;
+
+      // Step 2: Save updated component
+      await handleSave();
+
+      // Step 3: Fetch new component progress after save
+      const newComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const newProgress = newComponentProgressRes.data?.component_progress || 0;
+
+      // Step 4: Update SKU progress using delta logic
+      await updateSkuProgress(oldProgress, newProgress);
+
+      // Step 5: Update PKO progress
+      await updatePkoProgress();
+    } catch (error) {
+      console.error(" Error in handleSaveDraft:", error);
+    }
   };
 
-  // const validateAllSections = () => {
-  //   const unansweredQuestions = [];
+  const handleBackSavePkoProgress = async () => {
+    try {
+      // Step 1: Fetch old component progress before saving
+      const oldComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const oldProgress = oldComponentProgressRes.data?.component_progress || 0;
 
-  //   Object.values(pkgData.sections)
-  //     .flat()
-  //     .forEach((question) => {
-  //       const isAnswered =
-  //         pkgData.answers[question.question_id] !== undefined &&
-  //         pkgData.answers[question.question_id] !== "";
+      // Step 2: Save updated component
+      await handleSave(false);
 
-  //       // Add all mandatory unanswered questions
-  //       if (question.mandatory && !isAnswered) {
-  //         unansweredQuestions.push({
-  //           fieldName: question.question_text,
-  //           issue: "Please provide response for all mandatory fields.",
-  //         });
-  //       }
-  //     });
+      // Step 3: Fetch new component progress after save
+      const newComponentProgressRes = await axiosInstance.get(
+        `/sku/${skuId}/components/${skuData.componentId}/?pko_id=${pkoId}`,
+      );
+      const newProgress = newComponentProgressRes.data?.component_progress || 0;
 
-  //   return unansweredQuestions;
-  // };
+      // Step 4: Update SKU progress using delta logic
+      await updateSkuProgress(oldProgress, newProgress);
+
+      // Step 5: Update PKO progress
+      await updatePkoProgress();
+    } catch (error) {
+      console.error(" Error in handleSaveDraft:", error);
+    }
+  };
+
+  const validateAllSections = () => {
+    const allUnansweredQuestions = [];
+
+    // Loop through all sections
+    Object.entries(pkgData.sections).forEach(([sectionName, questions]) => {
+      questions.forEach((question) => {
+        const isAnswered =
+          pkgData.answers[question.question_id] !== undefined &&
+          pkgData.answers[question.question_id] !== "";
+
+        // Check if the question is visible
+        const isVisible = isAnswerMatch(
+          question.dependent_question,
+          pkgData.answers,
+          Object.values(pkgData.sections).flat(),
+        );
+
+        if (isVisible) {
+          if (question.mandatory && !isAnswered) {
+            allUnansweredQuestions.push({
+              section: sectionName,
+              question_id: question.question_id,
+              fieldName: question.question_text,
+              issue: "Please provide response for all the mandatory fields",
+            });
+          }
+
+          // Validation for fields with "validationdependency": "Y"
+          if (
+            question.validationdependency === "Y" &&
+            question.validation_dropdown &&
+            isAnswered
+          ) {
+            let selectedUnit = pkgData.answers[`${question.question_id}_unit`];
+            const enteredValue = parseFloat(
+              pkgData.answers[question.question_id],
+            );
+
+            // Get the selected "Component Type"
+            const componentTypeQuestion = Object.values(pkgData.sections)
+              .flat()
+              .find((q) => q.question_text === "Component Type");
+
+            const componentTypeQuestionId = componentTypeQuestion?.question_id;
+            const selectedComponentType =
+              pkgData.answers[componentTypeQuestionId];
+
+            if (!selectedUnit && question.dropdown_options?.length > 0) {
+              selectedUnit = question.dropdown_options[0];
+            }
+
+            if (selectedComponentType && selectedUnit && !isNaN(enteredValue)) {
+              const validationRules = question.validation_dropdown.filter(
+                (rule) =>
+                  rule.name?.toLowerCase() ===
+                    selectedComponentType?.toLowerCase() &&
+                  rule.unit?.toLowerCase() === selectedUnit?.toLowerCase(),
+              );
+
+              if (validationRules.length > 0) {
+                const rule = validationRules[0];
+                let issue = null;
+
+                if (
+                  rule.min_weight !== undefined &&
+                  rule.max_weight !== undefined &&
+                  (enteredValue < rule.min_weight ||
+                    enteredValue > rule.max_weight)
+                ) {
+                  issue = `Weight should be between ${rule.min_weight} and ${rule.max_weight} ${selectedUnit}`;
+                } else if (
+                  rule.min_length !== undefined &&
+                  rule.max_length !== undefined &&
+                  (enteredValue < rule.min_length ||
+                    enteredValue > rule.max_length)
+                ) {
+                  issue = `Length should be between ${rule.min_length} and ${rule.max_length} ${selectedUnit}`;
+                } else if (
+                  rule.min_width !== undefined &&
+                  rule.max_width !== undefined &&
+                  (enteredValue < rule.min_width ||
+                    enteredValue > rule.max_width)
+                ) {
+                  issue = `Width should be between ${rule.min_width} and ${rule.max_width} ${selectedUnit}`;
+                } else if (
+                  rule.min_depth !== undefined &&
+                  rule.max_depth !== undefined &&
+                  (enteredValue < rule.min_depth ||
+                    enteredValue > rule.max_depth)
+                ) {
+                  issue = `Depth should be between ${rule.min_depth} and ${rule.max_depth} ${selectedUnit}`;
+                }
+
+                if (issue) {
+                  allUnansweredQuestions.push({
+                    section: sectionName,
+                    question_id: question.question_id,
+                    fieldName: question.question_text,
+                    issue: `${question.question_text} ${issue}`,
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+    console.log("all unanswerd question", allUnansweredQuestions);
+    return allUnansweredQuestions;
+  };
 
   const handleBackToCurrentSection = () => {
     setShowValidationModal(false); // Close the modal
-    setIsSaveAsDraft(false); // Reset Save as Draft flag
+    setIsFullValidation(false); // Reset the flag
     setIsPreviousValidation(false); // Reset Previous validation flag
   };
 
   const validateCurrentSection = () => {
     const unansweredQuestions = [];
+    const errorIds = [];
 
     // Get the selected "Component Type"
     const componentTypeQuestion = Object.values(pkgData.sections)
@@ -201,21 +366,20 @@ const PkgDataForm = () => {
         pkgData.answers[question.question_id] !== "";
 
       // Check if the question is visible
-      const isVisible =
-        !question.dependent_question ||
-        isAnswerMatch(
-          question.field_dependency,
-          Array.isArray(question.dependent_question)
-            ? question.dependent_question.map((qId) => pkgData.answers[qId])
-            : [pkgData.answers[question.dependent_question]],
-        );
+      const isVisible = isAnswerMatch(
+        question.dependent_question,
+        pkgData.answers,
+        Object.values(pkgData.sections).flat(),
+      );
 
       if (isVisible) {
         if (question.mandatory && !isAnswered) {
           unansweredQuestions.push({
+            question_id: question.question_id,
             fieldName: question.question_text,
             issue: "Please provide response for all the mandatory fields",
           });
+          errorIds.push(question.question_id); // Add question ID to error list
         }
 
         // **Validation for all fields with "validationdependency": "Y"**
@@ -307,9 +471,11 @@ const PkgDataForm = () => {
 
               if (issue) {
                 unansweredQuestions.push({
+                  question_id: question.question_id,
                   fieldName: question.question_text,
                   issue: `${question.question_text} ${issue}`,
                 });
+                errorIds.push(question.question_id); // Add question ID to error list
               }
             } else {
               console.log(
@@ -321,6 +487,10 @@ const PkgDataForm = () => {
         }
       }
     });
+    // Update persistent errors
+    setPersistentValidationErrors((prev) => [
+      ...new Set([...prev, ...errorIds]),
+    ]);
 
     console.log("Final Validation Issues:", unansweredQuestions);
     return unansweredQuestions;
@@ -328,13 +498,16 @@ const PkgDataForm = () => {
 
   useEffect(() => {
     if (showValidationModal) {
-      setUnansweredQuestions(validateCurrentSection()); // Update modal dynamically
+      // Step 3: Check the flag before validating the current section
+      if (!isFullValidation) {
+        setUnansweredQuestions(validateCurrentSection()); // Update modal dynamically
+      }
     }
-  }, [pkgData.answers, showValidationModal]);
+  }, [pkgData.answers, showValidationModal, isFullValidation]);
 
   // Fallback to skuData.skuId if not explicitly passed
   const skuId = passedSkuId || skuData?.skuId || "N/A";
-  const isFirstLoad = useRef(true);
+  // const isFirstLoad = useRef(true);
 
   const autosavePkgData = async () => {
     await handleSave(false); // Call handleSave with showAlert = false
@@ -349,14 +522,11 @@ const PkgDataForm = () => {
       Object.values(pkgData.sections)
         .flat()
         .forEach((question) => {
-          const isVisible =
-            !question.dependent_question ||
-            isAnswerMatch(
-              question.field_dependency,
-              Array.isArray(question.dependent_question)
-                ? question.dependent_question.map((qId) => pkgData.answers[qId])
-                : [pkgData.answers[question.dependent_question]],
-            );
+          const isVisible = isAnswerMatch(
+            question.dependent_question,
+            pkgData.answers,
+            Object.values(pkgData.sections).flat(),
+          );
 
           if (isVisible && question.mandatory) {
             console.log(
@@ -400,16 +570,18 @@ const PkgDataForm = () => {
   }, [pkgData.answers, pkgData.sections, setPkgData]);
 
   useEffect(() => {
-    if (location.state) {
-      setSkuDetails((prev) => location.state.skuDetails || prev);
-      setPkoData((prev) => location.state.pkoData || prev);
+    if (stateIncomingComponentPage) {
+      setSkuDetails((prev) => stateIncomingComponentPage?.skuDetails || prev);
+      setPkoData((prev) => stateIncomingComponentPage?.pkoData || prev);
 
       setSkuData((prev) => ({
         ...prev,
-        skuId: location.state.skuId || prev.skuId,
-        componentId: location.state.componentId || prev.componentId,
-        componentName: location.state.componentName || prev.componentName,
-        formStatus: location.state.formStatus || prev.formStatus,
+        skuId: stateIncomingComponentPage?.skuId || prev.skuId,
+        componentId:
+          stateIncomingComponentPage?.componentId || prev.componentId,
+        componentName:
+          stateIncomingComponentPage?.componentName || prev.componentName,
+        formStatus: stateIncomingComponentPage?.formStatus || prev.formStatus,
       }));
 
       // Reset answers when componentId changes
@@ -419,116 +591,56 @@ const PkgDataForm = () => {
         activeSection: "Component Information", // Reset to default section
       }));
     }
-  }, [location.state, setSkuDetails, setPkoData, setSkuData, setPkgData]);
+  }, [setSkuDetails, setPkoData, setSkuData, setPkgData]);
 
   useEffect(() => {
-    if (pkgData.sections && location.state?.responses) {
+    if (pkgData.sections && stateIncomingComponentPage?.responses) {
       const answers = {};
-      Object.entries(location.state.responses).forEach(
-        ([questionText, response]) => {
-          const question = Object.values(pkgData.sections)
-            .flat()
-            .find(
-              (q) =>
-                q.question_text === questionText.split("||")[0] &&
-                q.question_id == questionText.split("||")[1],
-            );
+      if (Object.keys(stateIncomingComponentPage?.responses).length > 0) {
+        Object.entries(stateIncomingComponentPage?.responses).forEach(
+          ([questionText, response]) => {
+            const question = Object.values(pkgData.sections)
+              .flat()
+              .find(
+                (q) =>
+                  q.question_text === questionText.split("||")[0] &&
+                  q.question_id == questionText.split("||")[1],
+              );
 
-          if (question) {
-            // Extract numeric value and unit if present
-            if (
-              question.question_type === "Integer + Dropdown" ||
-              question.question_type === "Float + Dropdown"
-            ) {
-              const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
-              const match = response.match(regex);
+            if (question) {
+              // Extract numeric value and unit if present
+              if (
+                question.question_type === "Integer + Dropdown" ||
+                question.question_type === "Float + Dropdown"
+              ) {
+                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/; // Match number and unit
+                const match = response.match(regex);
 
-              if (match) {
-                const value = parseFloat(match[1]); // Extract numeric part (integer or float)
-                const unit = match[3]; // Extract unit part
+                if (match) {
+                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
+                  const unit = match[3]; // Extract unit part
 
-                answers[question.question_id] = value;
-                answers[`${question.question_id}_unit`] = unit;
+                  answers[question.question_id] = value;
+                  answers[`${question.question_id}_unit`] = unit;
+                } else {
+                  answers[question.question_id] = response;
+                }
               } else {
                 answers[question.question_id] = response;
               }
-            } else {
-              answers[question.question_id] = response;
             }
-          }
-        },
-      );
-
-      console.log("Populated answers for component:", answers);
+          },
+        );
+      } else {
+        answers[24] = stateIncomingComponentPage?.component_type;
+      }
 
       setPkgData((prev) => ({
         ...prev,
         answers,
       }));
     }
-  }, [pkgData.sections, location.state?.responses, setPkgData]);
-
-  useEffect(() => {
-    // Ensure both pkgData.sections and location.state.responses are available
-    if (
-      isFirstLoad.current &&
-      location.state?.responses &&
-      Object.keys(pkgData.sections).length > 0
-    ) {
-      setPkgData((prev) => {
-        const updatedAnswers = { ...prev.answers }; // Preserve existing answers
-
-        Object.entries(location.state.responses).forEach(
-          ([questionText, response]) => {
-            const question = Object.values(pkgData.sections)
-              .flat()
-              .find((q) => q.question_text === questionText);
-
-            if (question) {
-              if (
-                question.question_type == "Integer + Dropdown" ||
-                question.question_type == "Float + Dropdown"
-              ) {
-                const regex = /^(\d+(\.\d+)?)([a-zA-Z]+)$/;
-                const match = response.match(regex);
-
-                if (match) {
-                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
-                  const unit = match[3]; // Extract unit part
-                  updatedAnswers[question.question_id] = value;
-                  updatedAnswers[`${question.question_id}_unit`] = unit;
-                }
-              } else {
-                updatedAnswers[question.question_id] = response;
-              }
-            } else {
-              console.warn(`Question not found for text: ${questionText}`);
-            }
-          },
-        );
-
-        console.log("Mapped Answers from Responses:", updatedAnswers);
-        // Mark as loaded to prevent future runs
-        isFirstLoad.current = false;
-        return {
-          ...prev,
-          answers: updatedAnswers, // Update answers without clearing existing ones
-        };
-      });
-    }
-  }, [pkgData.sections, location.state?.responses, setPkgData]);
-
-  // console.log("Persisted SKU Data:", skuData);
-  // console.log("Persisted SKU Details:", skuDetails);
-  // console.log("Persisted PKO Data:", pkoData);
-
-  useEffect(() => {
-    console.log("Received State in PkgDataForm:", {
-      componentName,
-      pkoId,
-      description,
-    });
-  }, [componentName, pkoId, description]);
+  }, [pkgData.sections, setPkgData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -539,6 +651,8 @@ const PkgDataForm = () => {
         processQuestions(data); // Process the fetched data
       } catch (error) {
         console.error("Error fetching questionnaire data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -600,90 +714,194 @@ const PkgDataForm = () => {
     fetchData();
   }, []);
 
+  console.log(" SKU ID used in updateSkuProgress:", skuId);
+
+  const updateSkuProgress = async (oldProgress, newProgress) => {
+    try {
+      if (!skuId || skuId === "N/A") {
+        console.warn(" Invalid SKU ID. Skipping updateSkuProgress.");
+        return;
+      }
+
+      const res = await axiosInstance.get(`/skus/${skuId}/?pko_id=${pkoId}`);
+      const data = res.data;
+      const totalComponents = (data.components || []).length;
+      const oldSkuProgress = data.sku_progress || 0;
+
+      if (totalComponents === 0) {
+        console.warn("⚠️ No components found. Cannot update SKU progress.");
+        return;
+      }
+
+      const delta = ((newProgress - oldProgress) * 0.9) / totalComponents;
+      let updatedSkuProgress = Math.round(oldSkuProgress + delta);
+      updatedSkuProgress = Math.max(0, Math.min(100, updatedSkuProgress)); // Clamp to 0–100
+
+      await axiosInstance.put(`/skus/${skuId}/`, {
+        sku_id: skuId,
+        pko_id: pkoId,
+        sku_progress: updatedSkuProgress,
+      });
+
+      //  Fix: Update status separately
+      // await updateSkuStatus(
+      //   skuId,
+      //   updatedSkuProgress === 100 ? "Completed" : "Draft"
+      // );
+
+      console.log(
+        " SKU progress updated incrementally to:",
+        updatedSkuProgress,
+      );
+    } catch (error) {
+      console.error("Error updating SKU progress:", error);
+    }
+  };
+
+  const updatePkoProgress = async () => {
+    if (!pkoId) {
+      console.warn("Cannot update PKO progress: Missing pkoId.");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get("pkos/");
+      const allPkoData = response.data;
+      const currentPko = allPkoData[pkoId];
+
+      if (!currentPko) {
+        console.warn("No matching PKO found for ID:", pkoId);
+        return;
+      }
+
+      const skus = currentPko.skus || [];
+      const progressValues = skus
+        .map((sku) => sku.sku_progress)
+        .filter((p) => typeof p === "number");
+
+      const total = progressValues.reduce((sum, val) => sum + val, 0);
+      const overallProgress =
+        progressValues.length > 0
+          ? Math.round(total / progressValues.length)
+          : 0;
+
+      const res = await axiosInstance.put(`/update-pko-progress/`, {
+        pko_id: pkoId,
+        pko_progress: overallProgress,
+      });
+
+      console.log("PKO progress updated:", res.data.message || overallProgress);
+    } catch (error) {
+      console.error("Error updating PKO progress:", error);
+    }
+  };
+
+  // const handleBackClick = async () => {
+  //   await handleSave(false); // Call save function with false flag to skip alert
+  //   navigate("/skus"); // Navigate back after saving
+  // };
+
   const handleBackClick = async () => {
-    await handleSave(false); // Call save function with false flag to skip alert
+    await handleBackSavePkoProgress(); // Call save function with false flag to skip alert
     navigate("/skus"); // Navigate back after saving
+  };
+
+  const handleBackToSkuClick = async () => {
+    setIsFullValidation(true);
+    const allValidationResults = validateAllSections();
+    setUnansweredQuestions(allValidationResults);
+
+    if (allValidationResults.length > 0) {
+      // Update persistent errors before showing the modal
+      setPersistentValidationErrors(
+        allValidationResults.map((q) => q.question_id),
+      );
+      setShowValidationModal(true);
+    } else {
+      // Call handleSave before navigating back
+      await handleSave(false); // Call save function with false flag to skip alert
+      handleBackClick(); // Navigate back after saving
+    }
   };
 
   const handleInputChange = (questionId, value) => {
     setPkgData((prev) => {
       const updatedAnswers = { ...prev.answers };
 
-      // Handle the case where the value is 0
+      // Set the new value (allow 0)
       updatedAnswers[questionId] = value === "" ? "" : value;
 
       // Find the current question
-      const question = Object.values(pkgData.sections)
+      const currentQuestion = Object.values(pkgData.sections)
         .flat()
         .find((q) => q.question_id === questionId);
 
-      // Check if the field is a "Float + Dropdown" or "Integer + Dropdown"
+      // Default unit setup
       if (
-        (question?.question_type === "Float + Dropdown" ||
-          question?.question_type === "Integer + Dropdown") &&
+        (currentQuestion?.question_type === "Float + Dropdown" ||
+          currentQuestion?.question_type === "Integer + Dropdown") &&
         !updatedAnswers[`${questionId}_unit`]
       ) {
-        // Ensure a default unit is selected if not already set
-        updatedAnswers[`${questionId}_unit`] = question.dropdown_options[0];
+        updatedAnswers[`${questionId}_unit`] =
+          currentQuestion.dropdown_options[0];
       }
 
-      // Update the current question's answer
-      updatedAnswers[questionId] = value;
+      //  Update dependent questions: clear answers only if they become invisible
+      const allQuestions = Object.values(pkgData.sections).flat();
 
-      // Find and clear answers for all dependent questions
-      const dependentQuestionIds = Object.values(pkgData.sections)
-        .flat()
-        .filter((q) =>
-          Array.isArray(q.dependent_question)
-            ? q.dependent_question.includes(questionId)
-            : q.dependent_question === questionId,
-        )
-        .map((q) => q.question_id);
+      allQuestions.forEach((question) => {
+        if (question.dependent_question) {
+          const isNowVisible = isAnswerMatch(
+            question.dependent_question,
+            pkgData.answers,
+            Object.values(pkgData.sections).flat(),
+          );
 
-      dependentQuestionIds.forEach((depQuestionId) => {
-        delete updatedAnswers[depQuestionId]; // Clear dependent answers
+          // If it depends on this input and becomes hidden => clear its answer
+          const dependsOnThisInput = (() => {
+            const dep = question.dependent_question;
+            if (!dep || typeof dep !== "object") return false;
+
+            const mainMatch = dep.main_dependency?.question_id === questionId;
+            const andMatch = dep.and_condition?.question_id === questionId;
+            return mainMatch || andMatch;
+          })();
+
+          if (dependsOnThisInput && !isNowVisible) {
+            delete updatedAnswers[question.question_id];
+            delete updatedAnswers[`${question.question_id}_unit`];
+          }
+        }
       });
 
-      // Update the current question's answer
-      updatedAnswers[questionId] = value;
-
-      // Dynamically calculate visible mandatory counts
+      //  Recalculate progress
       let totalMandatory = 0;
       let answeredMandatory = 0;
 
-      Object.values(pkgData.sections)
-        .flat()
-        .forEach((question) => {
-          // Check if the question is visible
-          const isVisible =
-            !question.dependent_question ||
-            isAnswerMatch(
-              question.field_dependency,
-              Array.isArray(question.dependent_question)
-                ? question.dependent_question.map((qId) => updatedAnswers[qId])
-                : [updatedAnswers[question.dependent_question]],
-            );
+      allQuestions.forEach((question) => {
+        const isVisible = isAnswerMatch(
+          question.dependent_question,
+          pkgData.answers,
+          Object.values(pkgData.sections).flat(),
+        );
 
-          if (isVisible && question.mandatory) {
-            totalMandatory++;
-            if (
-              updatedAnswers[question.question_id] !== undefined &&
-              updatedAnswers[question.question_id] !== ""
-            ) {
-              answeredMandatory++;
-            }
+        if (isVisible && question.mandatory) {
+          totalMandatory++;
+          const ans = updatedAnswers[question.question_id];
+          if (ans !== undefined && ans !== "") {
+            answeredMandatory++;
           }
-        });
+        }
+      });
 
-      // Calculate progress percentage
       const progressPercentage =
         totalMandatory > 0 ? (answeredMandatory / totalMandatory) * 100 : 0;
-      console.log(
-        "answered question",
-        answeredMandatory,
-        totalMandatory,
-        updatedAnswers,
+
+      // Clear persistent errors for this question if answered
+      setPersistentValidationErrors((prevErrors) =>
+        prevErrors.filter((id) => id !== questionId),
       );
+
       return {
         ...prev,
         answers: updatedAnswers,
@@ -701,26 +919,92 @@ const PkgDataForm = () => {
     setIsFormFilled(hasAnswers);
   }, [pkgData.answers]);
 
-  const isAnswerMatch = (fieldDependency, parentAnswers) => {
-    if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
+  // const isAnswerMatch = (dependentQuestionObj, answers) => {
+  //   // No dependency → always visible
+  //   if (!dependentQuestionObj || typeof dependentQuestionObj !== "object") {
+  //     return true;
+  //   }
 
-    // Normalize fieldDependency into an array of conditions
-    const conditions = fieldDependency
-      .split(" OR ") // Split conditions by "OR"
-      .map((condition) => condition.trim().toLowerCase());
+  //   const { main_dependency, and_condition } = dependentQuestionObj;
 
-    // Check for exact matches only
-    return conditions.some((condition) =>
-      parentAnswers.some(
-        (parentAnswer) =>
-          (parentAnswer || "").trim().toLowerCase() === condition,
-      ),
-    );
+  //   // Validate presence of main_dependency
+  //   if (
+  //     !main_dependency?.question_id ||
+  //     !Array.isArray(main_dependency.expected_values)
+  //   ) {
+  //     return false; // if dependency structure is incorrect
+  //   }
+
+  //   const mainAnswer = answers[`${main_dependency.question_id}`];
+  //   const mainConditionMet =
+  //     main_dependency.expected_values.includes(mainAnswer);
+
+  //   let andConditionMet = true;
+
+  //   if (
+  //     and_condition?.question_id &&
+  //     and_condition?.expected_value !== undefined
+  //   ) {
+  //     const andAnswer = answers[`${and_condition.question_id}`];
+  //     andConditionMet = andAnswer === and_condition.expected_value;
+  //   }
+
+  //   // Return only if BOTH match
+  //   return mainConditionMet && andConditionMet;
+  // };
+
+  //dependentQuestionObj is object that defines the dependency logic (main_dependency and optionally and_condition
+  const isAnswerMatch = (dependentQuestionObj, answers, questionsList = []) => {
+    // Handle legacy string-based dependency logic
+    if (typeof dependentQuestionObj === "string") {
+      const conditions = dependentQuestionObj
+        .split(" OR")
+        .map((c) => c.trim().toLowerCase());
+
+      const parentAnswers = Object.values(answers).map((a) =>
+        String(a || "")
+          .toLowerCase()
+          .trim(),
+      );
+
+      return conditions.some((condition) => parentAnswers.includes(condition));
+    }
+
+    // If dependency object is not valid
+    if (!dependentQuestionObj || typeof dependentQuestionObj !== "object") {
+      return true;
+    }
+
+    const resolveQuestionId = (id) => {
+      // Check if this is actually a sequence_id → resolve to question_id
+      const found = questionsList.find((q) => q.sequence_id === id);
+      return found?.question_id || id; // fallback to id if not found
+    };
+
+    const { main_dependency, and_condition } = dependentQuestionObj;
+
+    const mainQId = resolveQuestionId(main_dependency?.question_id);
+    const mainAnswer = answers[`${mainQId}`];
+    const mainConditionMet = Array.isArray(main_dependency?.expected_values)
+      ? main_dependency.expected_values.includes(mainAnswer)
+      : false;
+
+    let andConditionMet = true;
+    if (and_condition?.question_id !== undefined) {
+      const andQId = resolveQuestionId(and_condition.question_id);
+      const andAnswer = answers[`${andQId}`];
+      andConditionMet = andAnswer === and_condition.expected_value;
+    }
+
+    return mainConditionMet && andConditionMet;
   };
 
   const renderField = (question) => {
     const handleChange = (e) =>
       handleInputChange(question.question_id, e.target.value);
+    const hasError = persistentValidationErrors.includes(question.question_id);
+    // Apply conditional styles based on validation errors
+    const inputClass = hasError ? "input-error" : "";
 
     const isOutsideDimension = /outside/i.test(question.question_text);
     const isInsideDimension = /inside/i.test(question.question_text);
@@ -763,11 +1047,12 @@ const PkgDataForm = () => {
           <div className="input-group align-items-center">
             <input
               maxLength="100"
-              className="h-42  w-100"
+              className={`h-42 w-100 ${inputClass}`}
               type="text"
               value={pkgData.answers[question.question_id] || ""}
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
+              tabIndex={0} // Make the input focusable
             />
           </div>
         );
@@ -779,7 +1064,7 @@ const PkgDataForm = () => {
               <label key={option} className="me-3">
                 <input
                   type="radio"
-                  className="me-2"
+                  className={`me-2 ${inputClass}`}
                   name={question.question_id}
                   value={option}
                   checked={pkgData.answers[question.question_id] === option}
@@ -795,9 +1080,10 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center select-arrow-pos">
             <select
-              className="w-100"
+              className={`w-100 ${inputClass}`}
               value={pkgData.answers[question.question_id] || ""}
               onChange={handleChange}
+              tabIndex={0} // Make focusable
             >
               <option value="">Select an option</option>
               {question.dropdown_options
@@ -816,7 +1102,7 @@ const PkgDataForm = () => {
           <div className="input-group align-items-center">
             {/* Input for the float value */}
             <input
-              className="h-42 w-75"
+              className={`h-42 w-75 ${inputClass}`}
               type="text" // Use text to allow decimal inputs
               value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
@@ -835,7 +1121,9 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
@@ -844,6 +1132,14 @@ const PkgDataForm = () => {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
 
             {/* Dropdown for the unit selection */}
@@ -864,6 +1160,7 @@ const PkgDataForm = () => {
                   synchronizeUnits(newUnit, "inside");
                 }
               }}
+              tabIndex={0} // Make focusable
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -886,7 +1183,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 w-75"
+              className={`h-42 w-75 ${inputClass}`}
               type="number"
               onWheel={(e) => e.target.blur()}
               step="1"
@@ -899,11 +1196,21 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
             <select
               className="bg-color-light-shade form-list w-25"
@@ -919,6 +1226,7 @@ const PkgDataForm = () => {
                   synchronizeUnits(newUnit, "inside");
                 }
               }}
+              tabIndex={0} // Make focusable
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -933,7 +1241,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42  w-100"
+              className={`h-42 w-100 ${inputClass}`}
               type="number"
               step="1"
               value={pkgData.answers[question.question_id] ?? ""}
@@ -946,11 +1254,21 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
           </div>
         );
@@ -959,7 +1277,7 @@ const PkgDataForm = () => {
         return (
           <div className="input-group align-items-center">
             <input
-              className="h-42 w-100"
+              className={`h-42 w-100 ${inputClass}`}
               type="text" // Use text to allow decimal inputs
               value={pkgData.answers[question.question_id] ?? ""}
               placeholder={question.placeholder || "Enter value"}
@@ -978,7 +1296,9 @@ const PkgDataForm = () => {
                   e.key !== "Backspace" &&
                   e.key !== "Delete" &&
                   e.key !== "ArrowLeft" &&
-                  e.key !== "ArrowRight"
+                  e.key !== "ArrowRight" &&
+                  e.key !== "Tab" &&
+                  !(e.ctrlKey || e.metaKey)
                 ) {
                   e.preventDefault();
                 }
@@ -987,6 +1307,14 @@ const PkgDataForm = () => {
                   e.preventDefault();
                 }
               }}
+              onPaste={(e) => {
+                // Prevent pasting non-numeric values
+                const pasteData = e.clipboardData.getData("text");
+                if (!/^\d*\.?\d*$/.test(pasteData)) {
+                  e.preventDefault();
+                }
+              }}
+              tabIndex={0} // Make focusable
             />
           </div>
         );
@@ -996,59 +1324,20 @@ const PkgDataForm = () => {
     }
   };
 
-  // const renderQuestions = (questions) => {
-  //   return questions.map((question) => {
-  //     // Collect answers for all parent questions
-  //     const parentAnswers = Array.isArray(question.dependent_question)
-  //       ? question.dependent_question.map(
-  //           (parentId) => pkgData.answers[parentId] || "",
-  //         )
-  //       : [pkgData.answers[question.dependent_question] || ""];
-
-  //     // Check if the question is visible based on dependencies
-  //     const isDependentVisible = isAnswerMatch(
-  //       question.field_dependency,
-  //       parentAnswers,
-  //     );
-
-  //     if (question.dependent_question && !isDependentVisible) {
-  //       return null; // Skip rendering if conditions aren't met
-  //     }
-
-  //     return (
-  //       <div className="form-group mt-4" key={question.question_id}>
-  //         <label>
-  //           {question.mandatory
-  //             ? `${question.question_text} *`
-  //             : question.question_text}
-  //         </label>
-  //         {renderField(question)}
-  //         {/* Recursively render follow-up questions */}
-  //         {question.follow_up_questions &&
-  //           question.follow_up_questions.length > 0 &&
-  //           renderQuestions(question.follow_up_questions)}
-  //       </div>
-  //     );
-  //   });
-  // };
   const renderQuestions = (questions) => {
     return questions.map((question) => {
       // Collect all parent answers
-      const parentAnswers = Array.isArray(question.dependent_question)
-        ? question.dependent_question.map(
-            (parentId) => pkgData.answers[parentId] || "",
-          )
-        : [pkgData.answers[question.dependent_question] || ""];
-
-      // Check if the question is visible based on dependency
       const isDependentVisible = isAnswerMatch(
-        question.field_dependency,
-        parentAnswers,
+        question.dependent_question,
+        pkgData.answers,
+        Object.values(pkgData.sections).flat(),
       );
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
       }
-
+      const hasError = persistentValidationErrors.includes(
+        question.question_id,
+      );
       // Info Icon with Instructions
       const infoIcon = checkImagePath(question.instructions) ? (
         <InfoOutlinedIcon
@@ -1071,7 +1360,7 @@ const PkgDataForm = () => {
         <div className="col-12 col-md-6 col-xl-8 col-xxxl-6">
           <div className="form-group mt-4" key={question.question_id}>
             <div className="d-flex justify-content-between align-items-center mb-2 h-26">
-              <label className="mb-0">
+              <label className={`mb-0 ${hasError ? "label-error" : ""}`}>
                 {question.mandatory ? (
                   <>
                     {question.question_text}{" "}
@@ -1179,6 +1468,24 @@ const PkgDataForm = () => {
       );
 
       if (response.status === 200) {
+        // Clear persistent errors on successful save
+        //  setPersistentValidationErrors([]);
+        if (pkgData.answers[24] != stateIncomingComponentPage?.component_type) {
+          try {
+            // Update the component type in the backend
+            await axiosInstance.put(
+              `/sku/${skuId}/components/${response.data.id}/`,
+              {
+                component_type: pkgData.answers[24],
+                pko_id: pkoId,
+              },
+            );
+          } catch (error) {
+            console.error("Error updating component type:", error);
+            alert("Failed to update component type. Please try again.");
+          }
+        }
+
         console.log("Save Response:", response.data);
         if (showAlert) alert("Component data saved successfully!");
 
@@ -1211,6 +1518,18 @@ const PkgDataForm = () => {
   return (
     <div>
       <Header></Header>
+      {loading && (
+        <div className="loader">
+          <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
+            <img
+              src="/assets/images/loading_gif.gif"
+              alt="Loading..."
+              width="120px"
+              height="120px"
+            />
+          </div>
+        </div>
+      )}
       <Breadcrumb
         onBackClick={handleBackClick}
         onSaveClick={handleSaveDraft}
@@ -1246,14 +1565,6 @@ const PkgDataForm = () => {
               ))}
 
               <div className="progress-loader-container pkgdataform-loader mt-4 d-flex align-items-center">
-                {/* <ProgressLoader
-                  percentage={Math.round(progressPercentage)}
-                  size={24}
-                />
-                <span className="progress-percentage-text ms-2">
-                  {Math.round(progressPercentage)}% completed
-                </span> */}
-
                 <ProgressLoader
                   percentage={Math.round(pkgData.pkgFormProgress)}
                   size={24}
@@ -1273,10 +1584,13 @@ const PkgDataForm = () => {
           unansweredQuestions={unansweredQuestions} // Pass the unanswered questions
           onBack={handleBackToCurrentSection}
           onProceed={handleProceedToNextSection}
-          // onSaveDraft={onSaveDraft} // Save as Draft functionality
-          // showSaveAsDraftButton={isSaveAsDraft} // Pass flag for Save as Draft
           onPrevious={proceedToPreviousSection}
           isPreviousValidation={isPreviousValidation}
+          isAllSectionsValidation={
+            Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
+            Object.keys(pkgData.sections).length - 1
+          } // Set to true for all sections validation
+          onBackToSku={handleBackClick}
         />
       )}
       {/* Footer with Previous and Next buttons */}
@@ -1293,30 +1607,17 @@ const PkgDataForm = () => {
           <FaArrowLeft /> Previous
         </button>
 
-        {/* Next Button */}
-        <button
-          // onClick={() => {
-          //   const sectionKeys = Object.keys(pkgData.sections);
-          //   const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
-          //   if (currentIndex < sectionKeys.length - 1) {
-          //     const nextSection = sectionKeys[currentIndex + 1];
-          //     setPkgData((prev) => ({ ...prev, activeSection: nextSection }));
-          //     sectionRefs.current[nextSection]?.current?.scrollIntoView({
-          //       behavior: "smooth",
-          //       block: "start",
-          //     });
-          //   }
-          // }}
-          onClick={handleNextClick}
-          className={`btn btn-primary ${
-            Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
-            Object.keys(pkgData.sections).length - 1
-              ? "invisible"
-              : ""
-          }`}
-        >
-          Next <FaArrowRight />
-        </button>
+        {/* Conditional rendering: Show Next button or Back to SKU page button */}
+        {Object.keys(pkgData.sections).indexOf(pkgData.activeSection) ===
+        Object.keys(pkgData.sections).length - 1 ? (
+          <button onClick={handleBackToSkuClick} className="btn btn-primary">
+            Back to SKU Page
+          </button>
+        ) : (
+          <button onClick={handleNextClick} className="btn btn-primary">
+            Next <FaArrowRight />
+          </button>
+        )}
       </div>
     </div>
   );

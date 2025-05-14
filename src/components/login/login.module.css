@@ -31,12 +31,18 @@
 
 /* Add this to your CSS or CSS module */
 .loaderOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.loader {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
-  backdrop-filter: blur(5px); /* Apply blur to the background */
-  z-index: 9999; /* Make sure it's on top of everything */
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
 }

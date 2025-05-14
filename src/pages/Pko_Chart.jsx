@@ -2,17 +2,23 @@ import React from "react";
 import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 
-const Pko_Chart = ({ labels, data }) => {
+const Pko_Chart = ({ labels, data, chartName }) => {
   const totalSKUs = data.reduce((a, b) => a + b, 0); // Calculate total SKUs
-  const completedSKUs = data[2] || 0; // Assuming "Completed" is the third item
+  const inReviewSKUs = data[2] || 0; // Assuming "Completed" is the third item
 
   const chartData = {
     labels,
     datasets: [
       {
         data,
-        backgroundColor: ["#EDEDED", "#257CFF", "#30AB30"], // Colors: Not Started, Draft, Completed
-        hoverBackgroundColor: ["#8C8C8C", "#257CFF", "#1E7B1E"], // Slightly darker on hover
+        backgroundColor:
+          chartName === "PKOs"
+            ? ["#EDEDED", "#257CFF", "#28a745"]
+            : ["#EDEDED", "#257CFF", "#FEB343", "#28a745"], // Not Started, Draft, Inreview, Approved
+        hoverBackgroundColor:
+          chartName === "PKOs"
+            ? ["#8C8C8C", "#1A5FD3", "#1e7e34"]
+            : ["#8C8C8C", "#1A5FD3", "#e09a21", "#1e7e34"],
         borderWidth: 1, // Add slight border for better segmentation
         cutout: "68%", // Adjust thickness for a cleaner look
       },
@@ -45,8 +51,8 @@ const Pko_Chart = ({ labels, data }) => {
     <div
       style={{
         position: "relative",
-        width: "180px",
-        height: "180px",
+        width: chartName === "SKU" ? "130px" : "180px",
+        height: chartName === "SKU" ? "130px" : "180px",
         margin: "0 auto",
       }}
     >
@@ -64,8 +70,10 @@ const Pko_Chart = ({ labels, data }) => {
           color: "#6C757D",
         }}
       >
-        <p style={{ margin: "0" }}>{completedSKUs} SKUs</p>
-        <p style={{ margin: "0" }}>completed</p>
+        <p style={{ margin: "0" }}>
+          {chartName === "PKOs" ? data[2] || 0 : chartName === "SKU" ? data[3] || 0 : inReviewSKUs} {chartName}
+        </p>
+        <p style={{ margin: "0" }}> {chartName === "PKOs" || chartName === "SKU" ? "Approved" : "In Review"}</p>
       </div>
     </div>
   );

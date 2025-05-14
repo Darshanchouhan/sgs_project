@@ -7,7 +7,7 @@ export default defineConfig({
     react({
       babel: {
         parserOpts: {
-          plugins: ['decorators-legacy'],
+          plugins: ["decorators-legacy"],
         },
       },
     }),
@@ -16,6 +16,6 @@ export default defineConfig({
     port: 3002, // Set the port to 3002
   },
   build: {
-    outDir: 'build', // Set your custom build folder name
+    outDir: "build", // Set your custom build folder name
   },
 });

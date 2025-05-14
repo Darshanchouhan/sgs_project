@@ -79,7 +79,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Interceptor to handle token expiry (refresh token logic)
@@ -95,7 +95,7 @@ axiosInstance.interceptors.response.use(
       window.location.href = "/login"; // Redirect to login page or show a modal
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;
