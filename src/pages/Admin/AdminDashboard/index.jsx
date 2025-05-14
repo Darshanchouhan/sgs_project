@@ -58,7 +58,7 @@ const AdminDashboard = () => {
               <DashboardPKOSummary
                 pkoIncomingData={dasboardAPIData?.pko_summary}
                 pkopProgressSummaryIncomingData={
-                  dasboardAPIData?.pko_progress_summary
+                  dasboardAPIData?.all_pko_progress
                 }
               />
 

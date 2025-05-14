@@ -510,13 +510,22 @@ const Sku_Page = () => {
         status: "Inreview",
       });
 
+      const cvsSupplier = localStorage.getItem("cvs_supplier");
+      await axiosInstance.post("/notifications/", {
+        status_change: "DraftToInReview",
+        skuid: skuId,
+        pkoid: pkoId,
+        cvs_supplier: cvsSupplier,
+      });
+      console.log("Notification created for Draft to InReview");
+
       // Update Local State**
-      updateSkuStatus(skuId, "Completed"); // Update VendorContext state
+      updateSkuStatus(skuId, "Inreview"); // Update VendorContext state
 
       setPkoData((prevPkoData) => ({
         ...prevPkoData,
         skus: prevPkoData.skus.map((sku) =>
-          sku.sku_id === skuId ? { ...sku, status: "Completed" } : sku,
+          sku.sku_id === skuId ? { ...sku, status: "Inreview" } : sku,
         ),
       }));
 
@@ -817,13 +826,16 @@ const Sku_Page = () => {
         sku_progress: combinedProgress,
         // status: isDraft ? "Draft" : "Completed", // Include status in payload
       };
-      payload["status"] = isBackClick
-        ? combinedProgress != 100
-          ? "Draft"
-          : "Inreview"
-        : isDraft
-          ? "Draft"
-          : "Inreview";
+      if (isBackClick) {
+        if (skuDetails?.status === "Inreview") {
+          payload["status"] = combinedProgress === 100 ? "Inreview" : "Draft";
+        } else {
+          payload["status"] = "Draft";
+        }
+      } else {
+        payload["status"] = isDraft ? "Draft" : "Inreview";
+      }
+
       questions.forEach((question) => {
         const answer = skuData.dimensionsAndWeights[question.question_id];
         let unit =

@@ -27,7 +27,7 @@ const SendReminderModal = ({
       "The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!",
     );
     onClose();
-  }
+  };
 
   if (!isOpen) return null;
 

@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
 
-const SKUDetailsSKUComponents = ({skuComponentDataIncoming}) => {
-  const {pkoId, skuId} = useParams(); // Assuming you are using react-router-dom for routing
+const SKUDetailsSKUComponents = ({ skuComponentDataIncoming }) => {
+  const { pkoId, skuId } = useParams(); // Assuming you are using react-router-dom for routing
   const navigate = useNavigate();
 
   const handleForwardClick = (idIncoming) => {
     // Navigate to the component details page with the component ID
     navigate(`/admincomponent/${pkoId}/${skuId}/${idIncoming}`);
-  }
-  
+  };
+
   return (
     <div className="col-12 col-md-7">
       <div
@@ -35,27 +35,29 @@ const SKUDetailsSKUComponents = ({skuComponentDataIncoming}) => {
               </tr>
             </thead>
             <tbody>
-            {skuComponentDataIncoming?.map((componentData)=>{
-              return(
-              <tr>
-                <td className="text-start align-middle">{componentData?.component_type}</td>
-                <td className="align-middle">{componentData?.name}</td>
-                <td className="text-center align-middle">
-                  <img
-                    src="/assets/images/forward-arrow-img.png"
-                    onClick={()=>handleForwardClick(componentData?.id)}
-                    alt="Forward"
-                    className="ms-2"
-                    style={{
-                      cursor: "pointer",
-                      width: "40px",
-                      height: "40px",
-                    }}
-                  />
-                </td>
-              </tr>
-              )
-            })}
+              {skuComponentDataIncoming?.map((componentData) => {
+                return (
+                  <tr>
+                    <td className="text-start align-middle">
+                      {componentData?.component_type}
+                    </td>
+                    <td className="align-middle">{componentData?.name}</td>
+                    <td className="text-center align-middle">
+                      <img
+                        src="/assets/images/forward-arrow-img.png"
+                        onClick={() => handleForwardClick(componentData?.id)}
+                        alt="Forward"
+                        className="ms-2"
+                        style={{
+                          cursor: "pointer",
+                          width: "40px",
+                          height: "40px",
+                        }}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

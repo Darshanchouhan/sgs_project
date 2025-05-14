@@ -71,9 +71,19 @@ const Pko_Chart = ({ labels, data, chartName }) => {
         }}
       >
         <p style={{ margin: "0" }}>
-          {chartName === "PKOs" ? data[2] || 0 : chartName === "SKU" ? data[3] || 0 : inReviewSKUs} {chartName}
+          {chartName === "PKOs"
+            ? data[2] || 0
+            : chartName === "SKU"
+              ? data[3] || 0
+              : inReviewSKUs}{" "}
+          {chartName}
         </p>
-        <p style={{ margin: "0" }}> {chartName === "PKOs" || chartName === "SKU" ? "Approved" : "In Review"}</p>
+        <p style={{ margin: "0" }}>
+          {" "}
+          {chartName === "PKOs" || chartName === "SKU"
+            ? "Approved"
+            : "In Review"}
+        </p>
       </div>
     </div>
   );

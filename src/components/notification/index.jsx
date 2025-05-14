@@ -115,27 +115,34 @@ const NotificationToast = ({
                     typeOfNotification === "admin"
                       ? reminder.adminseenstatus === "Unseen" &&
                         onMarkAsSeen(reminder.id)
-                      : reminder.status === "Unseen" &&
-                        onMarkAsSeen(reminder.id)
+                      : reminder.type === "reminder"
+                        ? reminder.status === "Unseen" &&
+                          onMarkAsSeen(reminder.id)
+                        : reminder.vendorseenstatus === "Unseen" &&
+                          onMarkAsSeen(reminder.id)
                   }
                 >
                   {(typeOfNotification === "admin"
                     ? reminder.adminseenstatus === "Unseen"
-                    : reminder.status === "Unseen") && (
+                    : reminder.type === "reminder"
+                      ? reminder.status === "Unseen"
+                      : reminder.vendorseenstatus === "Unseen") && (
                     <span className="new-notification-indicator w-8 h-8 rounded-circle bg-color-responce-pending"></span>
                   )}
                   <h4 className="fs-14 fw-600 text-color-labels mb-2">
-                    {!(typeOfNotification === "admin") && (
+                    {!(
+                      typeOfNotification === "admin" ||
+                      reminder.type === "notification"
+                    ) && (
                       <span className="text-color-typo-primary">
-                        {reminder.created_by.first_name}{" "}
-                        {reminder.created_by.last_name}
+                        {localStorage.getItem("user_name")}
                       </span>
                     )}{" "}
                     <>
                       {typeOfNotification === "admin" ? (
                         reminder.status_change === "InreviewToApproved" ? (
                           <>
-                            You have Approved the form for {" "}
+                            You have Approved the form for{" "}
                             <span className="text-color-typo-primary">
                               {reminder.skuid}
                             </span>{" "}
@@ -151,7 +158,7 @@ const NotificationToast = ({
                             <span className="text-color-typo-primary">
                               {reminder.cvs_supplier}
                             </span>{" "}
-                            for {" "}
+                            for{" "}
                             <span className="text-color-typo-primary">
                               {reminder.skuid}
                             </span>
@@ -159,7 +166,7 @@ const NotificationToast = ({
                           </>
                         ) : (
                           <>
-                            New submission for {" "}
+                            New submission for{" "}
                             <span className="text-color-typo-primary">
                               {reminder.skuid}
                             </span>{" "}
@@ -170,6 +177,30 @@ const NotificationToast = ({
                             has been submitted and it's in Review.
                           </>
                         )
+                      ) : reminder.type === "notification" ? (
+                        <>
+                          Your form for{" "}
+                          <span className="text-color-typo-primary">
+                            {reminder.skuid}
+                          </span>{" "}
+                          is now In Review.
+                        </>
+                      ) : reminder.status_change === "InreviewToApproved" ? (
+                        <>
+                          Your form for{" "}
+                          <span className="text-color-typo-primary">
+                            {reminder.skuid}
+                          </span>{" "}
+                          has been Approved by the Admin.
+                        </>
+                      ) : reminder.status_change === "InreviewToDraft" ? (
+                        <>
+                          Your form for{" "}
+                          <span className="text-color-typo-primary">
+                            {reminder.skuid}
+                          </span>{" "}
+                          needs changes and is back in Draft.
+                        </>
                       ) : (
                         reminder.message
                       )}
@@ -190,22 +221,31 @@ const NotificationToast = ({
                       )}
                       <span
                         className="px-2 py-1 rounded-pill me-2"
-                        title={typeOfNotification === "admin" ? reminder.pkoid : reminder.pko_id}
+                        title={
+                          typeOfNotification === "admin" ||
+                          reminder.type === "notification"
+                            ? reminder.pkoid
+                            : reminder.pko_id
+                        }
                         style={{
                           color: "#155DC9",
                           backgroundColor: "#E0ECFF",
-                          width: `${(typeOfNotification === "admin") ? "145px" :""}`,
-                          whiteSpace: `${(typeOfNotification === "admin") ? "nowrap" :""}`,
-                          overflow: `${(typeOfNotification === "admin") ? "hidden" :""}`,
-                          textOverflow: `${(typeOfNotification === "admin") ? "ellipsis" :""}`
+                          width: `${typeOfNotification === "admin" || reminder.type === "notification" ? "145px" : ""}`,
+                          whiteSpace: `${typeOfNotification === "admin" || reminder.type === "notification" ? "nowrap" : ""}`,
+                          overflow: `${typeOfNotification === "admin" || reminder.type === "notification" ? "hidden" : ""}`,
+                          textOverflow: `${typeOfNotification === "admin" || reminder.type === "notification" ? "ellipsis" : ""}`,
                         }}
                       >
                         PKO ID |{" "}
-                        {typeOfNotification === "admin"
+                        {typeOfNotification === "admin" ||
+                        reminder.type === "notification"
                           ? reminder.pkoid
                           : reminder.pko_id}
                       </span>
-                      {!(typeOfNotification === "admin") && (
+                      {!(
+                        typeOfNotification === "admin" ||
+                        reminder.type === "notification"
+                      ) && (
                         <>
                           <img
                             src="/assets/images/error-alert-circle.svg"

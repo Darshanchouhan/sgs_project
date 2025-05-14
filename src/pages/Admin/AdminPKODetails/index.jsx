@@ -9,28 +9,28 @@ import axiosInstance from "../../../services/axiosInstance";
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
 
 const AdminPKODetails = () => {
-
   const [pkoDataIncoming, setPkoDataIncoming] = React.useState({});
   const [loading, setLoading] = React.useState(true);
 
-  const {pkoId} = useParams(); // Assuming you are using react-router-dom for routing
+  const { pkoId } = useParams(); // Assuming you are using react-router-dom for routing
 
   const getPKODetails = async () => {
     try {
-      const response = await axiosInstance.get(`pko-dashboard-skulist/${pkoId}/`);
+      const response = await axiosInstance.get(
+        `pko-dashboard-skulist/${pkoId}/`,
+      );
       const PkoData = response.data;
       setPkoDataIncoming(PkoData);
       setLoading(false);
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error fetching PKO details:", error);
       setLoading(false);
     }
   };
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     getPKODetails();
-  },[pkoId])
+  }, [pkoId]);
 
   return (
     <div>
@@ -51,11 +51,13 @@ const AdminPKODetails = () => {
       <div className="d-flex">
         <DashboardSidebar />
         <div className="mainContent-holder w-100 h-100 bg-color-light-gray-shade">
-          <PKODetailsSubHeaderStrip pkoStatus={pkoDataIncoming?.status}/>
+          <PKODetailsSubHeaderStrip pkoStatus={pkoDataIncoming?.status} />
           {/* Main Section */}
           <div className="container-fluid px-20 px-md-4 pt-30 admin-container-height d-flex flex-column">
-            <PKODetailsPKOSummary pkoDataIncoming={pkoDataIncoming}/>
-            <PKODetailsSKUStatusAndTable skuDataIncoming={pkoDataIncoming?.skus}/>
+            <PKODetailsPKOSummary pkoDataIncoming={pkoDataIncoming} />
+            <PKODetailsSKUStatusAndTable
+              skuDataIncoming={pkoDataIncoming?.skus}
+            />
           </div>
         </div>
       </div>

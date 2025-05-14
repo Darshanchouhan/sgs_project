@@ -1,17 +1,20 @@
 import { useRef } from "react";
 
-const AdminRequestChangesModal = ({isRequestOpen, onRequestClose, RequestChanges}) => {
+const AdminRequestChangesModal = ({
+  isRequestOpen,
+  onRequestClose,
+  RequestChanges,
+}) => {
+  const backdropRef = useRef(null);
 
-    const backdropRef = useRef(null);
-  
-    const handleBackdropClick = (e) => {
-      // Only close if user clicked on the backdrop, not inside modal content
-      if (e.target === backdropRef.current) {
-        onRequestClose();
-      }
-    };
-  
-    if (!isRequestOpen) return null;
+  const handleBackdropClick = (e) => {
+    // Only close if user clicked on the backdrop, not inside modal content
+    if (e.target === backdropRef.current) {
+      onRequestClose();
+    }
+  };
+
+  if (!isRequestOpen) return null;
 
   return (
     <div

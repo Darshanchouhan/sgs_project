@@ -48,11 +48,7 @@ const Dimen_ImageOverlay = ({ onClose }) => {
 
       {/* Image Content */}
       <div className="offcanvas-body p-32 d-flex justify-content-center align-items-center h-100">
-        <img
-          src={imagePackaging}
-          alt="SKU Dimension Guide"
-          className="w-100"
-        />
+        <img src={imagePackaging} alt="SKU Dimension Guide" className="w-100" />
       </div>
     </div>
   );

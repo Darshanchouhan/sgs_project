@@ -1,4 +1,4 @@
-const SKUDetailsInfoBox = ({skuDataIncoming}) => {
+const SKUDetailsInfoBox = ({ skuDataIncoming }) => {
   return (
     <div className="px-28 py-20 border border-color-disabled-lite bg-white rounded-3 mb-3">
       <div className="row">
@@ -20,15 +20,23 @@ const SKUDetailsInfoBox = ({skuDataIncoming}) => {
             </div>
             <div className="d-flex flex-column">
               <p className="sku-details-label">Business Unit</p>
-              <h6 className="sku-details-value ">{skuDataIncoming?.businessunit ? skuDataIncoming?.businessunit : "N/A"}</h6>
+              <h6 className="sku-details-value ">
+                {skuDataIncoming?.businessunit
+                  ? skuDataIncoming?.businessunit
+                  : "N/A"}
+              </h6>
             </div>
             <div className="d-flex flex-column">
               <p className="sku-details-label">Category</p>
-              <h6 className="sku-details-value ">{skuDataIncoming?.category}</h6>
+              <h6 className="sku-details-value ">
+                {skuDataIncoming?.category}
+              </h6>
             </div>
             <div className="d-flex flex-column">
               <p className="sku-details-label">Subcategory</p>
-              <h6 className="sku-details-value ">{skuDataIncoming?.subcategory}</h6>
+              <h6 className="sku-details-value ">
+                {skuDataIncoming?.subcategory}
+              </h6>
             </div>
             <div className="d-flex flex-column">
               <p className="sku-details-label">Brand</p>
@@ -36,7 +44,9 @@ const SKUDetailsInfoBox = ({skuDataIncoming}) => {
             </div>
             <div className="d-flex flex-column">
               <p className="sku-details-label">Segment</p>
-              <h6 className="sku-details-value ">{skuDataIncoming?.segment ? skuDataIncoming?.segment : "N/A"}</h6>
+              <h6 className="sku-details-value ">
+                {skuDataIncoming?.segment ? skuDataIncoming?.segment : "N/A"}
+              </h6>
             </div>
             <div className="d-flex flex-column">
               <p className="sku-details-label">Size</p>

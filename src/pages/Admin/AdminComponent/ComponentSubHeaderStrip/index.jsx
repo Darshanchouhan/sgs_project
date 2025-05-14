@@ -1,9 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 
 const ComponentSubHeaderStrip = () => {
-
   const navigate = useNavigate();
-  const {pkoId, skuId} = useParams(); // Assuming you are using react-router-dom for routing
+  const { pkoId, skuId } = useParams(); // Assuming you are using react-router-dom for routing
 
   return (
     <div className="py-3 bg-white">
@@ -30,16 +29,16 @@ const ComponentSubHeaderStrip = () => {
                 </li>
                 <li className="breadcrumb-item">
                   <a
-                    onClick={() => navigate(`/adminskudetails/${pkoId}/${skuId}`)}
+                    onClick={() =>
+                      navigate(`/adminskudetails/${pkoId}/${skuId}`)
+                    }
                     className="text-decoration-none text-secondary fw-600 fs-14 cursor-pointer"
                   >
                     CVS Ibuprofen 200mg
                   </a>
                 </li>
                 <li className="breadcrumb-item">
-                  <a
-                    className="text-decoration-none text-color-list-item fw-600 fs-14"
-                  >
+                  <a className="text-decoration-none text-color-list-item fw-600 fs-14">
                     Box
                   </a>
                 </li>

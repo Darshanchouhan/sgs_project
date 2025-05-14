@@ -141,9 +141,8 @@ const VendorDashboard = () => {
     try {
       const currentStatus = sku.status || "Not Started";
 
-      if (currentStatus === "Completed") {
-        console.log("SKU is already completed. No status change needed.");
-        // Navigate directly to the SKU page without changing status
+      // Case 1: If already Draft, Inreview or Approved → only navigate
+      if (currentStatus !== "Not Started") {
         localStorage.setItem(
           "sku_page_state",
           JSON.stringify({
@@ -157,7 +156,15 @@ const VendorDashboard = () => {
         return;
       }
 
-      console.log("Sending PUT request with status: Draft");
+      // Case 2: If Not Started → send notification + change status to Draft
+      const cvsSupplier = localStorage.getItem("cvs_supplier");
+      await axiosInstance.post("/notifications/", {
+        status_change: "NotStartedToDraft",
+        skuid: sku.sku_id,
+        pkoid: selectedPkoId,
+        cvs_supplier: cvsSupplier,
+      });
+      console.log("Notification created");
 
       const response = await axiosInstance.put(
         `/skus/${sku.sku_id}/update_status/`,
@@ -174,38 +181,23 @@ const VendorDashboard = () => {
           );
           return { ...prevPkoData, skus: updatedSkus };
         });
-
-        localStorage.setItem(
-          "sku_page_state",
-          JSON.stringify({
-            skuId: sku.sku_id,
-            skuDetails: sku,
-            pkoData: pkoData || null,
-            duedate: pkoData?.duedate || null,
-          }),
-        );
-
-        navigate(
-          "/skus",
-          //   , {
-          //   state: {
-          //     skuId: sku.sku_id,
-          //     skuDetails: sku,
-          //     pkoData: pkoData || null,
-          //     duedate: pkoData?.duedate || null,
-          //   },
-          // }
-        );
-      } else {
-        console.warn(
-          "Failed to update SKU status. Status code:",
-          response.status,
-        );
-        alert("Failed to update SKU status. Please try again.");
+        console.log("SKU status updated to Draft");
       }
+
+      // After update → navigate
+      localStorage.setItem(
+        "sku_page_state",
+        JSON.stringify({
+          skuId: sku.sku_id,
+          skuDetails: sku,
+          pkoData: pkoData || null,
+          duedate: pkoData?.duedate || null,
+        }),
+      );
+      navigate("/skus");
     } catch (error) {
       console.error("Error during forward action for SKU:", error);
-      alert(`Failed to update SKU status: ${error.message}`);
+      alert(`Failed to process forward action: ${error.message}`);
     }
   };
 

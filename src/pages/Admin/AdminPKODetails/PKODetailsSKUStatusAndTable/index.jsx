@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PKODetailsSKUTableRow from "./PKODetailsSKUTableRow";
 
-const PKODetailsSKUStatusAndTable = ({skuDataIncoming}) => {
+const PKODetailsSKUStatusAndTable = ({ skuDataIncoming }) => {
   const [selectedSkuStatus, setSelectedSkuStatus] = useState("All SKUs");
 
   return (
@@ -28,7 +28,16 @@ const PKODetailsSKUStatusAndTable = ({skuDataIncoming}) => {
               <option value="In Review">In Review</option>
             </select>
           </div>
-          <h3 className="fs-18 fw-600 text-nowrap mb-0">{skuDataIncoming && (selectedSkuStatus === "All SKUs" ? skuDataIncoming : skuDataIncoming?.filter((item)=>item?.status === selectedSkuStatus))?.length} Total SKUs</h3>
+          <h3 className="fs-18 fw-600 text-nowrap mb-0">
+            {skuDataIncoming &&
+              (selectedSkuStatus === "All SKUs"
+                ? skuDataIncoming
+                : skuDataIncoming?.filter(
+                    (item) => item?.status === selectedSkuStatus,
+                  )
+              )?.length}{" "}
+            Total SKUs
+          </h3>
         </div>
       </div>
 
@@ -45,10 +54,20 @@ const PKODetailsSKUStatusAndTable = ({skuDataIncoming}) => {
             </tr>
           </thead>
           <tbody>
-          {skuDataIncoming && (selectedSkuStatus === "All SKUs" ? skuDataIncoming : skuDataIncoming?.filter((item)=>item?.status === selectedSkuStatus))?.map((skuRowData, index) => {
-            return(
-             <PKODetailsSKUTableRow key={index+1} skuRowData={skuRowData}/>
-            )})}
+            {skuDataIncoming &&
+              (selectedSkuStatus === "All SKUs"
+                ? skuDataIncoming
+                : skuDataIncoming?.filter(
+                    (item) => item?.status === selectedSkuStatus,
+                  )
+              )?.map((skuRowData, index) => {
+                return (
+                  <PKODetailsSKUTableRow
+                    key={index + 1}
+                    skuRowData={skuRowData}
+                  />
+                );
+              })}
           </tbody>
         </table>
       </div>
