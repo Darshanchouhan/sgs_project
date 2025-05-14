@@ -2,7 +2,12 @@ import React from "react";
 import { Doughnut } from "react-chartjs-2";
 import "chart.js/auto";
 
-const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
+const ProgressLoader = ({
+  percentage,
+  size = 130,
+  isVendorPage = false,
+  isVendorInsideTextRequired = false,
+}) => {
   const chartData = {
     datasets: [
       {
@@ -55,7 +60,13 @@ const ProgressLoader = ({ percentage, size = 130, isVendorPage = false }) => {
           }}
         >
           <span className="fs-24 fw-700 text-secondary">{percentage}%</span>{" "}
-          <br /> completed
+          {isVendorInsideTextRequired ? (
+            <></>
+          ) : (
+            <>
+              <br /> completed
+            </>
+          )}
         </div>
       )}
     </div>

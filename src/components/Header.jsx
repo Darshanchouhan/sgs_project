@@ -28,32 +28,58 @@ const Header = () => {
   const handleShowToast = async () => {
     try {
       const supplierId = localStorage.getItem("cvs_supplier") || "56789";
-      const res = await axiosInstance.get(
-        `/reminders/?cvs_supplier=${supplierId}`,
+
+      // Call both APIs in parallel
+      const [reminderRes, notificationRes] = await Promise.all([
+        axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`),
+        axiosInstance.get(`/notifications/?cvs_supplier=${supplierId}`),
+      ]);
+
+      // Tag each item with type for later display
+      const reminders = (reminderRes.data || []).map((item) => ({
+        ...item,
+        type: "reminder",
+      }));
+      const notifications = (notificationRes.data || []).map((item) => ({
+        ...item,
+        type: "notification",
+      }));
+      // Combine + sort by created_date desc
+      const combined = [...reminders, ...notifications].sort(
+        (a, b) => new Date(b.created_date) - new Date(a.created_date),
       );
-      const reminders = res.data || [];
-      setNotifications(reminders);
 
+      // Update state
+      setNotifications(combined);
+      console.log("mycombineddata", combined);
+      // Mark unseen reminders as seen
       const unseenReminders = reminders.filter((r) => r.status === "Unseen");
-
       if (unseenReminders.length > 0) {
         await Promise.all(
           unseenReminders.map((r) =>
             axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
           ),
         );
-
-        const refreshed = await axiosInstance.get(
+        // Refresh reminders only after marking as seen
+        const refreshedReminders = await axiosInstance.get(
           `/reminders/?cvs_supplier=${supplierId}`,
         );
-        setNotifications(refreshed.data || []);
+        const updatedReminders = (refreshedReminders.data || []).map(
+          (item) => ({ ...item, type: "reminder" }),
+        );
+
+        // Combine again with notifications and sort
+        const finalCombined = [...updatedReminders, ...notifications].sort(
+          (a, b) => new Date(b.created_date) - new Date(a.created_date),
+        );
+        setNotifications(finalCombined);
       }
 
-      setShowToast(true); // Move here: after data is ready
+      setShowToast(true);
     } catch (err) {
-      console.error("Error handling reminders:", err);
+      console.error("Error handling reminders and notifications:", err);
       setNotifications([]);
-      setShowToast(true); // Still show it even if there's an error
+      setShowToast(true);
     }
   };
 

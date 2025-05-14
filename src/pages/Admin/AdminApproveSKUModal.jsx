@@ -1,21 +1,24 @@
 import { useRef } from "react";
 
-const AdminApproveSKUModal = ({isApproveOpen, onApproveClose,ApproveSKU}) => {
+const AdminApproveSKUModal = ({
+  isApproveOpen,
+  onApproveClose,
+  ApproveSKU,
+}) => {
+  const backdropRef = useRef(null);
 
-    const backdropRef = useRef(null);
-  
-    const handleBackdropClick = (e) => {
-      // Only close if user clicked on the backdrop, not inside modal content
-      if (e.target === backdropRef.current) {
-        onApproveClose();
-      }
-    };
-  
-    if (!isApproveOpen) return null;
+  const handleBackdropClick = (e) => {
+    // Only close if user clicked on the backdrop, not inside modal content
+    if (e.target === backdropRef.current) {
+      onApproveClose();
+    }
+  };
+
+  if (!isApproveOpen) return null;
 
   return (
     <div
-     className="modal fade show d-block approve-sku-modal-popup"
+      className="modal fade show d-block approve-sku-modal-popup"
       tabIndex="-1"
       aria-labelledby="approveSKUModalLabel"
       aria-modal="true"

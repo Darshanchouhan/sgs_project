@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import axiosInstance from "../../../../services/axiosInstance";
 import Tooltip from "../../../Tooltip";
-import Dimen_ImageOverlay from "../../../Dimen_ImageOverlay"
+import Dimen_ImageOverlay from "../../../Dimen_ImageOverlay";
 
-
-const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData}) => {
-  
+const SKUDetailsPrimaryPackagingDetails = ({
+  skuDetailsPrimaryPackageDetailData,
+}) => {
   const [questions, setQuestions] = useState([]); // Store questions from API
-  const [skuData,setSkuData] = useState({});
+  const [skuData, setSkuData] = useState({});
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
-  const [questionAvailable,setQuestionAvailable] = useState([]);
+  const [questionAvailable, setQuestionAvailable] = useState([]);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
 
   const handleInstructionClick = () => {
@@ -35,20 +35,20 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
     fetchQuestions();
   }, []);
 
-  useEffect(()=>{
-    if (skuDetailsPrimaryPackageDetailData && questions?.length>0) {
-
+  useEffect(() => {
+    if (skuDetailsPrimaryPackageDetailData && questions?.length > 0) {
       // Create Question List filled in Vendor
-      setQuestionAvailable(Object?.keys(skuDetailsPrimaryPackageDetailData)?.map((item)=>{
-        return item?.split("||")[0];
-      }));
-  
+      setQuestionAvailable(
+        Object?.keys(skuDetailsPrimaryPackageDetailData)?.map((item) => {
+          return item?.split("||")[0];
+        }),
+      );
+
       // Creating answer with ID
       const answers = {};
 
       Object?.entries(skuDetailsPrimaryPackageDetailData)?.forEach(
         ([questionText, response]) => {
-
           // Find the matching question using text and ID
           const question = questions?.find(
             (q) =>
@@ -82,11 +82,10 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
         dimensionsAndWeights: answers,
       }));
     }
+  }, [skuDetailsPrimaryPackageDetailData, questions]);
 
-  },[skuDetailsPrimaryPackageDetailData, questions])
-
-   // Match dependent question visibility based on parent's answer and field dependency
-   const isAnswerMatch = (fieldDependency, parentAnswer) => {
+  // Match dependent question visibility based on parent's answer and field dependency
+  const isAnswerMatch = (fieldDependency, parentAnswer) => {
     if (!fieldDependency) return true; // No dependency, always visible
 
     const normalizedParentAnswer = parentAnswer?.trim()?.toLowerCase() || "";
@@ -98,7 +97,6 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
   };
 
   const renderField = (question) => {
-
     // Check if the question is related to height, width, or depth
     const showOverlayForDimension = /height|width|depth/i.test(
       question?.question_text,
@@ -112,7 +110,9 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
               type="text" // Allow any text input
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question?.placeholder || "Enter Value"}
-              value={skuData?.dimensionsAndWeights?.[question?.question_id] || ""}
+              value={
+                skuData?.dimensionsAndWeights?.[question?.question_id] || ""
+              }
               tabIndex={0} // Make the input focusable
               disabled
             />
@@ -133,7 +133,9 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
               type="text" // Keep text to control input handling
               className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question?.placeholder || "Enter Value"}
-              value={skuData?.dimensionsAndWeights?.[question?.question_id] || ""}
+              value={
+                skuData?.dimensionsAndWeights?.[question?.question_id] || ""
+              }
               tabIndex={0} // Make the input focusable
               disabled
             />
@@ -149,7 +151,6 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
         );
 
       case "Float + Dropdown": {
-
         return (
           <div className="d-flex align-items-center gap-2">
             <div className="d-flex align-items-center border border-color-typo-secondary rounded-2 ">
@@ -160,7 +161,9 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
                 className="form-control border-0 rounded-2 px-2"
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
-                value={skuData?.dimensionsAndWeights?.[question.question_id] ?? ""}
+                value={
+                  skuData?.dimensionsAndWeights?.[question.question_id] ?? ""
+                }
                 tabIndex={0} // Make the input focusable
                 disabled
               />
@@ -173,7 +176,7 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
                     `${question?.question_id}_unit`
                   ] || question?.dropdown_options?.[0] // Ensure default unit selection
                 }
-                tabIndex={0} // Make the dropdown focusable 
+                tabIndex={0} // Make the dropdown focusable
                 disabled
               >
                 {question?.dropdown_options?.map((option, index) => (
@@ -213,7 +216,9 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
           <div className="d-flex align-items-center gap-2">
             <select
               className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14"
-              value={skuData?.dimensionsAndWeights?.[question?.question_id] || ""}
+              value={
+                skuData?.dimensionsAndWeights?.[question?.question_id] || ""
+              }
               disabled
               tabIndex={0} // Make the dropdown focusable
             >
@@ -259,8 +264,8 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
     }
   };
 
-   // Render Questions with Dependent Logic
-   const renderQuestions = (questions) => {
+  // Render Questions with Dependent Logic
+  const renderQuestions = (questions) => {
     return questions?.map((question) => {
       const parentAnswer =
         skuData?.dimensionsAndWeights?.[question?.dependent_question];
@@ -273,39 +278,38 @@ const SKUDetailsPrimaryPackagingDetails = ({skuDetailsPrimaryPackageDetailData})
         return null;
       }
 
-      if(questionAvailable.includes(question?.question_text)){
-      return (
-        <div
-          key={question?.question_id}
-          className={`col-12 ${
-            question?.question_type === "Float + Dropdown" ||
-            question?.question_type === "Dropdown" ||
-            question?.question_type === "No Input Required"
-              ? "col-md-6"
-              : "col-12"
-          } mb-3`}
-        >
-          {question?.question_type !== "No Input Required" && (
-            <label className="fs-14 text-color-typo-primary mb-2 d-block">
-              {question?.question_text}
-              {question?.mandatory && <span> *</span>}
-            </label>
-          )}
-          {renderField(question)}
-        </div>
-      );
-    }
-    else{
-      return;
-    }
+      if (questionAvailable.includes(question?.question_text)) {
+        return (
+          <div
+            key={question?.question_id}
+            className={`col-12 ${
+              question?.question_type === "Float + Dropdown" ||
+              question?.question_type === "Dropdown" ||
+              question?.question_type === "No Input Required"
+                ? "col-md-6"
+                : "col-12"
+            } mb-3`}
+          >
+            {question?.question_type !== "No Input Required" && (
+              <label className="fs-14 text-color-typo-primary mb-2 d-block">
+                {question?.question_text}
+                {question?.mandatory && <span> *</span>}
+              </label>
+            )}
+            {renderField(question)}
+          </div>
+        );
+      } else {
+        return;
+      }
     });
   };
 
-  useEffect(()=>{
-   if(questions?.length > 0){
-    renderQuestions(questions)
-   }
-  },[questions])
+  useEffect(() => {
+    if (questions?.length > 0) {
+      renderQuestions(questions);
+    }
+  }, [questions]);
 
   return (
     <div className="col-12 col-md-5">

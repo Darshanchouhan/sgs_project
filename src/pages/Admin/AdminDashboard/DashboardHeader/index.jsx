@@ -13,20 +13,19 @@ const HeaderAdmin = () => {
   const [notifications, setNotifications] = useState([]);
 
   const notificationAPICall = async () => {
-    try{
-       const response = await axiosInstance.get("notifications/");
-        if (response?.status === 200) {
-          setNotifications(response?.data);
-        }
-    }
-    catch (err) {
+    try {
+      const response = await axiosInstance.get("notifications/");
+      if (response?.status === 200) {
+        setNotifications(response?.data);
+      }
+    } catch (err) {
       console.log(err, "notification get error");
     }
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     notificationAPICall();
-  },[window.location.pathname]);
+  }, [window.location.pathname]);
 
   const handleShowToast = () => {
     notificationAPICall();
@@ -61,7 +60,7 @@ const HeaderAdmin = () => {
         role: "admin",
       });
       // Refresh notifications after marking as seen
-      if(response?.status === 200) {
+      if (response?.status === 200) {
         notificationAPICall();
       }
     } catch (err) {
@@ -137,12 +136,12 @@ const HeaderAdmin = () => {
                   </button>
 
                   {showToast && (
-                      <NotificationToast
-                        handleCloseToast={handleHideToast}
-                        reminders={notifications}
-                        onMarkAsSeen={handleMarkAsSeen}
-                        typeOfNotification={"admin"}
-                      />
+                    <NotificationToast
+                      handleCloseToast={handleHideToast}
+                      reminders={notifications}
+                      onMarkAsSeen={handleMarkAsSeen}
+                      typeOfNotification={"admin"}
+                    />
                   )}
                 </div>
               </li>
