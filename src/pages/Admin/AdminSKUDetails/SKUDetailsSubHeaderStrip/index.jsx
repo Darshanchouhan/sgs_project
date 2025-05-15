@@ -59,7 +59,7 @@ const SKUDetailsSubHeaderStrip = ({
   const RequestChanges = async () => {
     try {
       await axiosInstance.post(`notifications/`, {
-        status_change: "DraftToInreview",
+        status_change: "InreviewToDraft",
         pkoid: pkoId,
         skuid: skuId,
         cvs_supplier: cvsSupplierId,
