@@ -164,6 +164,18 @@ const NotificationToast = ({
                             </span>
                             .
                           </>
+                        ) : reminder.status_change === "NotStartedToDraft" ? (
+                          <>
+                            New submission for{" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.skuid}
+                            </span>{" "}
+                            :{" "}
+                            <span className="text-color-typo-primary">
+                              {reminder.cvs_supplier}
+                            </span>{" "}
+                            has been updated from Not Started to Draft.
+                          </>
                         ) : (
                           <>
                             New submission for{" "}
