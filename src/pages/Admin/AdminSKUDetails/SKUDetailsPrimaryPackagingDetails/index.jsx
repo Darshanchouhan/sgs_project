@@ -108,7 +108,7 @@ const SKUDetailsPrimaryPackagingDetails = ({
           <div className="d-flex align-items-center gap-2">
             <input
               type="text" // Allow any text input
-              className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
+              className="adminDisabled-inputs form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question?.placeholder || "Enter Value"}
               value={
                 skuData?.dimensionsAndWeights?.[question?.question_id] || ""
@@ -131,7 +131,7 @@ const SKUDetailsPrimaryPackagingDetails = ({
           <div className="d-flex align-items-center gap-2">
             <input
               type="text" // Keep text to control input handling
-              className="form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
+              className="adminDisabled-inputs form-control fs-14 px-12 border border-color-typo-secondary rounded-2 h-44"
               placeholder={question?.placeholder || "Enter Value"}
               value={
                 skuData?.dimensionsAndWeights?.[question?.question_id] || ""
@@ -158,7 +158,7 @@ const SKUDetailsPrimaryPackagingDetails = ({
               <input
                 type="number"
                 step="any"
-                className="form-control border-0 rounded-2 px-2"
+                className="adminDisabled-inputs form-control border-0 rounded-2 px-2"
                 placeholder={question.placeholder || "Enter Value"}
                 style={{ flex: 2 }}
                 value={
@@ -215,7 +215,7 @@ const SKUDetailsPrimaryPackagingDetails = ({
         return (
           <div className="d-flex align-items-center gap-2">
             <select
-              className="form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14"
+              className="adminDisabled-inputs form-select border border-color-typo-secondary rounded-2 h-44 px-12 fs-14"
               value={
                 skuData?.dimensionsAndWeights?.[question?.question_id] || ""
               }

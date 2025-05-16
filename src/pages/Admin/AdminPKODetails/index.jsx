@@ -15,6 +15,7 @@ const AdminPKODetails = () => {
   const { pkoId } = useParams(); // Assuming you are using react-router-dom for routing
 
   const getPKODetails = async () => {
+    setLoading(true);
     try {
       const response = await axiosInstance.get(
         `pko-dashboard-skulist/${pkoId}/`,

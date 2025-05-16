@@ -11,6 +11,7 @@ const SKUDetailsSubHeaderStrip = ({
   submitted_date,
   cvsSupplierId,
   setApiCallAgain,
+  setLoading,
 }) => {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
@@ -34,6 +35,7 @@ const SKUDetailsSubHeaderStrip = ({
   };
 
   const ApproveSKU = async () => {
+    setLoading(true);
     try {
       await axiosInstance.post(`notifications/`, {
         status_change: "InreviewToApproved",
@@ -48,15 +50,19 @@ const SKUDetailsSubHeaderStrip = ({
         });
         setIsApproveModalOpen(false);
         setApiCallAgain((prev) => prev + 1);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.error("Error modifying in DB approve status SKU:", error);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error changing approve status SKU:", error);
     }
   };
 
   const RequestChanges = async () => {
+    setLoading(true);
     try {
       await axiosInstance.post(`notifications/`, {
         status_change: "InreviewToDraft",
@@ -71,11 +77,14 @@ const SKUDetailsSubHeaderStrip = ({
         });
         setIsRequestModalOpen(false);
         setApiCallAgain((prev) => prev + 1);
+        setLoading(false);
       } catch (error) {
         console.error("Error modifying in DB approve status SKU:", error);
+        setLoading(false);
       }
     } catch (error) {
-      console.error("Error changing approve status SKU:", error);
+      console.error("Error changing approve status SKU:", error);   
+      setLoading(false);
     }
   };
 

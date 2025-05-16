@@ -17,6 +17,7 @@ const AdminSKUDetails = () => {
   const { pkoId, skuId } = useParams(); // Assuming you are using react-router-dom for routing
 
   const getSKUDetails = async () => {
+    setLoading(true);
     try {
       const response = await axiosInstance.get(
         `skus/${skuId}/?pko_id=${pkoId}`,
@@ -59,6 +60,7 @@ const AdminSKUDetails = () => {
             submitted_date={skuDataIncoming?.updated_date}
             cvsSupplierId={skuDataIncoming?.cvs_supplier}
             setApiCallAgain={setApiCallAgain}
+            setLoading={setLoading}
           />
           {/* Main Section */}
           <div className="container-fluid px-20 px-md-4 pt-30 admin-container-height d-flex flex-column">
@@ -73,6 +75,9 @@ const AdminSKUDetails = () => {
               {/* Sku Components Section */}
               <SKUDetailsSKUComponents
                 skuComponentDataIncoming={skuDataIncoming?.components}
+                statusIncoming={skuDataIncoming?.status}
+                cvsSupplierId={skuDataIncoming?.cvs_supplier}
+                descriptionIncoming={skuDataIncoming?.description}
               />
             </div>
           </div>

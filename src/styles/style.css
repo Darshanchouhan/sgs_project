@@ -3627,8 +3627,7 @@ progress {
   opacity: 1;
 }
 .form-control:disabled {
-  /* background-color: var(--bs-secondary-bg); */
-  background-color: white !important;
+  background-color: var(--bs-secondary-bg);
   opacity: 1;
 }
 .form-control::file-selector-button {
@@ -3881,6 +3880,10 @@ textarea.form-control-lg {
 .form-check-input:disabled ~ .form-check-label {
   cursor: default;
   opacity: 0.5;
+}
+
+.adminDisabled-inputs {
+  background-color: white !important;
 }
 
 .form-switch {

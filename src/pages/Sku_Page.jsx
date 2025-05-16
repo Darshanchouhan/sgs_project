@@ -119,8 +119,14 @@ const Sku_Page = () => {
       console.log("Fetched Components:", components);
 
       for (let component of components) {
-        console.log("Fetching details for component:", component.id);
+        console.log("Fetching details for :", component.id);
         const componentResponse = component["responses"];
+        console.log(
+          "Fetching details for component:",
+          component.id,
+          componentResponse,
+          component,
+        );
 
         // Apply validation rules from PkgDataForm
         const componentIssues = validateComponentResponses(
@@ -145,61 +151,110 @@ const Sku_Page = () => {
     return issues;
   };
 
-  const isAnswerMatchForComponent = (fieldDependency, parentAnswers) => {
-    if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
+  // const isAnswerMatchForComponent = (fieldDependency, parentAnswers) => {
+  //   if (!fieldDependency || parentAnswers.length === 0) return true; // No dependency, always visible
 
-    // Normalize fieldDependency into an array of conditions
-    const conditions = fieldDependency
-      .split(" OR ") // Split conditions by "OR"
-      .map((condition) => condition.trim().toLowerCase());
+  //   // Normalize fieldDependency into an array of conditions
+  //   const conditions = fieldDependency
+  //     .split(" OR ") // Split conditions by "OR"
+  //     .map((condition) => condition.trim().toLowerCase());
 
-    // Check for exact matches only
-    return conditions.some((condition) =>
-      parentAnswers.some(
-        (parentAnswer) =>
-          (parentAnswer || "").trim().toLowerCase() === condition,
-      ),
-    );
+  //   // Check for exact matches only
+  //   return conditions.some((condition) =>
+  //     parentAnswers.some(
+  //       (parentAnswer) =>
+  //         (parentAnswer || "").trim().toLowerCase() === condition,
+  //     ),
+  //   );
+  // };
+
+  const isAnswerMatchForComponent = (
+    dependentQuestionObj,
+    answers,
+    questionsList = [],
+  ) => {
+    // Handle legacy string-based dependency logic
+    if (typeof dependentQuestionObj === "string") {
+      const conditions = dependentQuestionObj
+        .split(" OR")
+        .map((c) => c.trim().toLowerCase());
+
+      const parentAnswers = Object.values(answers).map((a) =>
+        String(a || "")
+          .toLowerCase()
+          .trim(),
+      );
+
+      return conditions.some((condition) => parentAnswers.includes(condition));
+    }
+
+    // If dependency object is not valid
+    if (!dependentQuestionObj || typeof dependentQuestionObj !== "object") {
+      return true;
+    }
+
+    const resolveQuestionId = (id) => {
+      // Check if this is actually a sequence_id → resolve to question_id
+      const found = questionsList.find((q) => q.sequence_id === id);
+      return found?.question_id || id; // fallback to id if not found
+    };
+
+    const { main_dependency, and_condition } = dependentQuestionObj;
+
+    const mainQId = resolveQuestionId(main_dependency?.question_id);
+    const mainAnswer = answers[`${mainQId}`];
+    const mainConditionMet = Array.isArray(main_dependency?.expected_values)
+      ? main_dependency.expected_values.includes(mainAnswer)
+      : false;
+
+    let andConditionMet = true;
+    if (and_condition?.question_id !== undefined) {
+      const andQId = resolveQuestionId(and_condition.question_id);
+      const andAnswer = answers[`${andQId}`];
+      andConditionMet = andAnswer === and_condition.expected_value;
+    }
+
+    return mainConditionMet && andConditionMet;
   };
 
   const validateComponentResponses = (component, responses) => {
     let issues = [];
-    const componentTypeQuestion = Object.values(questionsComponent)
-      .flat()
-      .find((q) => q.question_text === "Component Type");
 
-    // const componentTypeQuestionId = componentTypeQuestion?.question_id;
-    const selectedComponentType =
-      responses[
-        `${componentTypeQuestion.question_text}||${componentTypeQuestion.question_id}`
-      ];
+    // Prepare response map
+    const responseMap = {};
+    Object.entries(responses).forEach(([key, value]) => {
+      const parts = key.split("||");
+      const qid = parts[1];
+      if (qid) responseMap[qid] = value;
+    });
 
-    questionsComponent.forEach((question) => {
-      const response =
-        responses[`${question.question_text}||${question.question_id}`];
-      // const matchingKey = Object.keys(responses).find((key) => key.endsWith(`||${question.question_id}`));
+    const selectedComponentType = component.component_type;
 
-      // Check if the question is visible
+    // Filter questions for this component type
+    const relevantQuestions = questionsComponent.filter(
+      (q) =>
+        !q.component_type ||
+        q.component_type.toLowerCase() === selectedComponentType?.toLowerCase(),
+    );
+
+    //  MAIN VALIDATION LOOP
+    relevantQuestions.forEach((question) => {
       const isVisible =
         !question.dependent_question ||
         isAnswerMatchForComponent(
-          question.field_dependency,
-          Array.isArray(question.dependent_question)
-            ? question.dependent_question.map((qId) =>
-                Object.keys(responses).find((key) => key.endsWith(`||${qId}`)),
-              )
-            : [
-                Object.keys(responses).find((key) =>
-                  key.endsWith(`||${question.dependent_question}`),
-                ),
-              ],
+          question.dependent_question,
+          responseMap,
+          questionsComponent,
         );
 
-      // **Check Mandatory Fields**
+      if (!isVisible) return;
+
+      const response = responseMap[question.question_id?.toString()] ?? "";
+
+      //  MANDATORY CHECK
       if (
-        isVisible &&
         question.mandatory &&
-        (!response || response.trim() === "")
+        (!response || response.toString().trim() === "")
       ) {
         issues.push({
           where: "Component Form",
@@ -208,59 +263,72 @@ const Sku_Page = () => {
         });
       }
 
-      // **Validate numerical ranges (if applicable)**
-      const valueMatch = response?.match(/^(\d+(\.\d+)?)([a-zA-Z]+)?$/);
-      if (valueMatch && selectedComponentType) {
-        const value = parseFloat(valueMatch[1]);
-        const unit = valueMatch[3] || "";
+      // RANGE VALIDATION same as Component Page
+      if (
+        question.validationdependency === "Y" &&
+        question.validation_dropdown &&
+        response !== "" &&
+        response !== undefined
+      ) {
+        let selectedUnit = responseMap[`${question.question_id}_unit`] ?? "";
+        let enteredValue = parseFloat(response);
 
-        const validationRules = question.validation_dropdown?.find(
-          (rule) =>
-            rule.name?.toLowerCase() === selectedComponentType?.toLowerCase() &&
-            rule.unit?.toLowerCase() === unit?.toLowerCase(),
-        );
+        // If unit missing, set default
+        if (!selectedUnit && question.dropdown_options?.length > 0) {
+          selectedUnit = question.dropdown_options[0];
+        }
 
-        if (validationRules) {
-          const rule = validationRules;
-          let issue = null;
+        if (selectedComponentType && selectedUnit && !isNaN(enteredValue)) {
+          const validationRules = question.validation_dropdown.filter(
+            (rule) =>
+              rule.name?.toLowerCase() ===
+                selectedComponentType?.toLowerCase() &&
+              rule.unit?.toLowerCase() === selectedUnit?.toLowerCase(),
+          );
 
-          if (
-            rule.min_weight !== undefined &&
-            rule.max_weight !== undefined &&
-            (value < rule.min_weight || value > rule.max_weight)
-          ) {
-            issue = `${question.question_text} should be between ${rule.min_weight} and ${rule.max_weight} ${unit}`;
-          } else if (
-            rule.min_length !== undefined &&
-            rule.max_length !== undefined &&
-            (value < rule.min_length || value > rule.max_length)
-          ) {
-            issue = `${question.question_text} should be between ${rule.min_length} and ${rule.max_length} ${unit}`;
-          } else if (
-            rule.min_width !== undefined &&
-            rule.max_width !== undefined &&
-            (value < rule.min_width || value > rule.max_width)
-          ) {
-            issue = `${question.question_text} should be between ${rule.min_width} and ${rule.max_width} ${unit}`;
-          } else if (
-            rule.min_depth !== undefined &&
-            rule.max_depth !== undefined &&
-            (value < rule.min_depth || value > rule.max_depth)
-          ) {
-            issue = `${question.question_text} should be between ${rule.min_depth} and ${rule.max_depth} ${unit}`;
-          }
+          if (validationRules.length > 0) {
+            const rule = validationRules[0];
+            let issue = null;
 
-          if (issue) {
-            issues.push({
-              where: "Component Form",
-              component: component.name,
-              issue: issue,
-            });
+            if (
+              rule.min_weight !== undefined &&
+              rule.max_weight !== undefined &&
+              (enteredValue < rule.min_weight || enteredValue > rule.max_weight)
+            ) {
+              issue = `${question.question_text} Weight should be between ${rule.min_weight} and ${rule.max_weight} ${selectedUnit}`;
+            } else if (
+              rule.min_length !== undefined &&
+              rule.max_length !== undefined &&
+              (enteredValue < rule.min_length || enteredValue > rule.max_length)
+            ) {
+              issue = `${question.question_text} Length should be between ${rule.min_length} and ${rule.max_length} ${selectedUnit}`;
+            } else if (
+              rule.min_width !== undefined &&
+              rule.max_width !== undefined &&
+              (enteredValue < rule.min_width || enteredValue > rule.max_width)
+            ) {
+              issue = `${question.question_text} Width should be between ${rule.min_width} and ${rule.max_width} ${selectedUnit}`;
+            } else if (
+              rule.min_depth !== undefined &&
+              rule.max_depth !== undefined &&
+              (enteredValue < rule.min_depth || enteredValue > rule.max_depth)
+            ) {
+              issue = `${question.question_text} Depth should be between ${rule.min_depth} and ${rule.max_depth} ${selectedUnit}`;
+            }
+
+            if (issue) {
+              issues.push({
+                where: "Component Form",
+                component: component.name,
+                issue,
+              });
+            }
           }
         }
       }
     });
-    console.log(issues);
+
+    console.log(" Final Component validation:", issues);
     return issues;
   };
 
