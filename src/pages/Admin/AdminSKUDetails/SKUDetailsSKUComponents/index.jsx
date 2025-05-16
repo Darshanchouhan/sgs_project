@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
 
-const SKUDetailsSKUComponents = ({ skuComponentDataIncoming }) => {
+const SKUDetailsSKUComponents = ({ skuComponentDataIncoming, statusIncoming, cvsSupplierId, descriptionIncoming }) => {
   const { pkoId, skuId } = useParams(); // Assuming you are using react-router-dom for routing
   const navigate = useNavigate();
 
   const handleForwardClick = (idIncoming) => {
+    localStorage.setItem("adminComponentSkuName", descriptionIncoming);
+    localStorage.setItem("adminComponentSupplierId", cvsSupplierId);
+    localStorage.setItem("adminComponentStatus", statusIncoming);
     // Navigate to the component details page with the component ID
     navigate(`/admincomponent/${pkoId}/${skuId}/${idIncoming}`);
   };

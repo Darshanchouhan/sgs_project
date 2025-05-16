@@ -29,6 +29,7 @@ import AdminSKUDetails from "./pages/Admin/AdminSKUDetails";
 import AdminComponentPage from "./pages/Admin/AdminComponent";
 import AdminPKOManager from "./pages/Admin/AdminPKOManager";
 import AdminPKOManagerPreview from "./pages/Admin/AdminPKOManagerPreview";
+import AdminPKOManagerUploadSuccessful from "./pages/Admin/AdminPKOManagerUploadSuccessful";
 
 function App() {
   // Call the hook to start tracking inactivity and refreshing the token
@@ -125,6 +126,12 @@ function App() {
               <Route
                 path="/adminpkomanagerpreview"
                 element={<PrivateRoute element={<AdminPKOManagerPreview />} />}
+              />
+
+              {/* Private Route - Admin PKO Manager Upload Successful */}
+              <Route
+                path="/adminpkomanageruploadsuccessful"
+                element={<PrivateRoute element={<AdminPKOManagerUploadSuccessful />} />}
               />
 
               {/* Other routes can go here */}
