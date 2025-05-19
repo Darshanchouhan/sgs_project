@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import NotificationToast from "../../../../components/notification";
 import SentReminderModal from "./SentReminderModal";
-import CommentPanel from "./CommentPanel";
 import axiosInstance from "../../../../services/axiosInstance";
+import AdminCommentPanel from "../../AdminCommentPanel";
 
 const HeaderAdmin = () => {
   const [showToast, setShowToast] = useState(false);
@@ -149,13 +149,13 @@ const HeaderAdmin = () => {
                 <button
                   type="button"
                   className="btn p-0 border-none bg-transparent"
-                  // data-bs-toggle="offcanvas"
-                  // data-bs-target="#offcanvasCommentPanel"
-                  // aria-controls="offcanvasCommentPanel"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#offcanvasAdminCommentPanel"
+                  aria-controls="offcanvasAdminCommentPanel"
                 >
                   <img
-                    src="/assets/images/comment-icon.svg"
-                    alt="comment-icon"
+                    src="/assets/images/admin-comment-icon.svg"
+                    alt="admin-comment-icon"
                   />
                 </button>
               </li>
@@ -170,7 +170,7 @@ const HeaderAdmin = () => {
         reminderData={reminderData}
       />
 
-      <CommentPanel />
+      <AdminCommentPanel />
     </>
   );
 };

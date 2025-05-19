@@ -43,7 +43,7 @@ const PkgDataForm = () => {
 
   const [isFullValidation, setIsFullValidation] = useState(false); // Step 1: Create a flag
 
-  console.log(skuData, description,)
+  console.log(skuData, description);
 
   const handleNextClick = () => {
     setIsPreviousValidation(false);
@@ -597,7 +597,10 @@ const PkgDataForm = () => {
 
   useEffect(() => {
     if (pkgData.sections && stateIncomingComponentPage?.responses) {
-      console.log(stateIncomingComponentPage?.responses,"stateIncomingComponentPage?.responses")
+      console.log(
+        stateIncomingComponentPage?.responses,
+        "stateIncomingComponentPage?.responses",
+      );
       const answers = {};
       if (Object.keys(stateIncomingComponentPage?.responses).length > 0) {
         Object.entries(stateIncomingComponentPage?.responses).forEach(
@@ -1328,8 +1331,7 @@ const PkgDataForm = () => {
   };
 
   const renderQuestions = (questions) => {
-    
-    console.log(pkgData.sections,"pkgData.sections",pkgData.answers)
+    console.log(pkgData.sections, "pkgData.sections", pkgData.answers);
     return questions.map((question) => {
       // Collect all parent answers
       const isDependentVisible = isAnswerMatch(
