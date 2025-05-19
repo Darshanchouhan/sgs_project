@@ -131,7 +131,9 @@ function App() {
               {/* Private Route - Admin PKO Manager Upload Successful */}
               <Route
                 path="/adminpkomanageruploadsuccessful"
-                element={<PrivateRoute element={<AdminPKOManagerUploadSuccessful />} />}
+                element={
+                  <PrivateRoute element={<AdminPKOManagerUploadSuccessful />} />
+                }
               />
 
               {/* Other routes can go here */}

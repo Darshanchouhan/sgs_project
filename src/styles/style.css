@@ -23124,8 +23124,8 @@ input[type="radio"] {
 }
 .notificationToast {
   display: block !important;
-  min-width: 320px !important;
-  max-width: 320px !important;
+  min-width: 332px !important;
+  max-width: 332px !important;
   height: max-content !important;
   position: absolute !important;
   right: 0 !important;
@@ -23190,6 +23190,58 @@ input[type="radio"] {
   min-height: 20vh !important;
   max-height: 40vh !important;
   overflow-y: auto !important;
+}
+#offcanvasVendorCommentPanel {
+  width: 42%;
+}
+#offcanvasVendorCommentPanel #sendCommentTextarea {
+  padding-right: 35% !important;
+}
+#offcanvasVendorCommentPanel .allComments-block {
+  padding-bottom: 22% !important;
+  max-height: 68vh;
+  overflow-y: auto;
+}
+#offcanvasVendorCommentPanel .repliesBlock::before {
+  /* content: "";
+  width: 1.5px;
+  height: 56%;
+  background-color: #848383;
+  display: inline-block;
+  position: absolute;
+  top: 30px;
+  left: 10px; */
+}
+#offcanvasVendorCommentPanel .repliedBox {
+  border-left: 1.5px solid #848383;
+}
+#offcanvasVendorCommentPanel .repliedBox:last-child {
+  border-left: none !important;
+  position: relative;
+}
+#offcanvasVendorCommentPanel .repliedBox:last-child::before {
+  content: "";
+  display: inline-block;
+  width: 1.5px;
+  height: 26px;
+  background-color: #848383;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#offcanvasVendorCommentPanel .repliedBox > div::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    width: 10px;
+    height: 25%;
+    border-left: 1.5px solid #848383;
+    border-bottom: 1.5px solid #848383;
+    border-bottom-left-radius: 8px;
+}
+.form-floating > .form-select ~ label::after {
+  background-color: transparent !important;
 }
 /* Custom css end (Azahar) */
 

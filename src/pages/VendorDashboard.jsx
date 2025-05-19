@@ -9,6 +9,7 @@ import ModalLoad from "./ModalLoad";
 import Header from "../components/Header";
 import Pko_Chart from "./Pko_Chart";
 import ProgressLoader from "./ProgressLoader";
+import VendorCommentPanel from "../components/VendorCommentPanel";
 
 const VendorDashboard = () => {
   const [vendorData, setVendorData] = useState(null); // State to hold vendor data
@@ -221,7 +222,7 @@ const VendorDashboard = () => {
       )}
       {/* Page Header */}
       <div className="py-2 bg-color-light-shade">
-        <div className="container-fluid px-20 px-md-5">
+        <div className="container-fluid d-flex justify-content-between align-items-center px-20 px-md-5">
           <div className="input-group w-395 h-40 border border-secondary rounded-2 fs-14">
             <label
               className="d-flex align-items-center px-10  bg-white rounded-2 mb-0 border-0 fs-14 text-color-labels"
@@ -242,6 +243,18 @@ const VendorDashboard = () => {
               ))}
             </select>
           </div>
+          <button
+            type="button"
+            className="btn p-0 border-none bg-transparent"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasVendorCommentPanel"
+            aria-controls="offcanvasVendorCommentPanel"
+          >
+            <img
+              src="/assets/images/vendor-comment-icon.svg"
+              alt="vendor-comment-icon"
+            />
+          </button>
         </div>
       </div>
 
@@ -358,19 +371,17 @@ const VendorDashboard = () => {
                 </h6>
                 <span
                   className={`fw-600 px-12 py-2 text-nowrap d-flex align-items-center w-114
-        ${
-          new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-            ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
-            : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
-        }`}
+        ${new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+                      ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
+                      : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
+                    }`}
                 >
                   <span
                     className={`circle me-2 
-      ${
-        new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-          ? "bg-color-completed" // Green circle for Active
-          : "" // Gray circle for Closed
-      }`}
+      ${new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
+                        ? "bg-color-completed" // Green circle for Active
+                        : "" // Gray circle for Closed
+                      }`}
                   ></span>
                   {new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
                     ? "Active"
@@ -384,13 +395,13 @@ const VendorDashboard = () => {
                     <p className="fs-24 text-color-typo-primary fw-600 mb-0">
                       {pkoData?.duedate
                         ? new Date(pkoData.duedate).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "2-digit",
-                              day: "2-digit",
-                              year: "numeric",
-                            },
-                          )
+                          "en-US",
+                          {
+                            month: "2-digit",
+                            day: "2-digit",
+                            year: "numeric",
+                          },
+                        )
                         : "N/A"}
                     </p>
                   </div>
@@ -588,15 +599,14 @@ const VendorDashboard = () => {
                         <td className="align-middle">{sku.size}</td>
                         <td className="align-middle">
                           <span
-                            className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${
-                              status === "Inreview"
+                            className={`fw-600 text-nowrap px-12 py-2 d-inline-block rounded-pill ${status === "Inreview"
                                 ? "in-review-sku-status-pill text-white"
                                 : status === "Approved"
                                   ? "bg-color-completed text-white"
                                   : status === "Draft"
                                     ? "bg-color-draft text-white"
                                     : "bg-color-light-border text-color-typo-secondary"
-                            }`}
+                              }`}
                           >
                             {status === "Inreview" ? "In Review" : status}
                           </span>
@@ -643,18 +653,16 @@ const VendorDashboard = () => {
               role="tablist"
             >
               <button
-                className={`nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
-                  activeTab === "active" ? "active" : ""
-                }`}
+                className={`nav-link px-0 pb-18 me-5 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${activeTab === "active" ? "active" : ""
+                  }`}
                 type="button"
                 onClick={() => setActiveTab("active")}
               >
                 Active PKOs
               </button>
               <button
-                className={`nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${
-                  activeTab === "closed" ? "active" : ""
-                }`}
+                className={`nav-link px-0 pb-18 text-color-typo-primary bg-transparent border-0 border-bottom border-bottom-3 ${activeTab === "closed" ? "active" : ""
+                  }`}
                 type="button"
                 onClick={() => setActiveTab("closed")}
               >
@@ -712,15 +720,15 @@ const VendorDashboard = () => {
                             <td>
                               {pko.startdate
                                 ? new Date(pko.startdate).toLocaleDateString(
-                                    "en-GB",
-                                  )
+                                  "en-GB",
+                                )
                                 : "N/A"}
                             </td>
                             <td>
                               {pko.duedate
                                 ? new Date(pko.duedate).toLocaleDateString(
-                                    "en-GB",
-                                  )
+                                  "en-GB",
+                                )
                                 : "N/A"}
                             </td>
                             <td>Active</td>
@@ -784,15 +792,15 @@ const VendorDashboard = () => {
                               <td>
                                 {pko.startdate
                                   ? new Date(pko.startdate).toLocaleDateString(
-                                      "en-GB",
-                                    )
+                                    "en-GB",
+                                  )
                                   : "N/A"}
                               </td>
                               <td>
                                 {pko.duedate
                                   ? new Date(pko.duedate).toLocaleDateString(
-                                      "en-GB",
-                                    )
+                                    "en-GB",
+                                  )
                                   : "N/A"}
                               </td>
                               <td>Closed</td>
@@ -875,6 +883,8 @@ const VendorDashboard = () => {
         isVisible={isModalVisible}
         closeModal={closeModal}
       />
+
+      <VendorCommentPanel />
     </div>
   );
 };

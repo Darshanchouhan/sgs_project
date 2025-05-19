@@ -3,7 +3,12 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import Tooltip from "../../../Tooltip";
 import Compo_ImageOverlay from "../../../Compo_ImageOverlay";
 
-const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSectionData, activeSection}) => {
+const ComponentForm = ({
+  questionAvailable,
+  skuComponentDataIncoming,
+  groupingSectionData,
+  activeSection,
+}) => {
   const [componentPageData, setComponentPageData] = useState({});
   const [activeTooltipId, setActiveTooltipId] = useState(null); // State to track the active tooltip ID
   const [isOverlayVisible, setOverlayVisible] = useState(false);
@@ -12,50 +17,52 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
   const sectionRefs = useRef({}); // Store refs for each section
 
   useEffect(() => {
-      if (groupingSectionData && skuComponentDataIncoming?.responses) {
-        const answers = {};
-        if (Object?.keys(skuComponentDataIncoming?.responses)?.length > 0) {
-          Object?.entries(skuComponentDataIncoming?.responses)?.forEach(
-            ([questionText, response]) => {
-              const question = Object?.values(groupingSectionData)
-                ?.flat()
-                ?.find(
-                  (q) =>
-                    q?.question_text === questionText?.split("||")[0] &&
-                    q?.question_id == questionText?.split("||")[1],
-                );
-  
-              if (question) {
-                // Extract numeric value and unit if present
-                if (
-                  question?.question_type === "Integer + Dropdown" ||
-                  question?.question_type === "Float + Dropdown"
-                ) {
-                  const regex = /^(\d+(\?.\d+)?)([a-zA-Z]+)$/; // Match number and unit
-                  const match = response?.match(regex);
-  
-                  if (match) {
-                    const value = parseFloat(match[1]); // Extract numeric part (integer or float)
-                    const unit = match[3]; // Extract unit part
-  
-                    answers[question?.question_id] = value;
-                    answers[`${question?.question_id}_unit`] = unit;
-                  } else {
-                    answers[question?.question_id] = response;
-                  }
+    if (groupingSectionData && skuComponentDataIncoming?.responses) {
+      const answers = {};
+      if (Object?.keys(skuComponentDataIncoming?.responses)?.length > 0) {
+        Object?.entries(skuComponentDataIncoming?.responses)?.forEach(
+          ([questionText, response]) => {
+            const question = Object?.values(groupingSectionData)
+              ?.flat()
+              ?.find(
+                (q) =>
+                  q?.question_text === questionText?.split("||")[0] &&
+                  q?.question_id == questionText?.split("||")[1],
+              );
+
+            if (question) {
+              // Extract numeric value and unit if present
+              if (
+                question?.question_type === "Integer + Dropdown" ||
+                question?.question_type === "Float + Dropdown"
+              ) {
+                const regex = /^(\d+(\?.\d+)?)([a-zA-Z]+)$/; // Match number and unit
+                const match = response?.match(regex);
+
+                if (match) {
+                  const value = parseFloat(match[1]); // Extract numeric part (integer or float)
+                  const unit = match[3]; // Extract unit part
+
+                  answers[question?.question_id] = value;
+                  answers[`${question?.question_id}_unit`] = unit;
                 } else {
                   answers[question?.question_id] = response;
                 }
+              } else {
+                answers[question?.question_id] = response;
               }
-            },
-          );
-        } else {
-          answers[24] = skuComponentDataIncoming?.component_type;
-        }
-  
-        setComponentPageData((prev)=>{return {...prev, answers:answers}});
+            }
+          },
+        );
+      } else {
+        answers[24] = skuComponentDataIncoming?.component_type;
       }
-    }, [groupingSectionData, skuComponentDataIncoming]);
+
+      setComponentPageData((prev) => {
+        return { ...prev, answers: answers };
+      });
+    }
+  }, [groupingSectionData, skuComponentDataIncoming]);
 
   const checkImagePath = (path) => {
     const pattern = /^\/assets\/images\/[\w-]+\.(png|jpg|jpeg|gif|bmp)$/;
@@ -79,7 +86,7 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
     }
   };
 
-    const isAnswerMatch = (dependentQuestionObj, answers, questionsList = []) => {
+  const isAnswerMatch = (dependentQuestionObj, answers, questionsList = []) => {
     // Handle legacy string-based dependency logic
     if (typeof dependentQuestionObj === "string") {
       const conditions = dependentQuestionObj
@@ -92,7 +99,9 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
           ?.trim(),
       );
 
-      return conditions?.some((condition) => parentAnswers?.includes(condition));
+      return conditions?.some((condition) =>
+        parentAnswers?.includes(condition),
+      );
     }
 
     // If dependency object is not valid
@@ -125,7 +134,6 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
   };
 
   const renderField = (question) => {
-
     // eslint-disable-next-line default-case
     switch (question.question_type) {
       case "Varchar":
@@ -152,7 +160,10 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
                   className={`me-2`}
                   name={question.question_id}
                   value={option}
-                  checked={componentPageData?.answers?.[question.question_id] === option}
+                  checked={
+                    componentPageData?.answers?.[question.question_id] ===
+                    option
+                  }
                 />
                 {option}
               </label>
@@ -234,7 +245,10 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
             />
             <select
               className="adminDisabled-inputs bg-color-light-shade form-list w-25"
-              value={componentPageData?.answers?.[`${question.question_id}_unit`] || ""}
+              value={
+                componentPageData?.answers?.[`${question.question_id}_unit`] ||
+                ""
+              }
               tabIndex={0} // Make focusable
               disabled
             >
@@ -279,35 +293,35 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
   };
 
   const renderQuestions = (questions) => {
-      return questions?.map((question) => {
-        // Collect all parent answers
-        const isDependentVisible = isAnswerMatch(
-          question?.dependent_question,
-          componentPageData.answers,
-          Object?.values(groupingSectionData)?.flat(),
-        );
-        if (question?.dependent_question && !isDependentVisible) {
-          return null; // Skip rendering if conditions aren't met
-        }
+    return questions?.map((question) => {
+      // Collect all parent answers
+      const isDependentVisible = isAnswerMatch(
+        question?.dependent_question,
+        componentPageData.answers,
+        Object?.values(groupingSectionData)?.flat(),
+      );
+      if (question?.dependent_question && !isDependentVisible) {
+        return null; // Skip rendering if conditions aren't met
+      }
 
-        // Info Icon with Instructions
-        const infoIcon = checkImagePath(question?.instructions) ? (
-          <InfoOutlinedIcon
-            className="info-icon"
-            titleAccess={question?.instructions} // Display on hover
-            onClick={() => handleInfoClick(question?.question_text)}
+      // Info Icon with Instructions
+      const infoIcon = checkImagePath(question?.instructions) ? (
+        <InfoOutlinedIcon
+          className="info-icon"
+          titleAccess={question?.instructions} // Display on hover
+          onClick={() => handleInfoClick(question?.question_text)}
+        />
+      ) : (
+        question?.instructions && (
+          <Tooltip
+            id={question?.question_id}
+            instructions={question?.instructions}
+            activeTooltipId={activeTooltipId}
+            setActiveTooltipId={setActiveTooltipId}
           />
-        ) : (
-          question?.instructions && (
-            <Tooltip
-              id={question?.question_id}
-              instructions={question?.instructions}
-              activeTooltipId={activeTooltipId}
-              setActiveTooltipId={setActiveTooltipId}
-            />
-          )
-        );
-  
+        )
+      );
+
       if (questionAvailable.includes(question?.question_text)) {
         return (
           <div className="col-12 col-md-6 col-xl-8 col-xxxl-6">
@@ -315,9 +329,7 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
               <div className="d-flex justify-content-between align-items-center mb-2 h-26">
                 <label className={`mb-0`}>
                   {question?.mandatory ? (
-                    <>
-                      {question?.question_text}{" "}
-                    </>
+                    <>{question?.question_text} </>
                   ) : (
                     question?.question_text
                   )}
@@ -329,8 +341,8 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
           </div>
         );
       }
-      });
-    };
+    });
+  };
 
   const renderSections = () => {
     return Object?.entries(groupingSectionData)?.map(([section, questions]) => {
@@ -362,7 +374,12 @@ const ComponentForm = ({questionAvailable, skuComponentDataIncoming, groupingSec
   return (
     <div className="col-12 col-md-9">
       <div className="form-section mt-4 mb-5">
-        <div className="col-12">{skuComponentDataIncoming && groupingSectionData && activeSection && renderSections()}</div>
+        <div className="col-12">
+          {skuComponentDataIncoming &&
+            groupingSectionData &&
+            activeSection &&
+            renderSections()}
+        </div>
       </div>
     </div>
   );

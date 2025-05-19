@@ -580,7 +580,7 @@ const Sku_Page = () => {
 
       const cvsSupplier = localStorage.getItem("cvs_supplier");
       await axiosInstance.post("/notifications/", {
-        status_change: "DraftToInReview",
+        status_change: "DraftToInreview",
         skuid: skuId,
         pkoid: pkoId,
         cvs_supplier: cvsSupplier,
@@ -895,13 +895,13 @@ const Sku_Page = () => {
         // status: isDraft ? "Draft" : "Completed", // Include status in payload
       };
       if (isBackClick) {
-        if (skuDetails?.status === "Inreview") {
-          payload["status"] = combinedProgress === 100 ? "Inreview" : "Draft";
-        } else {
-          payload["status"] = "Draft";
+        if (skuDetails?.status === "Approved") {
+          payload["status"] = "Approved";
+        } else if (skuDetails?.status === "Inreview") {
+          payload["status"] = "Inreview";
         }
       } else {
-        payload["status"] = isDraft ? "Draft" : "Inreview";
+        payload["status"] = isDraft;
       }
 
       questions.forEach((question) => {

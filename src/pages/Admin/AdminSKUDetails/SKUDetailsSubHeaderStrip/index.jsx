@@ -83,7 +83,7 @@ const SKUDetailsSubHeaderStrip = ({
         setLoading(false);
       }
     } catch (error) {
-      console.error("Error changing approve status SKU:", error);   
+      console.error("Error changing approve status SKU:", error);
       setLoading(false);
     }
   };
