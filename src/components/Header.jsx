@@ -25,80 +25,121 @@ const Header = () => {
     setIsModalVisible(false);
   };
 
-  const handleShowToast = async () => {
-    try {
-      const supplierId = localStorage.getItem("cvs_supplier") || "56789";
+  // const handleShowToast = async () => {
+  //   try {
+  //     const supplierId = localStorage.getItem("cvs_supplier") || "56789";
 
-      // Call both APIs in parallel
-      const [reminderRes, notificationRes] = await Promise.all([
-        axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`),
-        axiosInstance.get(`/notifications/?cvs_supplier=${supplierId}`),
-      ]);
+  //     // Call both APIs in parallel
+  //     const [reminderRes, notificationRes] = await Promise.all([
+  //       axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`),
+  //       axiosInstance.get(`/notifications/?cvs_supplier=${supplierId}`),
+  //     ]);
 
-      // Tag each item with type for later display
-      const reminders = (reminderRes.data || []).map((item) => ({
-        ...item,
-        type: "reminder",
-      }));
-      const notifications = (notificationRes.data || []).map((item) => ({
-        ...item,
-        type: "notification",
-      }));
-      // Combine + sort by created_date desc
-      const combined = [...reminders, ...notifications].sort(
-        (a, b) => new Date(b.created_date) - new Date(a.created_date),
-      );
+  //   // Build your filtered+typed notifications list
+  //   const notifications = (notificationRes.data || [])
+  //   // only keep the two status_change values you care about
+  //   .filter(n => ["InreviewToApproved", "InreviewToDraft"].includes(n.status_change))
+  //   // tag them so your JSX knows how to render them
+  //   .map(item => ({ ...item, type: "notification" }));
 
-      // Update state
-      setNotifications(combined);
-      console.log("mycombineddata", combined);
-      // Mark unseen reminders as seen
-      const unseenReminders = reminders.filter((r) => r.status === "Unseen");
-      if (unseenReminders.length > 0) {
-        await Promise.all(
-          unseenReminders.map((r) =>
-            axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
-          ),
-        );
-        // Refresh reminders only after marking as seen
-        const refreshedReminders = await axiosInstance.get(
-          `/reminders/?cvs_supplier=${supplierId}`,
-        );
-        const updatedReminders = (refreshedReminders.data || []).map(
-          (item) => ({ ...item, type: "reminder" }),
-        );
+  //     // Tag each item with type for later display
+  //     const reminders = (reminderRes.data || []).map((item) => ({
+  //       ...item,
+  //       type: "reminder",
+  //     }));
+  //     // Combine + sort by created_date desc
+  //     const combined = [...reminders, ...notifications].sort(
+  //       (a, b) => new Date(b.created_date) - new Date(a.created_date),
+  //     );
 
-        // Combine again with notifications and sort
-        const finalCombined = [...updatedReminders, ...notifications].sort(
-          (a, b) => new Date(b.created_date) - new Date(a.created_date),
-        );
-        setNotifications(finalCombined);
-      }
+  //     // Update state
+  //     setNotifications(combined);
+  //     console.log("mycombineddata", combined);
+  //     // Mark unseen reminders as seen
+  //     const unseenReminders = reminders.filter((r) => r.status === "Unseen");
+  //     if (unseenReminders.length > 0) {
+  //       await Promise.all(
+  //         unseenReminders.map((r) =>
+  //           axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
+  //         ),
+  //       );
+  //       // Refresh reminders only after marking as seen
+  //       const refreshedReminders = await axiosInstance.get(
+  //         `/reminders/?cvs_supplier=${supplierId}`,
+  //       );
+  //       const updatedReminders = (refreshedReminders.data || []).map(
+  //         (item) => ({ ...item, type: "reminder" }),
+  //       );
 
-      setShowToast(true);
-    } catch (err) {
-      console.error("Error handling reminders and notifications:", err);
-      setNotifications([]);
+  //       // Combine again with notifications and sort
+  //       const finalCombined = [...updatedReminders, ...notifications].sort(
+  //         (a, b) => new Date(b.created_date) - new Date(a.created_date),
+  //       );
+  //       setNotifications(finalCombined);
+  //     }
+
+  //     setShowToast(true);
+  //   } catch (err) {
+  //     console.error("Error handling reminders and notifications:", err);
+  //     setNotifications([]);
+  //     setShowToast(true);
+  //   }
+  // };
+
+  const handleShowToast = () => {
+    const cached = localStorage.getItem("vendor_notifications");
+    if (cached) {
+      setNotifications(JSON.parse(cached));
       setShowToast(true);
     }
   };
 
   const handleHideToast = () => setShowToast(false);
 
-  const handleMarkAsSeen = async (reminderId) => {
+  const handleMarkAsSeen = async (itemId, type) => {
+    const supplierId = localStorage.getItem("cvs_supplier") || "56789";
+
     try {
-      await axiosInstance.patch("/reminders/", {
-        id: reminderId,
-        status: "Seen",
-      });
-      // Refresh notifications after marking as seen
-      const supplierId = localStorage.getItem("cvs_supplier") || "56789";
-      const res = await axiosInstance.get(
-        `/reminders/?cvs_supplier=${supplierId}`,
+      if (type === "reminder") {
+        await axiosInstance.patch("/reminders/", {
+          id: itemId,
+          status: "Seen",
+        });
+      } else if (type === "notification") {
+        await axiosInstance.patch("/notifications/", {
+          ids: [itemId],
+          role: "vendor",
+        });
+      }
+
+      // Refresh data in localStorage
+      const [reminderRes, notificationRes] = await Promise.all([
+        axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`),
+        axiosInstance.get(`/notifications/?cvs_supplier=${supplierId}`),
+      ]);
+
+      const reminders = (reminderRes.data || []).map((item) => ({
+        ...item,
+        type: "reminder",
+      }));
+
+      const notifications = (notificationRes.data || [])
+        .filter((n) =>
+          ["InreviewToApproved", "InreviewToDraft"].includes(n.status_change),
+        )
+        .map((item) => ({
+          ...item,
+          type: "notification",
+        }));
+
+      const combined = [...reminders, ...notifications].sort(
+        (a, b) => new Date(b.created_date) - new Date(a.created_date),
       );
-      setNotifications(res.data || []);
+
+      localStorage.setItem("vendor_notifications", JSON.stringify(combined));
+      setNotifications(combined);
     } catch (err) {
-      console.error(`Failed to mark reminder ${reminderId} as seen`, err);
+      console.error(`Failed to mark ${type} ${itemId} as seen`, err);
     }
   };
 
@@ -200,7 +241,6 @@ const Header = () => {
             isVisible={isModalVisible}
             closeModal={closeModal}
           />
-
         </div>
       </div>
     </nav>
