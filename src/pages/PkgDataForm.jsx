@@ -802,12 +802,8 @@ const PkgDataForm = () => {
     }
   };
 
-  // const handleBackClick = async () => {
-  //   await handleSave(false); // Call save function with false flag to skip alert
-  //   navigate("/skus"); // Navigate back after saving
-  // };
-
   const handleBackClick = async () => {
+    setLoading(true); // Show loader immediately
     await handleBackSavePkoProgress(); // Call save function with false flag to skip alert
     navigate("/skus"); // Navigate back after saving
   };
