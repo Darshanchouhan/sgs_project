@@ -23124,8 +23124,8 @@ input[type="radio"] {
 }
 .notificationToast {
   display: block !important;
-  min-width: 332px !important;
-  max-width: 332px !important;
+  min-width: 350px !important;
+  max-width: 350px !important;
   height: max-content !important;
   position: absolute !important;
   right: 0 !important;
@@ -23230,15 +23230,15 @@ input[type="radio"] {
   left: 0px;
 }
 #offcanvasVendorCommentPanel .repliedBox > div::before {
-    content: "";
-    position: absolute;
-    left: -20px;
-    top: 5px;
-    width: 10px;
-    height: 25%;
-    border-left: 1.5px solid #848383;
-    border-bottom: 1.5px solid #848383;
-    border-bottom-left-radius: 8px;
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 5px;
+  width: 10px;
+  height: 25%;
+  border-left: 1.5px solid #848383;
+  border-bottom: 1.5px solid #848383;
+  border-bottom-left-radius: 8px;
 }
 .form-floating > .form-select ~ label::after {
   background-color: transparent !important;

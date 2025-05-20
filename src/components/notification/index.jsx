@@ -111,16 +111,17 @@ const NotificationToast = ({
                 <li
                   key={reminder.id}
                   className="ps-28 pe-2 py-12 border-bottom position-relative cursor-pointer"
-                  onClick={() =>
-                    typeOfNotification === "admin"
-                      ? reminder.adminseenstatus === "Unseen" &&
-                        onMarkAsSeen(reminder.id)
-                      : reminder.type === "reminder"
-                        ? reminder.status === "Unseen" &&
-                          onMarkAsSeen(reminder.id)
-                        : reminder.vendorseenstatus === "Unseen" &&
-                          onMarkAsSeen(reminder.id)
-                  }
+                  onClick={() => {
+                    const isUnseen =
+                      typeOfNotification === "admin"
+                        ? reminder.adminseenstatus === "Unseen"
+                        : reminder.type === "reminder"
+                          ? reminder.status === "Unseen"
+                          : reminder.vendorseenstatus === "Unseen";
+                    if (isUnseen) {
+                      onMarkAsSeen(reminder.id, reminder.type);
+                    }
+                  }}
                 >
                   {(typeOfNotification === "admin"
                     ? reminder.adminseenstatus === "Unseen"
@@ -189,14 +190,6 @@ const NotificationToast = ({
                             has been submitted and it's in Review.
                           </>
                         )
-                      ) : reminder.type === "notification" ? (
-                        <>
-                          Your form for{" "}
-                          <span className="text-color-typo-primary">
-                            {reminder.skuid}
-                          </span>{" "}
-                          is now In Review.
-                        </>
                       ) : reminder.status_change === "InreviewToApproved" ? (
                         <>
                           Your form for{" "}
@@ -226,6 +219,10 @@ const NotificationToast = ({
                           style={{
                             color: "#155DC9",
                             backgroundColor: "#E0ECFF",
+                            width: `${typeOfNotification === "admin" || reminder.type === "notification" ? "70px" : ""}`,
+                            whiteSpace: `${typeOfNotification === "admin" || reminder.type === "notification" ? "nowrap" : ""}`,
+                            overflow: `${typeOfNotification === "admin" || reminder.type === "notification" ? "hidden" : ""}`,
+                            textOverflow: `${typeOfNotification === "admin" || reminder.type === "notification" ? "ellipsis" : ""}`,
                           }}
                         >
                           {reminder.skuid}

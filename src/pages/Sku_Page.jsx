@@ -894,6 +894,7 @@ const Sku_Page = () => {
         sku_progress: combinedProgress,
         // status: isDraft ? "Draft" : "Completed", // Include status in payload
       };
+      console.log("statuscheck", skuDetails?.status);
       if (isBackClick) {
         if (skuDetails?.status === "Approved") {
           payload["status"] = "Approved";
@@ -901,7 +902,7 @@ const Sku_Page = () => {
           payload["status"] = "Inreview";
         }
       } else {
-        payload["status"] = isDraft;
+        payload["status"] = "Draft";
       }
 
       questions.forEach((question) => {
