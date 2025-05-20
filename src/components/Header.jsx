@@ -25,72 +25,55 @@ const Header = () => {
     setIsModalVisible(false);
   };
 
-  // const handleShowToast = async () => {
-  //   try {
-  //     const supplierId = localStorage.getItem("cvs_supplier") || "56789";
-
-  //     // Call both APIs in parallel
-  //     const [reminderRes, notificationRes] = await Promise.all([
-  //       axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`),
-  //       axiosInstance.get(`/notifications/?cvs_supplier=${supplierId}`),
-  //     ]);
-
-  //   // Build your filtered+typed notifications list
-  //   const notifications = (notificationRes.data || [])
-  //   // only keep the two status_change values you care about
-  //   .filter(n => ["InreviewToApproved", "InreviewToDraft"].includes(n.status_change))
-  //   // tag them so your JSX knows how to render them
-  //   .map(item => ({ ...item, type: "notification" }));
-
-  //     // Tag each item with type for later display
-  //     const reminders = (reminderRes.data || []).map((item) => ({
-  //       ...item,
-  //       type: "reminder",
-  //     }));
-  //     // Combine + sort by created_date desc
-  //     const combined = [...reminders, ...notifications].sort(
-  //       (a, b) => new Date(b.created_date) - new Date(a.created_date),
-  //     );
-
-  //     // Update state
-  //     setNotifications(combined);
-  //     console.log("mycombineddata", combined);
-  //     // Mark unseen reminders as seen
-  //     const unseenReminders = reminders.filter((r) => r.status === "Unseen");
-  //     if (unseenReminders.length > 0) {
-  //       await Promise.all(
-  //         unseenReminders.map((r) =>
-  //           axiosInstance.patch(`/reminders/`, { id: r.id, status: "Seen" }),
-  //         ),
-  //       );
-  //       // Refresh reminders only after marking as seen
-  //       const refreshedReminders = await axiosInstance.get(
-  //         `/reminders/?cvs_supplier=${supplierId}`,
-  //       );
-  //       const updatedReminders = (refreshedReminders.data || []).map(
-  //         (item) => ({ ...item, type: "reminder" }),
-  //       );
-
-  //       // Combine again with notifications and sort
-  //       const finalCombined = [...updatedReminders, ...notifications].sort(
-  //         (a, b) => new Date(b.created_date) - new Date(a.created_date),
-  //       );
-  //       setNotifications(finalCombined);
-  //     }
-
-  //     setShowToast(true);
-  //   } catch (err) {
-  //     console.error("Error handling reminders and notifications:", err);
-  //     setNotifications([]);
+  // const handleShowToast = () => {
+  //   const cached = localStorage.getItem("vendor_notifications");
+  //   if (cached) {
+  //     setNotifications(JSON.parse(cached));
   //     setShowToast(true);
   //   }
   // };
-
-  const handleShowToast = () => {
+  const handleShowToast = async () => {
+    // 1. Show existing cached notifications instantly
     const cached = localStorage.getItem("vendor_notifications");
     if (cached) {
       setNotifications(JSON.parse(cached));
-      setShowToast(true);
+      setShowToast(true); // show toast instantly
+    } else {
+      setShowToast(true); // show empty toast while data is being fetched
+    }
+
+    // 2. Fetch fresh notifications and update state/localStorage in background
+    try {
+      const supplierId = localStorage.getItem("cvs_supplier") || "56789";
+
+      const [reminderRes, notificationRes] = await Promise.all([
+        axiosInstance.get(`/reminders/?cvs_supplier=${supplierId}`),
+        axiosInstance.get(`/notifications/?cvs_supplier=${supplierId}`),
+      ]);
+
+      const reminders = (reminderRes.data || []).map((item) => ({
+        ...item,
+        type: "reminder",
+      }));
+
+      const notifications = (notificationRes.data || [])
+        .filter((n) =>
+          ["InreviewToApproved", "InreviewToDraft"].includes(n.status_change),
+        )
+        .map((item) => ({
+          ...item,
+          type: "notification",
+        }));
+
+      const combined = [...reminders, ...notifications].sort(
+        (a, b) => new Date(b.created_date) - new Date(a.created_date),
+      );
+
+      // Update state and cache
+      setNotifications(combined);
+      localStorage.setItem("vendor_notifications", JSON.stringify(combined));
+    } catch (err) {
+      console.error("Error refreshing notifications:", err);
     }
   };
 

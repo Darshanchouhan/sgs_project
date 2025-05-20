@@ -994,6 +994,7 @@ const Sku_Page = () => {
 
   // Define the back action
   const handleBackClick = async () => {
+    setLoading(true);
     await saveSkuData(false, false, true);
     navigate("/vendordashboard"); // Navigate to Vendor Dashboard
   };
@@ -1068,6 +1069,7 @@ const Sku_Page = () => {
       );
       return;
     }
+    setLoading(true); // Show loader immediately
 
     try {
       // Call saveSkuData before proceeding

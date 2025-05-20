@@ -34,7 +34,7 @@ const ComponentSubHeaderStrip = ({
       // Calculate next index (wrap to 0 if at end)
       stepIndex = (currentIndex + 1) % componentsAllId.length;
     } else {
-      stepIndex = (currentIndex - 1 + values.length) % values.length;
+      stepIndex = (currentIndex - 1 + componentsAllId.length) % componentsAllId.length;
     }
     return componentsAllId[stepIndex];
   };
@@ -145,7 +145,7 @@ const ComponentSubHeaderStrip = ({
                 </ol>
               </nav>
               <div className="d-flex align-items-center mt-2">
-                <button
+                {componentsAllId?.length > 1 && <button
                   type="button"
                   className="btn p-0 border-none bg-transparent"
                 >
@@ -159,11 +159,11 @@ const ComponentSubHeaderStrip = ({
                       )
                     }
                   />
-                </button>
-                <h2 className="fs-24 fw-600 text-color-close-icon-box mx-3 mb-0">
+                </button>}
+                <h2 className={`fs-24 fw-600 text-color-close-icon-box ${componentsAllId?.length > 1 ? "mx-3" : "mx-0"} mb-0`}>
                   {skuComponentDataIncoming?.component_type}
                 </h2>
-                <button
+                {componentsAllId?.length > 1 && <button
                   type="button"
                   className="btn p-0 border-none bg-transparent"
                 >
@@ -177,7 +177,7 @@ const ComponentSubHeaderStrip = ({
                       )
                     }
                   />
-                </button>
+                </button>}
               </div>
             </div>
             <div className="d-flex align-items-center">
