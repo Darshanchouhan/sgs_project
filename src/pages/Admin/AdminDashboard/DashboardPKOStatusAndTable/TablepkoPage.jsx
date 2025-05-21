@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import dateStatusCheck from "../index";
 
 const TablepkoPage = (props) => {
   const navigate = useNavigate();
@@ -14,6 +13,21 @@ const TablepkoPage = (props) => {
 
   const navigateToPkoDetails = () => {
     navigate(`/adminpkodetails/${pkoItemIncoming?.["pko_id"]}`);
+  };
+
+  const dateStatusCheck = (date) => {
+    const dateComing = new Date(date);
+    const todayDate = new Date();
+
+    // Normalize both dates to remove time for accurate comparison
+    dateComing.setHours(0, 0, 0, 0);
+    todayDate.setHours(0, 0, 0, 0);
+
+    if (dateComing < todayDate) {
+      return "Closed";
+    } else {
+      return "Active";
+    }
   };
 
   const handleCheckboxSelect = () => {
