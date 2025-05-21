@@ -7,6 +7,7 @@ const Breadcrumb = ({
   componentName = "Default Component",
   pkoId = "N/A",
   description = "N/A",
+  isFormLocked,
 }) => {
   return (
     <div className="py-10 bg-color-light-shade">
@@ -61,10 +62,21 @@ const Breadcrumb = ({
             <button
               className="save-button fs-14 fw-600 border-0 px-4 py-12 h-44"
               style={{
-                backgroundColor: isFormFilled ? "#d43014" : "#cccccc",
-                color: isFormFilled ? "#ffffff" : "#666666",
+                backgroundColor: isFormLocked
+                  ? "#cccccc"
+                  : isFormFilled
+                    ? "#d43014"
+                    : "#cccccc",
+                color: isFormLocked
+                  ? "#666666"
+                  : isFormFilled
+                    ? "#ffffff"
+                    : "#666666",
+                cursor: isFormLocked ? "not-allowed" : "pointer",
+                opacity: isFormLocked ? 0.5 : 1,
               }}
-              onClick={onSaveClick}
+              onClick={!isFormLocked ? onSaveClick : undefined}
+              disabled={isFormLocked}
             >
               Save as Draft
             </button>

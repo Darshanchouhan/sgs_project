@@ -19,7 +19,7 @@ const PkgDataForm = () => {
     localStorage.getItem("component_page_state"),
   );
   const { pkgData, setPkgData } = useContext(PkgDataContext); // Use Context
-  const { skuData, setSkuData, setSkuDetails, setPkoData } =
+  const { skuData, setSkuData, setSkuDetails, setPkoData, skuDetails } =
     useContext(SkuContext);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -40,6 +40,12 @@ const PkgDataForm = () => {
   const [persistentValidationErrors, setPersistentValidationErrors] = useState(
     [],
   );
+  const skuPageState = JSON.parse(
+    localStorage.getItem("sku_page_state") || "{}",
+  );
+  const isPkoClosed = skuPageState?.isPkoClosed;
+  const isFormLocked =
+    isPkoClosed || ["Inreview", "Approved"].includes(skuDetails?.status);
 
   const [isFullValidation, setIsFullValidation] = useState(false); // Step 1: Create a flag
 
@@ -159,19 +165,11 @@ const PkgDataForm = () => {
     }
   };
 
-  // const handleSaveDraft = () => {
-  //   setIsPreviousValidation(false); // Reset Previous validation flag
-  //   handleSave(); // Directly save without validation
-
-  // };
-  // const handleSaveDraft = async () => {
-  //   setIsPreviousValidation(false);
-  //   await handleSave();
-  //   await updateSkuProgress();        // Save component data
-  //   await updatePkoProgress();    // Then update PKO progress using above logic
-  // };
-
   const handleSaveDraft = async () => {
+    if (isFormLocked) {
+      alert("This PKO is closed. You cannot edit or submit any form.");
+      return;
+    }
     try {
       setIsPreviousValidation(false);
 
@@ -1055,6 +1053,7 @@ const PkgDataForm = () => {
               placeholder={question.placeholder || "Enter value"}
               onChange={handleChange}
               tabIndex={0} // Make the input focusable
+              disabled={isFormLocked}
             />
           </div>
         );
@@ -1071,6 +1070,7 @@ const PkgDataForm = () => {
                   value={option}
                   checked={pkgData.answers[question.question_id] === option}
                   onChange={handleChange}
+                  disabled={isFormLocked}
                 />
                 {option}
               </label>
@@ -1086,6 +1086,7 @@ const PkgDataForm = () => {
               value={pkgData.answers[question.question_id] || ""}
               onChange={handleChange}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             >
               <option value="">Select an option</option>
               {question.dropdown_options
@@ -1142,6 +1143,7 @@ const PkgDataForm = () => {
                 }
               }}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             />
 
             {/* Dropdown for the unit selection */}
@@ -1163,6 +1165,7 @@ const PkgDataForm = () => {
                 }
               }}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -1213,6 +1216,7 @@ const PkgDataForm = () => {
                 }
               }}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             />
             <select
               className="bg-color-light-shade form-list w-25"
@@ -1229,6 +1233,7 @@ const PkgDataForm = () => {
                 }
               }}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             >
               {question.dropdown_options.map((option, index) => (
                 <option key={index} value={option}>
@@ -1271,6 +1276,7 @@ const PkgDataForm = () => {
                 }
               }}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             />
           </div>
         );
@@ -1317,6 +1323,7 @@ const PkgDataForm = () => {
                 }
               }}
               tabIndex={0} // Make focusable
+              disabled={isFormLocked}
             />
           </div>
         );
@@ -1409,6 +1416,10 @@ const PkgDataForm = () => {
     });
   };
   const handleSave = async (showAlert = true) => {
+    if (isFormLocked && !handleBackClick) {
+      console.warn("PKO is closed. Save skipped.");
+      return;
+    }
     if (!skuId || !skuData.componentId || !skuData.componentName || !pkoId) {
       console.error("Missing SKU ID, Component ID, Component Name, or PKO ID.");
       if (showAlert) alert("Cannot save data. Missing necessary information.");
@@ -1541,11 +1552,14 @@ const PkgDataForm = () => {
         skuId={skuId || "N/A"}
         description={description || "N/A"} // Pass Description
         componentName={componentName || "Default Component"}
+        isFormLocked={isFormLocked}
       />
-      <Autosave
-        saveFunction={autosavePkgData}
-        dependencies={[pkgData.answers]}
-      />
+      {!isFormLocked && (
+        <Autosave
+          saveFunction={autosavePkgData}
+          dependencies={[pkgData.answers]}
+        />
+      )}
       <div className="container-fluid px-5 pt-2 pb-100">
         <div className="row">
           <div className="col-12 col-md-3">

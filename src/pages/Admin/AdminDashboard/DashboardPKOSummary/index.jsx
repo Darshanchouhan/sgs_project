@@ -1,4 +1,5 @@
 import ProgressLoader from "../../../ProgressLoader";
+import { dateStatusCheck } from "../index";
 
 const DashboardPKOSummary = (props) => {
   const { pkoIncomingData, pkopProgressSummaryIncomingData } = props;
@@ -23,19 +24,19 @@ const DashboardPKOSummary = (props) => {
               <li className="d-flex align-items-center justify-content-between mb-3">
                 <p className="fs-14 text-color-typo-primary mb-0">Active</p>
                 <span className="fs-16 fw-600">
-                  {pkoIncomingData?.["active_pkos"]}
+                  {pkoIncomingData?.filter((item)=> dateStatusCheck(item?.["due_date"]) == "Active")?.length}
                 </span>
               </li>
               <li className="d-flex align-items-center justify-content-between mb-3">
                 <p className="fs-14 text-color-typo-primary mb-0">Closed</p>
                 <span className="fs-16 fw-600">
-                  {pkoIncomingData?.["closed_pkos"]}
+                  {pkoIncomingData?.filter((item)=> dateStatusCheck(item?.["due_date"]) == "Closed")?.length}
                 </span>
               </li>
               <li className="d-flex align-items-center justify-content-between mb-3 border-top pt-1">
                 <p className="fs-14 text-color-typo-primary mb-0">Total PKOs</p>
                 <span className="fs-16 fw-600">
-                  {pkoIncomingData?.["total_pkos"]}
+                  {pkoIncomingData?.length}
                 </span>
               </li>
             </ul>

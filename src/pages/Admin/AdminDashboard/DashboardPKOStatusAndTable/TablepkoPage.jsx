@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import dateStatusCheck from "../index";
 
 const TablepkoPage = (props) => {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ const TablepkoPage = (props) => {
         {pkoItemIncoming?.["skuformsapproved"].replace("/", " / ")} Approved
       </td>
       <td className="align-middle text-center">
-        {pkoItemIncoming?.["status"] === "Active" ? (
+        {dateStatusCheck(pkoItemIncoming?.["due_date"]) === "Active" ? (
           <span className="fs-14 fw-600 text-nowrap px-12 py-6 d-inline-block border rounded-pill active-pill">
             Active
           </span>
