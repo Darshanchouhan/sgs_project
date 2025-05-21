@@ -52,7 +52,7 @@ const AdminPKODetails = () => {
       <div className="d-flex">
         <DashboardSidebar />
         <div className="mainContent-holder w-100 h-100 bg-color-light-gray-shade">
-          <PKODetailsSubHeaderStrip pkoStatus={pkoDataIncoming?.status} />
+          <PKODetailsSubHeaderStrip pkoStatus={pkoDataIncoming?.due_date} />
           {/* Main Section */}
           <div className="container-fluid px-20 px-md-4 pt-30 admin-container-height d-flex flex-column">
             <PKODetailsPKOSummary pkoDataIncoming={pkoDataIncoming} />

@@ -177,6 +177,7 @@ const VendorDashboard = () => {
   const handleForwardClick = async (sku) => {
     try {
       const currentStatus = sku.status || "Not Started";
+      const isClosed = !isActive(pkoData?.duedate); // Use your existing helper
 
       // Case 1: If already Draft, Inreview or Approved → only navigate
       if (currentStatus !== "Not Started") {
@@ -187,6 +188,7 @@ const VendorDashboard = () => {
             skuDetails: sku,
             pkoData: pkoData || null,
             duedate: pkoData?.duedate || null,
+            isPkoClosed: isClosed,
           }),
         );
         navigate("/skus");
@@ -239,6 +241,14 @@ const VendorDashboard = () => {
   };
 
   const skuData = pkoData?.skus || []; // Ensure no errors if SKUs are missing
+
+  const isActive = (duedate) => {
+    if (!duedate) return false;
+    const due = new Date(duedate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Optional: normalize to ignore time
+    return due >= today;
+  };
 
   return (
     <div>
@@ -358,10 +368,8 @@ const VendorDashboard = () => {
                     </div>
                     <p className="fs-24 text-color-typo-primary fw-600 mb-0">
                       {vendorData?.pkos
-                        .filter(
-                          (pko) =>
-                            new Date(pko.duedate) > new Date(pko.startdate),
-                        )
+                        .filter((pko) => isActive(pko.duedate))
+
                         .length.toString()
                         .padStart(2, "0")}
                     </p>
@@ -385,10 +393,7 @@ const VendorDashboard = () => {
                     </div>
                     <p className="fs-24 text-color-typo-primary fw-600 mb-0">
                       {vendorData?.pkos
-                        .filter(
-                          (pko) =>
-                            new Date(pko.duedate) < new Date(pko.startdate),
-                        )
+                        .filter((pko) => !isActive(pko.duedate))
                         .length.toString()
                         .padStart(2, "0")}
                     </p>
@@ -407,23 +412,16 @@ const VendorDashboard = () => {
                 </h6>
                 <span
                   className={`fw-600 px-12 py-2 text-nowrap d-flex align-items-center w-114
-        ${
-          new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-            ? "  rounded-pill color-active-bg text-color-completed" // Green text for Active
-            : " rounded-pill bg-color-padding-label rounded-pill text-secondary fw-600" // Red pill for Closed
-        }`}
+    ${
+      isActive(pkoData?.duedate)
+        ? "rounded-pill color-active-bg text-color-completed"
+        : "rounded-pill bg-color-padding-label text-secondary fw-600"
+    }`}
                 >
                   <span
-                    className={`circle me-2 
-      ${
-        new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-          ? "bg-color-completed" // Green circle for Active
-          : "" // Gray circle for Closed
-      }`}
+                    className={`circle me-2 ${isActive(pkoData?.duedate) ? "bg-color-completed" : ""}`}
                   ></span>
-                  {new Date(pkoData?.duedate) >= new Date(pkoData?.startdate)
-                    ? "Active"
-                    : "Closed"}
+                  {isActive(pkoData?.duedate) ? "Active" : "Closed"}
                 </span>
                 <div className="d-flex flex-column h-100 align-items-start justify-content-end">
                   <div className="d-flex flex-column p-3 mt-12 bg-color-light-gray text-nowrap rounded-1 border border-color-dark-border">
@@ -745,37 +743,48 @@ const VendorDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {vendorData?.pkos
-                      .filter(
-                        (pko) =>
-                          new Date(pko.duedate) >= new Date(pko.startdate),
-                      )
-                      .map((pko) => {
-                        const pkoSkus = pkoData?.skus || []; // Get SKUs for this PKO
-                        return (
-                          <tr key={pko.pko_id}>
-                            <td>{pko.pko_id}</td>
-                            <td>{pko.businessunit || "N/A"}</td>
-                            <td>{pkoSkus.length || 0}</td>{" "}
-                            {/* Correct SKU count */}
-                            <td>
-                              {pko.startdate
-                                ? new Date(pko.startdate).toLocaleDateString(
-                                    "en-GB",
-                                  )
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {pko.duedate
-                                ? new Date(pko.duedate).toLocaleDateString(
-                                    "en-GB",
-                                  )
-                                : "N/A"}
-                            </td>
-                            <td>Active</td>
-                          </tr>
-                        );
-                      })}
+                    {vendorData?.pkos.filter((pko) => isActive(pko.duedate))
+                      .length > 0 ? (
+                      vendorData?.pkos
+                        .filter((pko) => isActive(pko.duedate))
+                        .map((pko) => {
+                          const pkoSkus = pkoData?.skus || [];
+                          return (
+                            <tr key={pko.pko_id}>
+                              <td>{pko.pko_id}</td>
+                              <td>{pko.businessunit || "N/A"}</td>
+                              <td>{pkoSkus.length || 0}</td>
+                              <td>
+                                {pko.startdate
+                                  ? new Date(pko.startdate).toLocaleDateString(
+                                      "en-GB",
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td>
+                                {pko.duedate
+                                  ? new Date(pko.duedate).toLocaleDateString(
+                                      "en-GB",
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td>Active</td>
+                            </tr>
+                          );
+                        })
+                    ) : (
+                      <tr>
+                        <td colSpan="6">
+                          <div
+                            className="alert alert-info text-center p-4 m-0"
+                            role="alert"
+                          >
+                            <i className="bi bi-info-circle me-2"></i>
+                            There are currently no active PKOs to display.
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -790,9 +799,8 @@ const VendorDashboard = () => {
               tabIndex="0"
             >
               <div className="active-pko-tbl">
-                {vendorData?.pkos.filter(
-                  (pko) => new Date(pko.duedate) < new Date(pko.startdate),
-                ).length > 0 ? (
+                {vendorData?.pkos.filter((pko) => !isActive(pko.duedate))
+                  .length > 0 ? (
                   <table className="table table-bordered fs-14">
                     <thead>
                       <tr>
@@ -818,10 +826,7 @@ const VendorDashboard = () => {
                     </thead>
                     <tbody>
                       {vendorData?.pkos
-                        .filter(
-                          (pko) =>
-                            new Date(pko.duedate) < new Date(pko.startdate),
-                        )
+                        .filter((pko) => !isActive(pko.duedate))
                         .map((pko) => {
                           const pkoSkus = pkoData?.skus || []; // Get SKUs for this PKO
                           return (

@@ -68,6 +68,12 @@ const Sku_Page = () => {
   const dropdownRef = useRef(null); // Create a ref for the dropdown
   const encodedPkoId = encodeURIComponent(pkoId);
   const [activeComponentId, setActiveComponentId] = useState(null);
+  const skuPageState = JSON.parse(
+    localStorage.getItem("sku_page_state") || "{}",
+  );
+  const isPkoClosed = skuPageState?.isPkoClosed;
+  const isFormLocked =
+    isPkoClosed || ["Inreview", "Approved"].includes(skuDetails?.status);
 
   const handleComponentTypeChange = (e) => {
     setSelectedComponentType(e.target.value);
@@ -864,6 +870,11 @@ const Sku_Page = () => {
     showAlert = true,
     isBackClick = false,
   ) => {
+    if (isFormLocked && !isBackClick) {
+      console.warn("PKO is closed. Save skipped.");
+      return;
+    }
+
     if (!skuId || !pkoId) {
       console.error("SKU ID or PKO ID is missing");
       return;
@@ -1159,6 +1170,10 @@ const Sku_Page = () => {
   };
 
   const handleSaveEdit = async (index) => {
+    // if (isFormLocked) {
+    //   alert("This PKO is closed. You cannot edit or submit any form.");
+    //   return;
+    // }
     const updatedComponents = [...skuData.components];
     updatedComponents[index].name = editedComponentName;
 
@@ -1314,6 +1329,7 @@ const Sku_Page = () => {
                 handleInputChange(question.question_id, e.target.value)
               }
               tabIndex={0} // Make the input focusable
+              disabled={isFormLocked}
             />
             {question.instructions && (
               <Tooltip
@@ -1337,6 +1353,7 @@ const Sku_Page = () => {
               onWheel={(e) => e.target.blur()}
               onKeyDown={handleKeyDown} // Restrict invalid key presses
               tabIndex={0} // Make the input focusable
+              disabled={isFormLocked}
             />
             {question.instructions && (
               <Tooltip
@@ -1459,6 +1476,7 @@ const Sku_Page = () => {
                   }
                 }}
                 tabIndex={0} // Make the input focusable
+                disabled={isFormLocked}
               />
 
               {/* Unit Dropdown */}
@@ -1469,6 +1487,7 @@ const Sku_Page = () => {
                     `${question.question_id}_unit`
                   ] || question.dropdown_options[0] // Ensure default unit selection
                 }
+                disabled={isFormLocked}
                 onChange={(e) => {
                   const newUnit = e.target.value;
 
@@ -1544,6 +1563,7 @@ const Sku_Page = () => {
               value={skuData.dimensionsAndWeights[question.question_id] || ""}
               onChange={handleChange}
               tabIndex={0} // Make the dropdown focusable
+              disabled={isFormLocked}
             >
               <option value="">
                 {question.placeholder || "Select an option"}
@@ -1676,8 +1696,13 @@ const Sku_Page = () => {
               </p>
 
               <button
-                className="save-button text-white bg-secondary ms-4 me-12 fs-14 fw-600 border-0 px-4 py-12"
-                onClick={saveSkuData}
+                className={`save-button ms-4 me-12 fs-14 fw-600 border-0 px-4 py-12 ${
+                  isFormLocked
+                    ? "bg-secondary text-white opacity-50 cursor-not-allowed"
+                    : "bg-secondary text-white"
+                }`}
+                onClick={!isFormLocked ? saveSkuData : undefined}
+                disabled={isFormLocked}
               >
                 Save as Draft
               </button>
@@ -1688,10 +1713,11 @@ const Sku_Page = () => {
                   skuData.components.every(
                     (comp) => comp.form_status === "Completed",
                   )
-                    ? "bg-secondary text-white" // Apply "Save as Draft" button color
+                    ? "bg-secondary text-white"
                     : ""
-                }`}
-                onClick={handleValidateAndSubmit}
+                } ${isFormLocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={!isFormLocked ? handleValidateAndSubmit : undefined}
+                disabled={isFormLocked}
               >
                 Validate & Submit
               </button>
@@ -1708,21 +1734,25 @@ const Sku_Page = () => {
           </div>
         </div>
       </div>
-      <Autosave saveFunction={autosaveSkuData} dependencies={[skuData]} />
+      {!isFormLocked && (
+        <Autosave saveFunction={autosaveSkuData} dependencies={[skuData]} />
+      )}
       <div className="d-flex align-items-center justify-content-end px-40 mt-2">
-        <button
-          type="button"
-          className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center"
-          data-bs-toggle="modal"
-          data-bs-target="#importSkuDataModal"
-        >
-          <img
-            src="/assets/images/import-icon.svg"
-            className="me-2"
-            alt="import-icon"
-          />
-          Import data from other SKUs
-        </button>
+        {!isFormLocked && (
+          <button
+            type="button"
+            className="btn text-primary bg-transparent fs-14 fw-600 p-0 d-flex align-items-center"
+            data-bs-toggle="modal"
+            data-bs-target="#importSkuDataModal"
+          >
+            <img
+              src="/assets/images/import-icon.svg"
+              className="me-2"
+              alt="import-icon"
+            />
+            Import data from other SKUs
+          </button>
+        )}
       </div>
 
       <Importdata
@@ -1851,6 +1881,7 @@ const Sku_Page = () => {
                       <button
                         className="btn btn-outline-primary"
                         onClick={handleAddProductImageClick}
+                        disabled={isFormLocked} //disable if PKO is closed
                       >
                         + Add/View Images
                       </button>
@@ -1891,6 +1922,7 @@ const Sku_Page = () => {
                             isCancelDisabled: false,
                           }));
                         }}
+                        disabled={isFormLocked} //disable if PKO is closed
                       >
                         + Add SKU Components
                       </button>
@@ -2040,6 +2072,7 @@ const Sku_Page = () => {
                                         onClick={() =>
                                           handleEditComponent(index)
                                         }
+                                        disabled={isFormLocked} //disable if PKO is closed
                                       >
                                         <img
                                           src="/assets/images/Edit.svg"
@@ -2060,6 +2093,7 @@ const Sku_Page = () => {
                                         onClick={() => {
                                           setActiveComponentId(component.id); //  Set the component ID to be replaced
                                         }}
+                                        disabled={isFormLocked} //disable if PKO is closed
                                       >
                                         <img
                                           src="/assets/images/import-icon-black.svg"
@@ -2078,6 +2112,7 @@ const Sku_Page = () => {
                                           setComponentToDelete(component);
                                           setShowDeletePopup(true);
                                         }}
+                                        disabled={isFormLocked} //disable if PKO is closed
                                       >
                                         <img
                                           src="/assets/images/delete-bin.svg"
@@ -2112,6 +2147,7 @@ const Sku_Page = () => {
                           id="dropdown"
                           value={selectedComponentType}
                           onChange={handleComponentTypeChange}
+                          disabled={isFormLocked} //disable if PKO is closed
                         >
                           <option value="" disabled>
                             Component Type
@@ -2132,6 +2168,7 @@ const Sku_Page = () => {
                               newComponent: e.target.value,
                             }))
                           }
+                          disabled={isFormLocked} //disable if PKO is closed
                         />
                         <div
                           className="d-flex align-items-center cursor-pointer text-color-primary"

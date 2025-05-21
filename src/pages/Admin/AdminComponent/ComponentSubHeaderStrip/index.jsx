@@ -34,7 +34,8 @@ const ComponentSubHeaderStrip = ({
       // Calculate next index (wrap to 0 if at end)
       stepIndex = (currentIndex + 1) % componentsAllId.length;
     } else {
-      stepIndex = (currentIndex - 1 + componentsAllId.length) % componentsAllId.length;
+      stepIndex =
+        (currentIndex - 1 + componentsAllId.length) % componentsAllId.length;
     }
     return componentsAllId[stepIndex];
   };
@@ -145,39 +146,45 @@ const ComponentSubHeaderStrip = ({
                 </ol>
               </nav>
               <div className="d-flex align-items-center mt-2">
-                {componentsAllId?.length > 1 && <button
-                  type="button"
-                  className="btn p-0 border-none bg-transparent"
+                {componentsAllId?.length > 1 && (
+                  <button
+                    type="button"
+                    className="btn p-0 border-none bg-transparent"
+                  >
+                    <img
+                      src="/assets/images/back-action-icon.svg"
+                      style={{ width: "36px", height: "36px" }}
+                      alt="Back Icon"
+                      onClick={() =>
+                        navigate(
+                          `/admincomponent/${pkoId}/${skuId}/${handleClick("Previous")}`,
+                        )
+                      }
+                    />
+                  </button>
+                )}
+                <h2
+                  className={`fs-24 fw-600 text-color-close-icon-box ${componentsAllId?.length > 1 ? "mx-3" : "mx-0"} mb-0`}
                 >
-                  <img
-                    src="/assets/images/back-action-icon.svg"
-                    style={{ width: "36px", height: "36px" }}
-                    alt="Back Icon"
-                    onClick={() =>
-                      navigate(
-                        `/admincomponent/${pkoId}/${skuId}/${handleClick("Previous")}`,
-                      )
-                    }
-                  />
-                </button>}
-                <h2 className={`fs-24 fw-600 text-color-close-icon-box ${componentsAllId?.length > 1 ? "mx-3" : "mx-0"} mb-0`}>
                   {skuComponentDataIncoming?.component_type}
                 </h2>
-                {componentsAllId?.length > 1 && <button
-                  type="button"
-                  className="btn p-0 border-none bg-transparent"
-                >
-                  <img
-                    src="/assets/images/forward-action-icon.svg"
-                    style={{ width: "36px", height: "36px" }}
-                    alt="Back Icon"
-                    onClick={() =>
-                      navigate(
-                        `/admincomponent/${pkoId}/${skuId}/${handleClick("Next")}`,
-                      )
-                    }
-                  />
-                </button>}
+                {componentsAllId?.length > 1 && (
+                  <button
+                    type="button"
+                    className="btn p-0 border-none bg-transparent"
+                  >
+                    <img
+                      src="/assets/images/forward-action-icon.svg"
+                      style={{ width: "36px", height: "36px" }}
+                      alt="Back Icon"
+                      onClick={() =>
+                        navigate(
+                          `/admincomponent/${pkoId}/${skuId}/${handleClick("Next")}`,
+                        )
+                      }
+                    />
+                  </button>
+                )}
               </div>
             </div>
             <div className="d-flex align-items-center">
