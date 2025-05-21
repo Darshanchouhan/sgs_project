@@ -42,8 +42,7 @@ const PKODetailsPKOSummary = ({ pkoDataIncoming }) => {
               <li className="d-flex align-items-center mb-3">
                 <p className="fs-14 text-color-labels mb-0 w-50">Due Date</p>
                 <span className="fs-14 fw-600 text-color-typo-primary">
-                  {pkoDataIncoming?.due_date} ({pkoDataIncoming?.days_left} days
-                  left)
+                  {pkoDataIncoming?.due_date} ({pkoDataIncoming?.days_left})
                 </span>
               </li>
             </ul>
