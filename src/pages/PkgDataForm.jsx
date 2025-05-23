@@ -51,19 +51,51 @@ const PkgDataForm = () => {
 
   console.log(skuData, description);
 
+  // const handleNextClick = () => {
+  //   setIsPreviousValidation(false);
+  //   const sectionKeys = Object.keys(pkgData.sections);
+  //   const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+
+  //   // Get the latest unanswered questions for the current section
+  //   const validationResults = validateCurrentSection();
+  //   setUnansweredQuestions(validationResults); // Update state with validation results
+
+  //   if (validationResults.length > 0) {
+  //     setShowValidationModal(true); // Show the validation modal only if there are errors
+  //   } else if (currentIndex < sectionKeys.length - 1) {
+  //     // If no unanswered questions, proceed to the next section
+  //     const nextSectionKey = sectionKeys[currentIndex + 1];
+  //     setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey }));
+  //     sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
+  //       behavior: "smooth",
+  //       block: "start",
+  //     });
+  //   }
+  // };
+
   const handleNextClick = () => {
+    if (isFormLocked) {
+      const sectionKeys = Object.keys(pkgData.sections);
+      const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
+      if (currentIndex < sectionKeys.length - 1) {
+        const nextSectionKey = sectionKeys[currentIndex + 1];
+        setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey }));
+        sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+      return;
+    }
+
     setIsPreviousValidation(false);
     const sectionKeys = Object.keys(pkgData.sections);
     const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
-
-    // Get the latest unanswered questions for the current section
     const validationResults = validateCurrentSection();
-    setUnansweredQuestions(validationResults); // Update state with validation results
-
+    setUnansweredQuestions(validationResults);
     if (validationResults.length > 0) {
-      setShowValidationModal(true); // Show the validation modal only if there are errors
+      setShowValidationModal(true);
     } else if (currentIndex < sectionKeys.length - 1) {
-      // If no unanswered questions, proceed to the next section
       const nextSectionKey = sectionKeys[currentIndex + 1];
       setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey }));
       sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
@@ -74,6 +106,11 @@ const PkgDataForm = () => {
   };
 
   const handlePreviousClick = () => {
+    if (isFormLocked) {
+      proceedToPreviousSection();
+      return;
+    }
+
     setIsPreviousValidation(true); // Indicate this is a Previous operation
     const validationResults = validateCurrentSection(); // Validate current section
     setUnansweredQuestions(validationResults); // Update unanswered questions state
@@ -807,6 +844,12 @@ const PkgDataForm = () => {
   };
 
   const handleBackToSkuClick = async () => {
+    if (isFormLocked) {
+      // Skip validation completely
+      await handleSave(false); // Save data silently
+      handleBackClick(); // Navigate back
+      return;
+    }
     setIsFullValidation(true);
     const allValidationResults = validateAllSections();
     setUnansweredQuestions(allValidationResults);
@@ -1002,7 +1045,9 @@ const PkgDataForm = () => {
   const renderField = (question) => {
     const handleChange = (e) =>
       handleInputChange(question.question_id, e.target.value);
-    const hasError = persistentValidationErrors.includes(question.question_id);
+    const hasError =
+      !isFormLocked &&
+      persistentValidationErrors.includes(question.question_id);
     // Apply conditional styles based on validation errors
     const inputClass = hasError ? "input-error" : "";
 
@@ -1345,9 +1390,9 @@ const PkgDataForm = () => {
       if (question.dependent_question && !isDependentVisible) {
         return null; // Skip rendering if conditions aren't met
       }
-      const hasError = persistentValidationErrors.includes(
-        question.question_id,
-      );
+      const hasError =
+        !isFormLocked &&
+        persistentValidationErrors.includes(question.question_id);
       // Info Icon with Instructions
       const infoIcon = checkImagePath(question.instructions) ? (
         <InfoOutlinedIcon

@@ -8,21 +8,20 @@ import DashboardPKOStatusAndTable from "./DashboardPKOStatusAndTable";
 import axiosInstance from "../../../services/axiosInstance";
 import HeaderAdmin from "./DashboardHeader";
 
-export const dateStatusCheck=(date)=>{
-    const dateComing = new Date(date);
-    const todayDate = new Date();
+export const dateStatusCheck = (date) => {
+  const dateComing = new Date(date);
+  const todayDate = new Date();
 
-    // Normalize both dates to remove time for accurate comparison
-    dateComing.setHours(0, 0, 0, 0);
-    todayDate.setHours(0, 0, 0, 0);
+  // Normalize both dates to remove time for accurate comparison
+  dateComing.setHours(0, 0, 0, 0);
+  todayDate.setHours(0, 0, 0, 0);
 
-     if(dateComing<todayDate){
-      return "Closed";
-     }
-     else{
-      return "Active";
-     }
+  if (dateComing < todayDate) {
+    return "Closed";
+  } else {
+    return "Active";
   }
+};
 
 const AdminDashboard = () => {
   const [dasboardAPIData, setDasboardAPIData] = useState();

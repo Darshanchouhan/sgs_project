@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import "./../styles/style.css";
 import axiosInstance from "../services/axiosInstance";
-import { VendorContext } from "./VendorContext"; // Import Vendor Context
 import ModalLoad from "./ModalLoad";
 import Header from "../components/Header";
 import Pko_Chart from "./Pko_Chart";
@@ -50,8 +49,14 @@ const VendorDashboard = () => {
 
         // Check for previously selected PKO ID in localStorage
         const storedPkoId = localStorage.getItem("selectedPkoId");
-        const defaultPkoId =
-          storedPkoId || data[cvsSupplier]?.pkos[0]?.pko_id || "";
+        // const defaultPkoId =
+        //   storedPkoId || data[cvsSupplier]?.pkos[0]?.pko_id || "";
+        const pkos = data[cvsSupplier]?.pkos || [];
+        const sortedByDueDate = pkos
+          .filter((pko) => !!pko.duedate)
+          .sort((a, b) => new Date(b.duedate) - new Date(a.duedate));
+
+        const defaultPkoId = storedPkoId || sortedByDueDate[0]?.pko_id || "";
 
         setSelectedPkoId(defaultPkoId);
       } catch (error) {
@@ -80,24 +85,13 @@ const VendorDashboard = () => {
         if (pkoDetails) {
           console.log("Fetched PKO Details:", pkoDetails);
 
-          setPkoData(pkoDetails);
+          setPkoData({
+            ...pkoDetails,
+            skus: (pkoDetails.skus || []).sort((a, b) =>
+              a.sku_id.localeCompare(b.sku_id),
+            ),
+          });
 
-          // Calculate the average progress
-          // const skus = pkoDetails.skus || [];
-          // console.log("SKUs for this PKO:", skus);
-
-          // const totalProgress = skus.reduce(
-          //   (acc, sku) => acc + (sku.sku_progress || 0),
-          //   0
-          // );
-          // console.log("Total Progress of all SKUs:", totalProgress);
-
-          // const averageProgress =
-          //   skus.length > 0 ? totalProgress / skus.length : 0;
-          // console.log("Calculated Average Progress:", averageProgress);
-
-          // setOverallProgress(averageProgress);
-          //Fetch actual PKO progress from backend
           try {
             const progressRes = await axiosInstance.get(
               `/update-pko-progress/?pko_id=${selectedPkoId}`,
@@ -179,7 +173,7 @@ const VendorDashboard = () => {
       const currentStatus = sku.status || "Not Started";
       const isClosed = !isActive(pkoData?.duedate); // Use your existing helper
 
-      // Case 1: If already Draft, Inreview or Approved → only navigate
+      //  If already Draft, Inreview or Approved → only navigate
       if (currentStatus !== "Not Started") {
         localStorage.setItem(
           "sku_page_state",
@@ -189,13 +183,15 @@ const VendorDashboard = () => {
             pkoData: pkoData || null,
             duedate: pkoData?.duedate || null,
             isPkoClosed: isClosed,
+            isFormLocked:
+              isClosed || ["Inreview", "Approved"].includes(currentStatus),
           }),
         );
         navigate("/skus");
         return;
       }
 
-      // Case 2: If Not Started → send notification + change status to Draft
+      // If Not Started → send notification + change status to Draft
       const cvsSupplier = localStorage.getItem("cvs_supplier");
       await axiosInstance.post("/notifications/", {
         status_change: "NotStartedToDraft",
@@ -621,6 +617,7 @@ const VendorDashboard = () => {
                     const status = sku.status || "Not Started";
                     return status === selectedSkuStatus;
                   })
+                  .sort((a, b) => a.sku_id.localeCompare(b.sku_id))
                   .map((sku) => {
                     const status = sku.status || "Not Started"; // Fetch updated status
                     return (

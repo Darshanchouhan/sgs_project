@@ -11586,6 +11586,10 @@ fieldset:disabled .btn {
   padding-right: 1.875rem !important;
 }
 
+.pe-35 {
+  padding-right: 2.188rem !important;
+}
+
 .pe-40 {
   padding-right: 2.5rem !important;
 }
@@ -23202,16 +23206,6 @@ input[type="radio"] {
   max-height: 68vh;
   overflow-y: auto;
 }
-#offcanvasVendorCommentPanel .repliesBlock::before {
-  /* content: "";
-  width: 1.5px;
-  height: 56%;
-  background-color: #848383;
-  display: inline-block;
-  position: absolute;
-  top: 30px;
-  left: 10px; */
-}
 #offcanvasVendorCommentPanel .repliedBox {
   border-left: 1.5px solid #848383;
 }
@@ -23242,6 +23236,22 @@ input[type="radio"] {
 }
 .form-floating > .form-select ~ label::after {
   background-color: transparent !important;
+}
+#offcanvasAdminCommentPanel {
+  width: 82%;
+}
+#offcanvasAdminCommentPanel #sendCommentTextareaAdmin {
+  padding-bottom: 42px !important;
+}
+#offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder  {
+  min-height: 20vh !important;
+  max-height: 52vh !important;
+  overflow-y: auto !important;
+}
+@media (min-width: 1650px) {
+  #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder  {
+    max-height: 62vh !important;
+  }
 }
 /* Custom css end (Azahar) */
 
