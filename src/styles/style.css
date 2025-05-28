@@ -23248,9 +23248,21 @@ input[type="radio"] {
   max-height: 52vh !important;
   overflow-y: auto !important;
 }
+
+#offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holdeFilterOpen  {
+  min-height: 20vh !important;
+  max-height: 37.5vh !important;
+  overflow-y: auto !important;
+}
 @media (min-width: 1650px) {
   #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder  {
     max-height: 62vh !important;
+  }
+}
+
+@media (min-width: 1650px) {
+  #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holdeFilterOpen  {
+    max-height: 56vh !important;
   }
 }
 /* Custom css end (Azahar) */
