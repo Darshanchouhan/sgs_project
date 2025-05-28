@@ -540,7 +540,7 @@ const AdminCommentPanel = () => {
             </button>
           )}
         </div>
-        <div className="mb-2 table-responsive AdminCommentPanelMainTable-holder">
+        <div className={`mb-2 table-responsive ${!(filterSupplierName !== "Select Supplier Name" ||  filterSelectedPkoID !== "Select PKO ID" || filterSelectedSkuID !== "Select SKU ID") ? "AdminCommentPanelMainTable-holder" : "AdminCommentPanelMainTable-holdeFilterOpen"}`}>
           <table className="table table-bordered fs-14 fw-400 text-color-typo-primary mb-0">
             <thead className="sticky-top">
               <tr>
