@@ -16,6 +16,6 @@ export default defineConfig({
     port: 3002, // Set the port to 3002
   },
   build: {
-    outDir: "dist", // Set your custom build folder name
+    outDir: "build", // Set your custom build folder name
   },
 });
