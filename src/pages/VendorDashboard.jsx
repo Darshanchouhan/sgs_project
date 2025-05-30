@@ -21,8 +21,47 @@ const VendorDashboard = () => {
   const navigate = useNavigate();
   const [overallProgress, setOverallProgress] = useState(0); // State for overall progress
   const [activeTab, setActiveTab] = useState("active"); // Default to Active PKOs
+  const [commentDropdownData, setCommentDropdownData] = useState({
+    pkos: [],
+    skus: [],
+    componentsBySku: {}, // { sku_id: [component1, component2] }
+  });
 
-  // Function to close the modal
+  useEffect(() => {
+    const preloadCommentDropdownData = async () => {
+      try {
+        const supplierId = localStorage.getItem("cvs_supplier");
+        const vendorRes = await axiosInstance.get(`vendors/${supplierId}`);
+        const vendor = vendorRes.data?.[supplierId];
+        const pkos = vendor?.pkos || [];
+
+        const pkoRes = await axiosInstance.get("pkos/");
+        const pkoMap = pkoRes.data;
+
+        const allSkus = [];
+
+        pkos.forEach((pko) => {
+          const pkoDetails = pkoMap[pko.pko_id];
+          if (pkoDetails?.skus?.length) {
+            pkoDetails.skus.forEach((sku) =>
+              allSkus.push({ ...sku, pko_id: pko.pko_id }),
+            );
+          }
+        });
+
+        setCommentDropdownData({
+          pkos,
+          skus: allSkus,
+          componentsBySku: {}, // Now unused
+        });
+      } catch (err) {
+        console.error("Error loading dropdown data for comment panel", err);
+      }
+    };
+
+    preloadCommentDropdownData();
+  }, []);
+
   const closeModal = () => {
     localStorage.setItem("loadCount", 1);
     setIsModalVisible(false); // Close the modal
@@ -927,7 +966,11 @@ const VendorDashboard = () => {
         closeModal={closeModal}
       />
 
-      <VendorCommentPanel />
+      <VendorCommentPanel
+        dropdownData={commentDropdownData}
+        initialSelectedPkoId={selectedPkoId}
+        initialFilterPkoId={selectedPkoId}
+      />
     </div>
   );
 };
