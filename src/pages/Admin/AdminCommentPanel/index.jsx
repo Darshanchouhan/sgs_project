@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../../../services/axiosInstance";
 import { useParams } from "react-router-dom";
 import CommentRowParentMessage from "./CommentRowParentMessage";
-import {getLatestTimestampFromSameSender} from "./CommentRowParentMessage"
+import { getLatestTimestampFromSameSender } from "./CommentRowParentMessage";
+import {nameFormation } from "./CommentRowParentMessage";
 
 const AdminCommentPanel = () => {
   const [commentGetAPIData, SetCommentGetAPIData] = useState([]);
+  const [sortedCommentData, setSortedCommentData] = useState([]);
   const { pkoId, skuId } = useParams();
   const [pkoWholeDataList, setPKOWholeDataList] = useState();
   const [pkoDataList, setPkoDataList] = useState(undefined);
@@ -29,31 +31,108 @@ const AdminCommentPanel = () => {
   );
   const [textComment, setTextComment] = useState("");
   const [collapseFilterVal, setCollapseFilterVal] = useState(true);
+  const [loader, setLoader] = useState({
+    loadingSupplierCommentCall: false,
+    loadingCommentCall: false,
+    loadingPkoCall: false,
+    loadingSkuCall: false,
+    loadingSubmit: false,
+  });
+  const [pkoSortAsc, setPkoSortAsc] = useState(true);
+  const [nameSortAsc, setNameSortAsc] = useState(true);
+  const [skuSortAsc, setSkuSortAsc] = useState(true);
+  const [dateSortAsc, setDateSortAsc] = useState(true);
+
+  useEffect(() => {
+    setSortedCommentData(
+      commentGetAPIData?.filter((item) => item?.is_deleted === false)?.length >
+        0 &&
+        commentGetAPIData
+          ?.filter((item) => item?.is_deleted === false)
+          ?.sort((a, b) => {
+            const timeA = new Date(getLatestTimestampFromSameSender(a));
+            const timeB = new Date(getLatestTimestampFromSameSender(b));
+            return timeB - timeA; // Descending order
+          })
+    );
+  }, [commentGetAPIData]);
+
+  useEffect(() => {
+    const offcanvasElement = document.getElementById(
+      "offcanvasAdminCommentPanel"
+    );
+
+    const handleOffcanvasOpen = async () => {
+      // Reset all inputs
+      setTextComment("");
+      setSelectedSkuID("Select SKU ID");
+      setSelectedPkoID("Select PKO ID");
+      setSelectedComponentID("Select Component ID");
+      setFilterSupplierName("Select Supplier Name");
+      apiGetPko();
+
+      if (pkoId) {
+        setFilterSelectedPkoID(pkoId);
+        setCollapseFilterVal(false);
+        apiGetSKU(pkoId, "filterData");
+        if (skuId) {
+          setFilterSelectedSkuID(skuId);
+          setCollapseFilterVal(false);
+          await apiGetCallComment(pkoId, skuId);
+        } else {
+          setFilterSelectedSkuID("Select SKU ID");
+          await apiGetCallComment(pkoId);
+        }
+      } else {
+        setFilterSelectedPkoID("Select PKO ID");
+        await apiGetCallComment();
+      }
+    };
+
+    if (offcanvasElement) {
+      offcanvasElement.addEventListener(
+        "shown.bs.offcanvas",
+        handleOffcanvasOpen
+      );
+    }
+
+    return () => {
+      if (offcanvasElement) {
+        offcanvasElement.removeEventListener(
+          "shown.bs.offcanvas",
+          handleOffcanvasOpen
+        );
+      }
+    };
+  }, [pkoId, skuId]);
 
   const apiGetCallComment = async (pko_id, sku_id) => {
+    setLoader((prev) => ({ ...prev, loadingCommentCall: true }));
     try {
       const response = await axiosInstance.get(
         `/comments${sku_id ? `/?sku_id=${sku_id}&pko_id=${pko_id}` : pko_id ? `/?pko_id=${pko_id}` : ""}`
       );
       SetCommentGetAPIData(response.data);
+      setLoader((prev) => ({ ...prev, loadingCommentCall: false }));
     } catch (err) {
       console.log(err, "error from comment block");
     }
   };
 
   const apiGetSupplierCallComment = async (cvs_supplier) => {
+    setLoader((prev) => ({ ...prev, loadingSupplierCommentCall: true }));
     try {
       const response = await axiosInstance.get(
         `/comments/?cvs_supplier=${cvs_supplier}`
       );
       SetCommentGetAPIData(response.data);
+      setLoader((prev) => ({ ...prev, loadingSupplierCommentCall: false }));
     } catch (err) {
       console.log(err, "error from comment block");
     }
   };
 
   const supplierListGen = (dataIncoming) => {
-    console.log("inside supplier");
     // Unique cvs_supplier
 
     const uniqueCVSSupplierDetails = [];
@@ -72,31 +151,19 @@ const AdminCommentPanel = () => {
   };
 
   const apiGetPko = async () => {
+    setLoader((prev) => ({ ...prev, loadingPkoCall: true }));
     try {
       const response = await axiosInstance.get(`/pko-dashboard/`);
       setPkoDataList(response.data?.pko_details?.map((item) => item?.pko_id));
       setPKOWholeDataList(response.data?.pko_details);
       supplierListGen(response.data?.pko_details);
+      setLoader((prev) => ({ ...prev, loadingPkoCall: false }));
     } catch (err) {
       console.log(err, "error from comment block");
     }
   };
 
   const supplierFilterAccToPKO = (pkoIDComing) => {
-    console.log(
-      pkoWholeDataList,
-      pkoWholeDataList
-        ?.filter((item) => {
-          return item.pko_id === pkoIDComing;
-        })
-        ?.map((item) => {
-          return {
-            cvs_supplier: item?.cvs_supplier,
-            supplier_name: item?.supplier_name,
-          };
-        }),
-      "first instance"
-    );
     pkoWholeDataList &&
       setSupplierNameFilterDataList(
         pkoWholeDataList
@@ -130,31 +197,6 @@ const AdminCommentPanel = () => {
     setCollapseFilterVal(true);
   };
 
-  const filterAPIAsync = async () => {
-    setSelectedPkoID("Select PKO ID");
-    setSelectedSkuID("Select SKU ID");
-    setSelectedComponentID("Select Component ID");
-    defaultFilter();
-    apiGetPko();
-    if (pkoId) {
-      apiGetSKU(pkoId, "filterData");
-      setCollapseFilterVal(false);
-      setFilterSelectedPkoID(pkoId);
-      if (skuId) {
-        setFilterSelectedSkuID(skuId);
-        await apiGetCallComment(pkoId, skuId);
-      } else {
-        await apiGetCallComment(pkoId);
-      }
-    } else {
-      apiGetCallComment();
-    }
-  };
-
-  useEffect(() => {
-    filterAPIAsync();
-  }, [pkoId, skuId]);
-
   useEffect(() => {
     if (pkoWholeDataList && pkoId) {
       supplierFilterAccToPKO(pkoId);
@@ -162,6 +204,7 @@ const AdminCommentPanel = () => {
   }, [pkoId, pkoWholeDataList]);
 
   const apiGetSKU = async (pko_id, dataType) => {
+    setLoader((prev) => ({ ...prev, loadingSkuCall: true }));
     try {
       const response = await axiosInstance.get(
         `/pko-dashboard-skulist/${pko_id}/`
@@ -173,6 +216,7 @@ const AdminCommentPanel = () => {
         setSelectedComponentID("Select Component ID");
         setSkuDataList(response.data?.skus?.map((item) => item?.sku_id));
       }
+      setLoader((prev) => ({ ...prev, loadingSkuCall: false }));
     } catch (err) {
       console.log(err, "error from comment block");
     }
@@ -254,6 +298,7 @@ const AdminCommentPanel = () => {
   };
 
   const handleSubmitComment = async () => {
+    setLoader((prev) => ({ ...prev, loadingSubmit: true }));
     try {
       await axiosInstance.post(`/comments/`, {
         pko_id: selectedPkoID === "Select PKO ID" ? "" : selectedPkoID,
@@ -273,6 +318,7 @@ const AdminCommentPanel = () => {
       setComponentDataList(setComponentDataList);
       setSkuDataList(undefined);
       setTextComment("");
+      setLoader((prev) => ({ ...prev, loadingSubmit: false }));
     } catch (err) {
       console.log(err, "error from comment block");
     }
@@ -290,14 +336,74 @@ const AdminCommentPanel = () => {
 
   const apiCallCommentAfterDeleteAndWritingComment = () => {
     if (
-      filterSelectedPkoID !== "Select PKO ID" ||
+      filterSelectedPkoID !== "Select PKO ID" &&
       filterSelectedSkuID !== "Select SKU ID"
     ) {
       apiGetCallComment(filterSelectedPkoID, filterSelectedSkuID);
+    } else if (filterSelectedPkoID !== "Select Component ID") {
+      apiGetCallComment(filterSelectedPkoID);
     } else if (filterSupplierName !== "Select Supplier Name") {
       apiGetSupplierCallComment(filterSupplierName);
     } else {
       apiGetCallComment();
+    }
+  };
+
+  const handleSortPko = () => {
+    if (sortedCommentData) {
+      const sortedData = [...sortedCommentData].sort((a, b) => {
+        return pkoSortAsc
+          ? a.pko_id.localeCompare(b.pko_id, undefined, {
+              sensitivity: "base",
+            })
+          : b.pko_id.localeCompare(a.pko_id, undefined, {
+              sensitivity: "base",
+            })
+    });
+      setSortedCommentData(sortedData);
+      setPkoSortAsc(!pkoSortAsc); // Toggle for next click
+    }
+  };
+
+  const handleSortSku = () => {
+    if (sortedCommentData) {
+      const sortedData = [...sortedCommentData].sort((a, b) =>{
+        return pkoSortAsc
+          ? a.sku_id === null ? "zzz" : a.sku_id.localeCompare(b.sku_id === null ? "zzz" : b.sku_id, undefined, {
+              sensitivity: "base",
+            })
+          : b.sku_id === null ? "zzz" : b.sku_id.localeCompare(a.sku_id === null ? "zzz" : a.sku_id, undefined, {
+              sensitivity: "base",
+            })
+    });
+      setSortedCommentData(sortedData);
+      setSkuSortAsc(!skuSortAsc); // Toggle for next click
+    }
+  };
+
+  const handleSortName = () => {
+  if (sortedCommentData) {
+    const sortedData = [...sortedCommentData].sort((a, b) => {
+      const nameA = a.sender_type === "admin" ? "Administrator" : nameFormation(a.user);
+      const nameB = b.sender_type === "admin" ? "Administrator" : nameFormation(b.user);
+      return nameSortAsc
+        ? nameA.localeCompare(nameB, undefined, { sensitivity: "base" })
+        : nameB.localeCompare(nameA, undefined, { sensitivity: "base" });
+    });
+    setSortedCommentData(sortedData);
+    setNameSortAsc(!nameSortAsc); // Toggle for next click
+  }
+};
+
+  const handleSortDate = () => {
+    if (sortedCommentData) {
+      const sortedData = [...sortedCommentData]?.sort((a, b) => {
+        const timeA = new Date(getLatestTimestampFromSameSender(a));
+        const timeB = new Date(getLatestTimestampFromSameSender(b));
+        return dateSortAsc ? timeB - timeA : timeA - timeB; // Descending order
+      });
+      setSortedCommentData(sortedData);
+      setDateSortAsc(!dateSortAsc); // Toggle for next click
     }
   };
 
@@ -540,97 +646,111 @@ const AdminCommentPanel = () => {
             </button>
           )}
         </div>
-        <div className={`mb-2 table-responsive ${!(filterSupplierName !== "Select Supplier Name" ||  filterSelectedPkoID !== "Select PKO ID" || filterSelectedSkuID !== "Select SKU ID") ? "AdminCommentPanelMainTable-holder" : "AdminCommentPanelMainTable-holdeFilterOpen"}`}>
-          <table className="table table-bordered fs-14 fw-400 text-color-typo-primary mb-0">
-            <thead className="sticky-top">
-              <tr>
-                <th
-                  scope="col"
-                  className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
-                >
-                  <div className="d-flex align-items-center justify-content-between">
-                    Name
-                    <img
-                      className="cursor-pointer"
-                      src="/assets/images/Filter_icon.svg"
-                      alt="sorting-icon"
-                    />
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
-                >
-                  Comment
-                </th>
-                <th
-                  scope="col"
-                  className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
-                >
-                  <div className="d-flex align-items-center justify-content-between">
-                    Last Active
-                    <img
-                      className="cursor-pointer"
-                      src="/assets/images/Filter_icon.svg"
-                      alt="sorting-icon"
-                    />
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
-                >
-                  <div className="d-flex align-items-center justify-content-between">
-                    PKO ID
-                    <img
-                      className="cursor-pointer"
-                      src="/assets/images/Filter_icon.svg"
-                      alt="sorting-icon"
-                    />
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
-                >
-                  <div className="d-flex align-items-center justify-content-between">
-                    SKU ID
-                    <img
-                      className="cursor-pointer"
-                      src="/assets/images/Filter_icon.svg"
-                      alt="sorting-icon"
-                    />
-                  </div>
-                </th>
-                <th
-                  scope="col"
-                  className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
-                ></th>
-              </tr>
-            </thead>
-            <tbody>
-              {commentGetAPIData?.filter((item) => item?.is_deleted === false)
-                ?.length > 0 &&
-                commentGetAPIData
-                  ?.filter((item) => item?.is_deleted === false)
-                  ?.sort((a, b) => {
-                    const timeA = new Date(getLatestTimestampFromSameSender(a));
-                    const timeB = new Date(getLatestTimestampFromSameSender(b));
-                    return timeB - timeA; // Descending order
-                  })
-                  ?.map((item) => {
-                    return (
-                      <CommentRowParentMessage
-                        parentMessage={item}
-                        apiCallCommentAfterDeleteAndWritingComment={
-                          apiCallCommentAfterDeleteAndWritingComment
-                        }
+        {loader.loadingSupplierCommentCall ||
+        loader.loadingCommentCall ||
+        loader.loadingPkoCall ||
+        loader.loadingSkuCall ||
+        loader.loadingSubmit ? (
+          <div className="loader">
+            <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
+              <img
+                src="/assets/images/loading_gif.gif"
+                alt="Loading..."
+                width="120px"
+                height="120px"
+              />
+            </div>
+          </div>
+        ) : (
+          <div
+            className={`mb-2 table-responsive ${!(filterSupplierName !== "Select Supplier Name" || filterSelectedPkoID !== "Select PKO ID" || filterSelectedSkuID !== "Select SKU ID") ? "AdminCommentPanelMainTable-holder" : "AdminCommentPanelMainTable-holdeFilterOpen"}`}
+          >
+            <table className="table table-bordered fs-14 fw-400 text-color-typo-primary mb-0">
+              <thead className="sticky-top">
+                <tr>
+                  <th
+                    scope="col"
+                    className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
+                  >
+                    <div className="d-flex align-items-center justify-content-between">
+                      Name
+                      <img
+                        className="cursor-pointer"
+                        src="/assets/images/Filter_icon.svg"
+                        alt="sorting-icon"
+                        onClick={handleSortName}
                       />
-                    );
-                  })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
+                  >
+                    Comment
+                  </th>
+                  <th
+                    scope="col"
+                    className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
+                  >
+                    <div className="d-flex align-items-center justify-content-between">
+                      Last Active
+                      <img
+                        className="cursor-pointer"
+                        src="/assets/images/Filter_icon.svg"
+                        alt="sorting-icon"
+                        onClick={handleSortDate}
+                      />
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
+                  >
+                    <div className="d-flex align-items-center justify-content-between">
+                      PKO ID
+                      <img
+                        className="cursor-pointer"
+                        src="/assets/images/Filter_icon.svg"
+                        alt="sorting-icon"
+                        onClick={handleSortPko}
+                      />
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
+                  >
+                    <div className="d-flex align-items-center justify-content-between">
+                      SKU ID
+                      <img
+                        className="cursor-pointer"
+                        src="/assets/images/Filter_icon.svg"
+                        alt="sorting-icon"
+                        onClick={handleSortSku}
+                      />
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="p-12 fw-600 bg-color-drag-drop-box text-nowrap"
+                  ></th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedCommentData && sortedCommentData?.map((item) => {
+                  return (
+                    <CommentRowParentMessage
+                      parentMessage={item}
+                      apiCallCommentAfterDeleteAndWritingComment={
+                        apiCallCommentAfterDeleteAndWritingComment
+                      }
+                    />
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

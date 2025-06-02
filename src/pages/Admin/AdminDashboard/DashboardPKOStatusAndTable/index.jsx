@@ -13,6 +13,8 @@ const DashboardPKOStatusAndTable = (props) => {
   const [text, setText] = useState(
     "The PKO submission deadline is approaching! Please ensure you submit your forms before the closing date to have your input counted. Thank you!",
   );
+  const [supplierSortAsc, setSupplierSortAsc] = useState(true);
+  const [dateSortAsc, setDateSortAsc] = useState(true);
 
   useEffect(() => {
     setFilterTablepkoData(tablepkoData);
@@ -28,24 +30,28 @@ const DashboardPKOStatusAndTable = (props) => {
   };
 
   const handleSortSupplier = () => {
-    if (filterTablepkoData) {
-      const sortedData = [...filterTablepkoData].sort((a, b) =>
-        a.supplier_name.localeCompare(b.supplier_name, undefined, {
-          sensitivity: "base",
-        }),
-      );
-      setFilterTablepkoData(sortedData);
-    }
-  };
+  if (filterTablepkoData) {
+    const sortedData = [...filterTablepkoData].sort((a, b) =>
+      supplierSortAsc
+        ? a.supplier_name.localeCompare(b.supplier_name, undefined, { sensitivity: "base" })
+        : b.supplier_name.localeCompare(a.supplier_name, undefined, { sensitivity: "base" })
+    );
+    setFilterTablepkoData(sortedData);
+    setSupplierSortAsc(!supplierSortAsc); // Toggle for next click
+  }
+};
 
-  const handleSortDate = () => {
-    if (filterTablepkoData) {
-      const sortedData = [...filterTablepkoData].sort((a, b) => {
-        return new Date(a.due_date) - new Date(b.due_date);
-      });
-      setFilterTablepkoData(sortedData);
-    }
-  };
+const handleSortDate = () => {
+  if (filterTablepkoData) {
+    const sortedData = [...filterTablepkoData].sort((a, b) =>
+      dateSortAsc
+        ? new Date(a.due_date) - new Date(b.due_date)
+        : new Date(b.due_date) - new Date(a.due_date)
+    );
+    setFilterTablepkoData(sortedData);
+    setDateSortAsc(!dateSortAsc); // Toggle for next click
+  }
+};
 
   const wordCount = (str) => {
     return str
