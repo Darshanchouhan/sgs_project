@@ -43,6 +43,7 @@ const PkgDataForm = () => {
   const skuPageState = JSON.parse(
     localStorage.getItem("sku_page_state") || "{}",
   );
+
   const isPkoClosed = skuPageState?.isPkoClosed;
   const isFormLocked =
     isPkoClosed || ["Inreview", "Approved"].includes(skuDetails?.status);
@@ -50,28 +51,6 @@ const PkgDataForm = () => {
   const [isFullValidation, setIsFullValidation] = useState(false); // Step 1: Create a flag
 
   console.log(skuData, description);
-
-  // const handleNextClick = () => {
-  //   setIsPreviousValidation(false);
-  //   const sectionKeys = Object.keys(pkgData.sections);
-  //   const currentIndex = sectionKeys.indexOf(pkgData.activeSection);
-
-  //   // Get the latest unanswered questions for the current section
-  //   const validationResults = validateCurrentSection();
-  //   setUnansweredQuestions(validationResults); // Update state with validation results
-
-  //   if (validationResults.length > 0) {
-  //     setShowValidationModal(true); // Show the validation modal only if there are errors
-  //   } else if (currentIndex < sectionKeys.length - 1) {
-  //     // If no unanswered questions, proceed to the next section
-  //     const nextSectionKey = sectionKeys[currentIndex + 1];
-  //     setPkgData((prev) => ({ ...prev, activeSection: nextSectionKey }));
-  //     sectionRefs.current[nextSectionKey]?.current?.scrollIntoView({
-  //       behavior: "smooth",
-  //       block: "start",
-  //     });
-  //   }
-  // };
 
   const handleNextClick = () => {
     if (isFormLocked) {

@@ -5,37 +5,80 @@ const VendorCommentPanel = ({
   dropdownData = {},
   initialSelectedPkoId = "",
   initialFilterPkoId = "",
+  initialSelectedSkuId = "", // For Add Comment section
+  initialFilterSkuId = "", // For Filter section
+  initialSelectedComponentName = "",
 }) => {
   const [selectedPkoId, setSelectedPkoId] = useState(initialSelectedPkoId);
   const [hasUserChangedPko, setHasUserChangedPko] = useState(false);
-  const [selectedSkuId, setSelectedSkuId] = useState("");
-  const [selectedComponent, setSelectedComponent] = useState("");
+  const [selectedSkuId, setSelectedSkuId] = useState(initialSelectedSkuId);
   const [componentList, setComponentList] = useState([]);
   const [filterPkoId, setFilterPkoId] = useState(initialFilterPkoId);
   const [hasUserChangedFilterPko, setHasUserChangedFilterPko] = useState(false);
-
-  const [filterSkuId, setFilterSkuId] = useState("");
+  const [filterSkuId, setFilterSkuId] = useState(initialFilterSkuId);
   const { pkos = [], skus = [] } = dropdownData;
   const filteredSkus = skus.filter((sku) => sku.pko_id === selectedPkoId);
   const filteredSkusForFilter = skus.filter(
     (sku) => sku.pko_id === filterPkoId,
   );
+  //   const filteredSkusForFilter = skus.filter(
+  //   (sku) => sku.pko_id === filterPkoId || sku.pko_id === initialFilterPkoId
+  // );
 
+  const [selectedComponent, setSelectedComponent] = useState(
+    initialSelectedComponentName,
+  );
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [openReplyFor, setOpenReplyFor] = useState(null);
+  const [replyTextByComment, setReplyTextByComment] = useState({});
+  const [groupedComments, setGroupedComments] = useState([]);
+
+  useEffect(() => {
+    const offcanvasEl = document.getElementById("offcanvasVendorCommentPanel");
+    if (!offcanvasEl) return;
+
+    const onHidden = () => {
+      // reset everything back to props
+      setSelectedPkoId(initialSelectedPkoId);
+      setSelectedSkuId(initialSelectedSkuId);
+      setFilterPkoId(initialFilterPkoId);
+      setFilterSkuId(initialFilterSkuId);
+      setSelectedComponent(initialSelectedComponentName);
+    };
+
+    offcanvasEl.addEventListener("hidden.bs.offcanvas", onHidden);
+    return () => {
+      offcanvasEl.removeEventListener("hidden.bs.offcanvas", onHidden);
+    };
+  }, [
+    initialSelectedPkoId,
+    initialFilterPkoId,
+    initialSelectedSkuId,
+    initialFilterSkuId,
+    initialSelectedComponentName,
+  ]);
 
   useEffect(() => {
     // Set from parent unless user manually changed
     if (!hasUserChangedPko) {
       setSelectedPkoId(initialSelectedPkoId);
+      setSelectedSkuId(initialSelectedSkuId); // sync only once
     }
   }, [initialSelectedPkoId, hasUserChangedPko]);
 
   useEffect(() => {
     if (!hasUserChangedFilterPko) {
       setFilterPkoId(initialFilterPkoId);
+      setFilterSkuId(initialFilterSkuId); // sync only once
     }
   }, [initialFilterPkoId, hasUserChangedFilterPko]);
+
+  useEffect(() => {
+    if (initialSelectedComponentName) {
+      setSelectedComponent(initialSelectedComponentName);
+    }
+  }, [initialSelectedComponentName]);
 
   // Reset when PKO changes
   useEffect(() => {
@@ -65,125 +108,6 @@ const VendorCommentPanel = ({
   }, [selectedSkuId, selectedPkoId]);
 
   useEffect(() => {
-    const fetchAllComments = async () => {
-      try {
-        const pkoRequests = pkos.map((pko) =>
-          axiosInstance.get(`/comments/?pko_id=${pko.pko_id}`),
-        );
-
-        const skuRequests = skus.map((sku) =>
-          axiosInstance.get(
-            `/comments/?pko_id=${sku.pko_id}&sku_id=${sku.sku_id}`,
-          ),
-        );
-
-        const componentRequests = await Promise.all(
-          skus.map(async (sku) => {
-            const res = await axiosInstance.get(
-              `/skus/${sku.sku_id}/?pko_id=${sku.pko_id}`,
-            );
-            const components = res.data?.components || [];
-
-            return Promise.all(
-              components.map((comp) =>
-                axiosInstance.get(
-                  `/comments/?pko_id=${sku.pko_id}&sku_id=${sku.sku_id}&component_id=${comp.id}`,
-                ),
-              ),
-            );
-          }),
-        );
-
-        const resolvedPko = await Promise.all(pkoRequests);
-        const resolvedSku = await Promise.all(skuRequests);
-
-        const allComments = [
-          ...resolvedPko.flatMap((r) => r.data || []),
-          ...resolvedSku.flatMap((r) => r.data || []),
-          ...componentRequests.flat(2).flatMap((r) => r.data || []),
-        ];
-
-        setComments(allComments);
-      } catch (err) {
-        console.error("Failed to fetch ALL comments", err);
-        setComments([]);
-      }
-    };
-    const fetchFilteredComments = async () => {
-      try {
-        let allComments = [];
-
-        if (filterPkoId && !filterSkuId) {
-          // Fetch PKO-level comments
-          const pkoLevelRes = await axiosInstance.get(
-            `/comments/?pko_id=${filterPkoId}`,
-          );
-          allComments.push(...(pkoLevelRes.data || []));
-
-          // Fetch all SKUs under this PKO
-          const relatedSkus = skus.filter((sku) => sku.pko_id === filterPkoId);
-
-          for (const sku of relatedSkus) {
-            // SKU-level comments
-            const skuLevelRes = await axiosInstance.get(
-              `/comments/?pko_id=${filterPkoId}&sku_id=${sku.sku_id}`,
-            );
-            allComments.push(...(skuLevelRes.data || []));
-
-            // Component-level comments
-            const skuDetailRes = await axiosInstance.get(
-              `/skus/${sku.sku_id}/?pko_id=${filterPkoId}`,
-            );
-            const components = skuDetailRes.data?.components || [];
-
-            const componentRequests = await Promise.all(
-              components.map((comp) =>
-                axiosInstance.get(
-                  `/comments/?pko_id=${filterPkoId}&sku_id=${sku.sku_id}&component_id=${comp.id}`,
-                ),
-              ),
-            );
-            allComments.push(
-              ...componentRequests.flatMap((res) => res.data || []),
-            );
-          }
-        }
-
-        if (filterPkoId && filterSkuId) {
-          // SKU-level comments
-          const skuRes = await axiosInstance.get(
-            `/comments/?pko_id=${filterPkoId}&sku_id=${filterSkuId}`,
-          );
-          allComments.push(...(skuRes.data || []));
-
-          // Component-level comments
-          const skuDetails = await axiosInstance.get(
-            `/skus/${filterSkuId}/?pko_id=${filterPkoId}`,
-          );
-          const components = skuDetails.data?.components || [];
-
-          const componentRequests = await Promise.all(
-            components.map((comp) =>
-              axiosInstance.get(
-                `/comments/?pko_id=${filterPkoId}&sku_id=${filterSkuId}&component_id=${comp.id}`,
-              ),
-            ),
-          );
-
-          allComments.push(...componentRequests.flatMap((r) => r.data || []));
-        }
-        //  Deduplicate based on unique comment ID
-        const deduplicatedComments = Array.from(
-          new Map(allComments.map((comment) => [comment.id, comment])).values(),
-        );
-
-        setComments(deduplicatedComments);
-      } catch (err) {
-        console.error("Failed to fetch FILTERED comments", err);
-        setComments([]);
-      }
-    };
-
     if (pkos.length && skus.length) {
       if (!filterPkoId && !filterSkuId) {
         fetchAllComments();
@@ -192,6 +116,143 @@ const VendorCommentPanel = ({
       }
     }
   }, [filterPkoId, filterSkuId, pkos, skus]);
+
+  const markCommentsAsSeen = async (comments) => {
+    const unseenIds = comments
+      .filter((c) => !c.vendor_seen && c.sender_type === "admin") // adjust condition if needed
+      .map((c) => c.id);
+
+    if (unseenIds.length === 0) return;
+
+    try {
+      await axiosInstance.patch("/comments/", {
+        comment_ids: unseenIds,
+      });
+      console.log("Marked as seen:", unseenIds);
+    } catch (err) {
+      console.error("Failed to mark comments as seen", err);
+    }
+  };
+
+  const fetchAllComments = async () => {
+    try {
+      const pkoRequests = pkos.map((pko) =>
+        axiosInstance.get(`/comments/?pko_id=${pko.pko_id}`),
+      );
+
+      const skuRequests = skus.map((sku) =>
+        axiosInstance.get(
+          `/comments/?pko_id=${sku.pko_id}&sku_id=${sku.sku_id}`,
+        ),
+      );
+
+      const componentRequests = await Promise.all(
+        skus.map(async (sku) => {
+          const res = await axiosInstance.get(
+            `/skus/${sku.sku_id}/?pko_id=${sku.pko_id}`,
+          );
+          const components = res.data?.components || [];
+
+          return Promise.all(
+            components.map((comp) =>
+              axiosInstance.get(
+                `/comments/?pko_id=${sku.pko_id}&sku_id=${sku.sku_id}&component_id=${comp.id}`,
+              ),
+            ),
+          );
+        }),
+      );
+
+      const resolvedPko = await Promise.all(pkoRequests);
+      const resolvedSku = await Promise.all(skuRequests);
+
+      const allComments = [
+        ...resolvedPko.flatMap((r) => r.data || []),
+        ...resolvedSku.flatMap((r) => r.data || []),
+        ...componentRequests.flat(2).flatMap((r) => r.data || []),
+      ];
+
+      setComments(allComments);
+    } catch (err) {
+      console.error("Failed to fetch ALL comments", err);
+      setComments([]);
+    }
+  };
+
+  const fetchFilteredComments = async () => {
+    try {
+      let allComments = [];
+
+      if (filterPkoId && !filterSkuId) {
+        const pkoLevelRes = await axiosInstance.get(
+          `/comments/?pko_id=${filterPkoId}`,
+        );
+        allComments.push(...(pkoLevelRes.data || []));
+
+        const relatedSkus = skus.filter((sku) => sku.pko_id === filterPkoId);
+
+        for (const sku of relatedSkus) {
+          const skuLevelRes = await axiosInstance.get(
+            `/comments/?pko_id=${filterPkoId}&sku_id=${sku.sku_id}`,
+          );
+          allComments.push(...(skuLevelRes.data || []));
+
+          const skuDetailRes = await axiosInstance.get(
+            `/skus/${sku.sku_id}/?pko_id=${filterPkoId}`,
+          );
+          const components = skuDetailRes.data?.components || [];
+
+          const componentRequests = await Promise.all(
+            components.map((comp) =>
+              axiosInstance.get(
+                `/comments/?pko_id=${filterPkoId}&sku_id=${sku.sku_id}&component_id=${comp.id}`,
+              ),
+            ),
+          );
+
+          allComments.push(
+            ...componentRequests.flatMap((res) => res.data || []),
+          );
+        }
+      }
+
+      if (filterPkoId && filterSkuId) {
+        const skuRes = await axiosInstance.get(
+          `/comments/?pko_id=${filterPkoId}&sku_id=${filterSkuId}`,
+        );
+        allComments.push(...(skuRes.data || []));
+
+        const skuDetails = await axiosInstance.get(
+          `/skus/${filterSkuId}/?pko_id=${filterPkoId}`,
+        );
+        const components = skuDetails.data?.components || [];
+
+        const componentRequests = await Promise.all(
+          components.map((comp) =>
+            axiosInstance.get(
+              `/comments/?pko_id=${filterPkoId}&sku_id=${filterSkuId}&component_id=${comp.id}`,
+            ),
+          ),
+        );
+
+        allComments.push(...componentRequests.flatMap((r) => r.data || []));
+      }
+
+      // Deduplicate by comment ID
+      const deduplicatedComments = Array.from(
+        new Map(allComments.map((comment) => [comment.id, comment])).values(),
+      );
+      const sortedComments = deduplicatedComments.sort(
+        (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
+      );
+      setComments(deduplicatedComments);
+      setComments(sortedComments);
+      await markCommentsAsSeen(allComments);
+    } catch (err) {
+      console.error("Failed to fetch FILTERED comments", err);
+      setComments([]);
+    }
+  };
 
   const handlePostComment = async () => {
     if (!selectedPkoId || !commentText.trim()) return;
@@ -216,6 +277,59 @@ const VendorCommentPanel = ({
     } catch (error) {
       console.error(
         "Failed to post comment:",
+        error?.response?.data || error.message,
+      );
+    }
+  };
+
+  const handlePostReply = async (commentId) => {
+    const reply = replyTextByComment[commentId]?.trim();
+    if (!reply) return;
+
+    const payload = {
+      parent_id: commentId,
+      message: reply,
+      sender_type: "admin", // or "vendor" dynamically if needed
+    };
+
+    try {
+      const res = await axiosInstance.post("/comments/", payload);
+      console.log("Reply posted successfully:", res?.data);
+
+      // Clear and close
+      setReplyTextByComment((prev) => ({ ...prev, [commentId]: "" }));
+      setOpenReplyFor(null);
+
+      //  Refresh comments to see the reply
+      if (!filterPkoId && !filterSkuId) {
+        await fetchAllComments();
+      } else {
+        await fetchFilteredComments();
+      }
+    } catch (error) {
+      console.error(
+        "Failed to post reply:",
+        error?.response?.data || error.message,
+      );
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await axiosInstance.delete("/comments/", {
+        data: { comment_id: commentId },
+      });
+      console.log("Comment deleted successfully:", commentId);
+
+      // Refresh comments after delete
+      if (!filterPkoId && !filterSkuId) {
+        await fetchAllComments();
+      } else {
+        await fetchFilteredComments();
+      }
+    } catch (error) {
+      console.error(
+        "Failed to delete comment:",
         error?.response?.data || error.message,
       );
     }
@@ -275,79 +389,93 @@ const VendorCommentPanel = ({
         </div>
 
         <div className="d-flex align-items-center justify-content-between w-100 gap-2">
+          <div>
+            <label className="fs-12 fw-600 text-color-typo-primary">
+              Add Comment labels{" "}
+            </label>
+          </div>
+
           {/* PKO Dropdown */}
-          <div className="form-floating w-100">
-            <select
-              className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
-              id="floatingPkoIdSelect"
-              value={selectedPkoId}
-              onChange={(e) => {
-                setSelectedPkoId(e.target.value);
-                setHasUserChangedPko(true); // Mark that user manually changed PKO
-              }}
-            >
-              {/* <option value="">Select PKO</option> */}
-              {pkos.map((pko) => (
-                <option key={pko.pko_id} value={pko.pko_id}>
-                  {pko.pko_id}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="floatingPkoIdSelect"
-              className="fs-10 fw-600 text-color-typo-primary"
-            >
+          <div className="fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40">
+            <label className="fs-12 fw-600 text-color-typo-primary">
               PKO ID
             </label>
+            <span className="fs-14 fw-600 text-primary"> {selectedPkoId} </span>
           </div>
-
-          {/* SKU Dropdown */}
-          <div className="form-floating w-100">
-            <select
-              className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
-              id="floatingSkuSelect"
-              value={selectedSkuId}
-              onChange={(e) => setSelectedSkuId(e.target.value)}
-              disabled={!selectedPkoId}
-            >
-              <option value="">Select SKU</option>
-              {filteredSkus.map((sku) => (
-                <option key={sku.sku_id} value={sku.sku_id}>
-                  {sku.sku_id}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="floatingSkuSelect"
-              className="fs-10 fw-600 text-color-typo-primary"
-            >
-              SKU
-            </label>
-          </div>
+          {/* SKU Label or Dropdown */}
+          {initialSelectedSkuId ? (
+            <div className="fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40">
+              <label className="fs-12 fw-600 text-color-typo-primary">
+                SKU{" "}
+              </label>
+              <span className="fs-14 fw-600 text-primary">
+                {" "}
+                {initialSelectedSkuId}{" "}
+              </span>
+            </div>
+          ) : (
+            <div className="form-floating w-100">
+              <select
+                className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
+                id="floatingSkuSelect"
+                value={selectedSkuId}
+                onChange={(e) => {
+                  setSelectedSkuId(e.target.value);
+                  setHasUserChangedPko(true);
+                }}
+                disabled={!selectedPkoId}
+              >
+                <option value="">Select</option>
+                {filteredSkus.map((sku) => (
+                  <option key={sku.sku_id} value={sku.sku_id}>
+                    {sku.sku_id}
+                  </option>
+                ))}
+              </select>
+              <label
+                htmlFor="floatingSkuSelect"
+                className="fs-10 fw-600 text-color-typo-primary"
+              >
+                SKU
+              </label>
+            </div>
+          )}
 
           {/* Component Dropdown */}
-          <div className="form-floating w-100">
-            <select
-              className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
-              id="floatingComponentSelect"
-              value={selectedComponent}
-              onChange={(e) => setSelectedComponent(e.target.value)}
-              disabled={!componentList.length}
-            >
-              <option value="">Select Component</option>
-              {componentList.map((comp, idx) => (
-                <option key={idx} value={comp.name}>
-                  {comp.name}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="floatingComponentSelect"
-              className="fs-10 fw-600 text-color-typo-primary"
-            >
-              Component
-            </label>
-          </div>
+          {initialSelectedComponentName ? (
+            <div className="fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40">
+              <label className="fs-12 fw-600 text-color-typo-primary">
+                Component
+              </label>
+              <span className="fs-14 fw-600 text-primary">
+                {" "}
+                {initialSelectedComponentName}
+              </span>
+            </div>
+          ) : (
+            <div className="form-floating w-100">
+              <select
+                className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
+                id="floatingComponentSelect"
+                value={selectedComponent}
+                onChange={(e) => setSelectedComponent(e.target.value)}
+                disabled={!componentList.length}
+              >
+                <option value="">Select</option>
+                {componentList.map((comp, idx) => (
+                  <option key={idx} value={comp.name}>
+                    {comp.name}
+                  </option>
+                ))}
+              </select>
+              <label
+                htmlFor="floatingComponentSelect"
+                className="fs-10 fw-600 text-color-typo-primary"
+              >
+                Component
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
@@ -423,8 +551,10 @@ const VendorCommentPanel = ({
                 <select
                   className="form-select ..."
                   value={filterSkuId}
-                  onChange={(e) => setFilterSkuId(e.target.value)}
-                  disabled={!filterPkoId}
+                  onChange={(e) => {
+                    setFilterSkuId(e.target.value);
+                    setHasUserChangedFilterPko(true); // Track manual change
+                  }}
                 >
                   <option value="">Select SKU</option>{" "}
                   {/*  Default placeholder */}
@@ -473,17 +603,24 @@ const VendorCommentPanel = ({
                     </div>
                   </div>
                   <div className="d-flex align-items-center">
-                    {isUser && (
-                      <button type="button" className="btn border-0 p-0 ms-3">
-                        <img
-                          src="/assets/images/delete-icon-blue.svg"
-                          alt="delete-icon-blue"
-                        />
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="btn border-0 p-0 me-3"
+                      onClick={() => handleDeleteComment(comment.id)}
+                    >
+                      <img
+                        src="/assets/images/delete-icon-blue.svg"
+                        alt="delete-icon-blue"
+                      />
+                    </button>
                     <button
                       type="button"
                       className="btn border-0 p-0 d-flex align-items-center ms-3"
+                      onClick={() =>
+                        setOpenReplyFor(
+                          openReplyFor === comment.id ? null : comment.id,
+                        )
+                      }
                     >
                       <img
                         src="/assets/images/reply-icon.svg"
@@ -545,6 +682,82 @@ const VendorCommentPanel = ({
                     </div>
                   </div>
                 </div>
+
+                {/* Replies should be rendered here inside the comment block */}
+                {openReplyFor === comment.id && (
+                  <div className="repliesBlock ms-3 ps-3 border-start mt-3">
+                    {comment.replies &&
+                      comment.replies.length > 0 &&
+                      comment.replies.map((reply) => {
+                        const isReplyUser =
+                          reply.user === localStorage.getItem("user_name");
+                        return (
+                          <div key={reply.id} className="mb-3">
+                            <div className="d-flex align-items-center">
+                              <img
+                                src={
+                                  isReplyUser
+                                    ? "/assets/images/user-chart-profile-icon.svg"
+                                    : "/assets/images/administrator-icon.svg"
+                                }
+                                alt="user-icon"
+                              />
+                              <div className="ms-10">
+                                <h3 className="fs-14 fw-600">
+                                  {isReplyUser
+                                    ? `${reply.user} (You)`
+                                    : reply.user}
+                                </h3>
+                                <h4 className="fs-14 fw-400 text-color-typo-secondary mb-0">
+                                  {new Date(reply.timestamp).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    },
+                                  )}
+                                </h4>
+                              </div>
+                            </div>
+                            <p className="fs-14 mt-2 mb-0 ms-5">
+                              {reply.message}
+                            </p>
+                          </div>
+                        );
+                      })}
+
+                    {/* Always show the reply input below */}
+                    <div className="border-top bg-white px-3 py-3">
+                      <textarea
+                        className="form-control fs-14 text-color-typo-primary"
+                        placeholder="Enter a reply.."
+                        style={{ height: "64px" }}
+                        value={replyTextByComment[comment.id] || ""}
+                        onChange={(e) =>
+                          setReplyTextByComment((prev) => ({
+                            ...prev,
+                            [comment.id]: e.target.value,
+                          }))
+                        }
+                      ></textarea>
+                      <div className="d-flex justify-content-end mt-2">
+                        <button
+                          className="btn text-primary bg-transparent border-0 p-0 fs-14 fw-600 d-flex align-items-center"
+                          onClick={() => handlePostReply(comment.id)}
+                          disabled={!replyTextByComment[comment.id]?.trim()}
+                        >
+                          Reply
+                          <img
+                            src="/assets/images/send-reply-icon.svg"
+                            alt="send-reply-icon"
+                            className="ms-2"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

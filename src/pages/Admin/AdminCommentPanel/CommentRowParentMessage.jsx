@@ -75,12 +75,12 @@ const CommentRowParentMessage = (props) => {
 
     // Step 1: Filter replies where is_deleted === false
     const activeReplies = parentMessage?.replies?.filter(
-      (reply) => reply?.is_deleted === false
+      (reply) => reply?.is_deleted === false,
     );
 
     // Step 2: Check if all those replies are admin_seen === true
     const allSeenByAdmin = activeReplies?.every(
-      (reply) => reply?.admin_seen === true
+      (reply) => reply?.admin_seen === true,
     );
 
     if (!allSeenByAdmin) {
@@ -100,9 +100,9 @@ const CommentRowParentMessage = (props) => {
     <>
       <tr>
         <td className="px-12 py-2 align-middle fw-600 text-nowrap">
-          {parentMessage?.sender_type === "admin" ? 
+          {parentMessage?.sender_type === "admin" ? (
             <></>
-          : parentMessage?.admin_seen === false ? (
+          ) : parentMessage?.admin_seen === false ? (
             <span className="w-8 h-8 rounded-circle bg-color-draft d-inline-block me-10"></span>
           ) : (
             <></>

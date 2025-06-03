@@ -30,28 +30,32 @@ const DashboardPKOStatusAndTable = (props) => {
   };
 
   const handleSortSupplier = () => {
-  if (filterTablepkoData) {
-    const sortedData = [...filterTablepkoData].sort((a, b) =>
-      supplierSortAsc
-        ? a.supplier_name.localeCompare(b.supplier_name, undefined, { sensitivity: "base" })
-        : b.supplier_name.localeCompare(a.supplier_name, undefined, { sensitivity: "base" })
-    );
-    setFilterTablepkoData(sortedData);
-    setSupplierSortAsc(!supplierSortAsc); // Toggle for next click
-  }
-};
+    if (filterTablepkoData) {
+      const sortedData = [...filterTablepkoData].sort((a, b) =>
+        supplierSortAsc
+          ? a.supplier_name.localeCompare(b.supplier_name, undefined, {
+              sensitivity: "base",
+            })
+          : b.supplier_name.localeCompare(a.supplier_name, undefined, {
+              sensitivity: "base",
+            }),
+      );
+      setFilterTablepkoData(sortedData);
+      setSupplierSortAsc(!supplierSortAsc); // Toggle for next click
+    }
+  };
 
-const handleSortDate = () => {
-  if (filterTablepkoData) {
-    const sortedData = [...filterTablepkoData].sort((a, b) =>
-      dateSortAsc
-        ? new Date(a.due_date) - new Date(b.due_date)
-        : new Date(b.due_date) - new Date(a.due_date)
-    );
-    setFilterTablepkoData(sortedData);
-    setDateSortAsc(!dateSortAsc); // Toggle for next click
-  }
-};
+  const handleSortDate = () => {
+    if (filterTablepkoData) {
+      const sortedData = [...filterTablepkoData].sort((a, b) =>
+        dateSortAsc
+          ? new Date(a.due_date) - new Date(b.due_date)
+          : new Date(b.due_date) - new Date(a.due_date),
+      );
+      setFilterTablepkoData(sortedData);
+      setDateSortAsc(!dateSortAsc); // Toggle for next click
+    }
+  };
 
   const wordCount = (str) => {
     return str

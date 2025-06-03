@@ -1,4 +1,6 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import axiosInstance from "../services/axiosInstance";
+import VendorCommentPanel from "../components/VendorCommentPanel";
 
 const Breadcrumb = ({
   onBackClick,
@@ -8,7 +10,56 @@ const Breadcrumb = ({
   pkoId = "N/A",
   description = "N/A",
   isFormLocked,
+  currentSkuDetails = {},
+  pkoData = {},
+  allSupplierPkoData = [],
+  allSupplierSkus = [],
 }) => {
+  const [commentDropdownData, setCommentDropdownData] = useState({
+    pkos: [],
+    skus: [],
+  });
+  const skuState = JSON.parse(localStorage.getItem("sku_page_state"));
+  const selectedSkuId = skuState?.skuId;
+  const selectedPkoId = skuState?.pkoData?.pko_id;
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const supplierId = localStorage.getItem("cvs_supplier");
+        const vendorRes = await axiosInstance.get(`vendors/${supplierId}`);
+        const vendor = vendorRes.data?.[supplierId];
+        const pkos = vendor?.pkos || [];
+
+        const pkoRes = await axiosInstance.get("pkos/");
+        const pkoMap = pkoRes.data;
+
+        const allSkus = [];
+
+        pkos.forEach((pko) => {
+          const pkoDetails = pkoMap[pko.pko_id];
+          if (pkoDetails?.skus?.length) {
+            pkoDetails.skus.forEach((sku) =>
+              allSkus.push({ ...sku, pko_id: pko.pko_id }),
+            );
+          }
+        });
+
+        setCommentDropdownData({
+          pkos,
+          skus: allSkus,
+        });
+      } catch (err) {
+        console.error(
+          "Failed to fetch dropdown data for VendorCommentPanel:",
+          err,
+        );
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
+
   return (
     <div className="py-10 bg-color-light-shade">
       <div className="container-fluid px-5">
@@ -80,6 +131,33 @@ const Breadcrumb = ({
             >
               Save as Draft
             </button>
+            <div>
+              <button
+                type="button"
+                className="btn p-0 border-none bg-transparent ps-3 border-start"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasVendorCommentPanel"
+                aria-controls="offcanvasVendorCommentPanel"
+              >
+                <img
+                  src="/assets/images/vendor-comment-icon.svg"
+                  alt="vendor-comment-icon"
+                />
+              </button>
+
+              <VendorCommentPanel
+                dropdownData={{
+                  pkos: commentDropdownData.pkos,
+                  skus: commentDropdownData.skus,
+                  componentsBySku: {},
+                }}
+                initialSelectedPkoId={selectedPkoId}
+                initialFilterPkoId={selectedPkoId}
+                initialSelectedSkuId={selectedSkuId}
+                initialFilterSkuId={selectedSkuId}
+                initialSelectedComponentName={componentName}
+              />
+            </div>
           </div>
         </div>
       </div>
