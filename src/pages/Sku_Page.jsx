@@ -13,6 +13,7 @@ import { VendorContext } from "./VendorContext";
 import SkuValidation from "./SkuValidation";
 import Dimen_ImageOverlay from "./Dimen_ImageOverlay"; // Import Overlay Component
 import Importdata from "./ImportData";
+import VendorCommentPanel from "../components/VendorCommentPanel";
 
 const Sku_Page = () => {
   const {
@@ -67,6 +68,12 @@ const Sku_Page = () => {
   const [dropdownListComing, setDropdownListComing] = useState([]); // Store the dropdown list
   const dropdownRef = useRef(null); // Create a ref for the dropdown
   const encodedPkoId = encodeURIComponent(pkoId);
+  const [commentDropdownData, setCommentDropdownData] = useState({
+    pkos: [],
+    skus: [],
+    componentsBySku: {}, // { sku_id: [component1, component2] }
+  });
+
   const [activeComponentId, setActiveComponentId] = useState(null);
   const skuPageState = JSON.parse(
     localStorage.getItem("sku_page_state") || "{}",
@@ -94,6 +101,41 @@ const Sku_Page = () => {
   };
 
   // add dropdown list call
+
+  useEffect(() => {
+    const preloadCommentDropdownData = async () => {
+      try {
+        const supplierId = localStorage.getItem("cvs_supplier");
+        const vendorRes = await axiosInstance.get(`vendors/${supplierId}`);
+        const vendor = vendorRes.data?.[supplierId];
+        const pkos = vendor?.pkos || [];
+
+        const pkoRes = await axiosInstance.get("pkos/");
+        const pkoMap = pkoRes.data;
+
+        const allSkus = [];
+
+        pkos.forEach((pko) => {
+          const pkoDetails = pkoMap[pko.pko_id];
+          if (pkoDetails?.skus?.length) {
+            pkoDetails.skus.forEach((sku) =>
+              allSkus.push({ ...sku, pko_id: pko.pko_id }),
+            );
+          }
+        });
+
+        setCommentDropdownData({
+          pkos,
+          skus: allSkus,
+          componentsBySku: {}, // Now unused
+        });
+      } catch (err) {
+        console.error("Error loading dropdown data for comment panel", err);
+      }
+    };
+
+    preloadCommentDropdownData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1721,6 +1763,18 @@ const Sku_Page = () => {
               >
                 Validate & Submit
               </button>
+              <button
+                type="button"
+                className="btn p-0 border-none bg-transparent ps-3 border-start"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasVendorCommentPanel"
+                aria-controls="offcanvasVendorCommentPanel"
+              >
+                <img
+                  src="/assets/images/vendor-comment-icon.svg"
+                  alt="vendor-comment-icon"
+                />
+              </button>
             </div>
             <SkuValidation
               validationIssues={validationIssues}
@@ -2216,6 +2270,18 @@ const Sku_Page = () => {
           </div>
         </div>
       </div>
+      {/* <VendorCommentPanel
+              dropdownData={commentDropdownData}
+              initialSelectedPkoId={pkoId}
+              initialFilterPkoId={skuId}
+            /> */}
+      <VendorCommentPanel
+        dropdownData={commentDropdownData}
+        initialSelectedPkoId={pkoId}
+        initialSelectedSkuId={skuId}
+        initialFilterPkoId={pkoId}
+        initialFilterSkuId={skuId}
+      />
     </>
   );
 };

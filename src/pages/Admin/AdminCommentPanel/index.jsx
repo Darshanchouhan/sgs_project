@@ -3,7 +3,7 @@ import axiosInstance from "../../../services/axiosInstance";
 import { useParams } from "react-router-dom";
 import CommentRowParentMessage from "./CommentRowParentMessage";
 import { getLatestTimestampFromSameSender } from "./CommentRowParentMessage";
-import {nameFormation } from "./CommentRowParentMessage";
+import { nameFormation } from "./CommentRowParentMessage";
 
 const AdminCommentPanel = () => {
   const [commentGetAPIData, SetCommentGetAPIData] = useState([]);
@@ -16,18 +16,18 @@ const AdminCommentPanel = () => {
   const [selectedPkoID, setSelectedPkoID] = useState("Select PKO ID");
   const [selectedSkuID, setSelectedSkuID] = useState("Select SKU ID");
   const [selectedComponentID, setSelectedComponentID] = useState(
-    "Select Component ID"
+    "Select Component ID",
   );
   const [skuFilterDataList, setSkuFilterDataList] = useState([]);
   const [supplierNameFilterDataList, setSupplierNameFilterDataList] = useState(
-    []
+    [],
   );
   const [filterSelectedPkoID, setFilterSelectedPkoID] =
     useState("Select PKO ID");
   const [filterSelectedSkuID, setFilterSelectedSkuID] =
     useState("Select SKU ID");
   const [filterSupplierName, setFilterSupplierName] = useState(
-    "Select Supplier Name"
+    "Select Supplier Name",
   );
   const [textComment, setTextComment] = useState("");
   const [collapseFilterVal, setCollapseFilterVal] = useState(true);
@@ -53,13 +53,13 @@ const AdminCommentPanel = () => {
             const timeA = new Date(getLatestTimestampFromSameSender(a));
             const timeB = new Date(getLatestTimestampFromSameSender(b));
             return timeB - timeA; // Descending order
-          })
+          }),
     );
   }, [commentGetAPIData]);
 
   useEffect(() => {
     const offcanvasElement = document.getElementById(
-      "offcanvasAdminCommentPanel"
+      "offcanvasAdminCommentPanel",
     );
 
     const handleOffcanvasOpen = async () => {
@@ -92,7 +92,7 @@ const AdminCommentPanel = () => {
     if (offcanvasElement) {
       offcanvasElement.addEventListener(
         "shown.bs.offcanvas",
-        handleOffcanvasOpen
+        handleOffcanvasOpen,
       );
     }
 
@@ -100,7 +100,7 @@ const AdminCommentPanel = () => {
       if (offcanvasElement) {
         offcanvasElement.removeEventListener(
           "shown.bs.offcanvas",
-          handleOffcanvasOpen
+          handleOffcanvasOpen,
         );
       }
     };
@@ -110,7 +110,7 @@ const AdminCommentPanel = () => {
     setLoader((prev) => ({ ...prev, loadingCommentCall: true }));
     try {
       const response = await axiosInstance.get(
-        `/comments${sku_id ? `/?sku_id=${sku_id}&pko_id=${pko_id}` : pko_id ? `/?pko_id=${pko_id}` : ""}`
+        `/comments${sku_id ? `/?sku_id=${sku_id}&pko_id=${pko_id}` : pko_id ? `/?pko_id=${pko_id}` : ""}`,
       );
       SetCommentGetAPIData(response.data);
       setLoader((prev) => ({ ...prev, loadingCommentCall: false }));
@@ -123,7 +123,7 @@ const AdminCommentPanel = () => {
     setLoader((prev) => ({ ...prev, loadingSupplierCommentCall: true }));
     try {
       const response = await axiosInstance.get(
-        `/comments/?cvs_supplier=${cvs_supplier}`
+        `/comments/?cvs_supplier=${cvs_supplier}`,
       );
       SetCommentGetAPIData(response.data);
       setLoader((prev) => ({ ...prev, loadingSupplierCommentCall: false }));
@@ -175,7 +175,7 @@ const AdminCommentPanel = () => {
               cvs_supplier: item?.cvs_supplier,
               supplier_name: item?.supplier_name,
             };
-          })
+          }),
       );
   };
 
@@ -186,7 +186,7 @@ const AdminCommentPanel = () => {
           ?.filter((item) => {
             return item.cvs_supplier === supplierIDComing;
           })
-          ?.map((item) => item?.pko_id)
+          ?.map((item) => item?.pko_id),
       );
   };
 
@@ -207,7 +207,7 @@ const AdminCommentPanel = () => {
     setLoader((prev) => ({ ...prev, loadingSkuCall: true }));
     try {
       const response = await axiosInstance.get(
-        `/pko-dashboard-skulist/${pko_id}/`
+        `/pko-dashboard-skulist/${pko_id}/`,
       );
       if (dataType === "filterData") {
         setSkuFilterDataList(response.data?.skus?.map((item) => item?.sku_id));
@@ -225,7 +225,7 @@ const AdminCommentPanel = () => {
   const apiGetComponent = async (sku_id) => {
     try {
       const response = await axiosInstance.get(
-        `/skus/${sku_id}/?pko_id=${selectedPkoID}`
+        `/skus/${sku_id}/?pko_id=${selectedPkoID}`,
       );
       setComponentDataList(response.data?.components);
       setSelectedComponentID("Select Component ID");
@@ -358,8 +358,8 @@ const AdminCommentPanel = () => {
             })
           : b.pko_id.localeCompare(a.pko_id, undefined, {
               sensitivity: "base",
-            })
-    });
+            });
+      });
       setSortedCommentData(sortedData);
       setPkoSortAsc(!pkoSortAsc); // Toggle for next click
     }
@@ -367,33 +367,47 @@ const AdminCommentPanel = () => {
 
   const handleSortSku = () => {
     if (sortedCommentData) {
-      const sortedData = [...sortedCommentData].sort((a, b) =>{
+      const sortedData = [...sortedCommentData].sort((a, b) => {
         return pkoSortAsc
-          ? a.sku_id === null ? "zzz" : a.sku_id.localeCompare(b.sku_id === null ? "zzz" : b.sku_id, undefined, {
-              sensitivity: "base",
-            })
-          : b.sku_id === null ? "zzz" : b.sku_id.localeCompare(a.sku_id === null ? "zzz" : a.sku_id, undefined, {
-              sensitivity: "base",
-            })
-    });
+          ? a.sku_id === null
+            ? "zzz"
+            : a.sku_id.localeCompare(
+                b.sku_id === null ? "zzz" : b.sku_id,
+                undefined,
+                {
+                  sensitivity: "base",
+                },
+              )
+          : b.sku_id === null
+            ? "zzz"
+            : b.sku_id.localeCompare(
+                a.sku_id === null ? "zzz" : a.sku_id,
+                undefined,
+                {
+                  sensitivity: "base",
+                },
+              );
+      });
       setSortedCommentData(sortedData);
       setSkuSortAsc(!skuSortAsc); // Toggle for next click
     }
   };
 
   const handleSortName = () => {
-  if (sortedCommentData) {
-    const sortedData = [...sortedCommentData].sort((a, b) => {
-      const nameA = a.sender_type === "admin" ? "Administrator" : nameFormation(a.user);
-      const nameB = b.sender_type === "admin" ? "Administrator" : nameFormation(b.user);
-      return nameSortAsc
-        ? nameA.localeCompare(nameB, undefined, { sensitivity: "base" })
-        : nameB.localeCompare(nameA, undefined, { sensitivity: "base" });
-    });
-    setSortedCommentData(sortedData);
-    setNameSortAsc(!nameSortAsc); // Toggle for next click
-  }
-};
+    if (sortedCommentData) {
+      const sortedData = [...sortedCommentData].sort((a, b) => {
+        const nameA =
+          a.sender_type === "admin" ? "Administrator" : nameFormation(a.user);
+        const nameB =
+          b.sender_type === "admin" ? "Administrator" : nameFormation(b.user);
+        return nameSortAsc
+          ? nameA.localeCompare(nameB, undefined, { sensitivity: "base" })
+          : nameB.localeCompare(nameA, undefined, { sensitivity: "base" });
+      });
+      setSortedCommentData(sortedData);
+      setNameSortAsc(!nameSortAsc); // Toggle for next click
+    }
+  };
 
   const handleSortDate = () => {
     if (sortedCommentData) {
@@ -737,16 +751,17 @@ const AdminCommentPanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedCommentData && sortedCommentData?.map((item) => {
-                  return (
-                    <CommentRowParentMessage
-                      parentMessage={item}
-                      apiCallCommentAfterDeleteAndWritingComment={
-                        apiCallCommentAfterDeleteAndWritingComment
-                      }
-                    />
-                  );
-                })}
+                {sortedCommentData &&
+                  sortedCommentData?.map((item) => {
+                    return (
+                      <CommentRowParentMessage
+                        parentMessage={item}
+                        apiCallCommentAfterDeleteAndWritingComment={
+                          apiCallCommentAfterDeleteAndWritingComment
+                        }
+                      />
+                    );
+                  })}
               </tbody>
             </table>
           </div>
