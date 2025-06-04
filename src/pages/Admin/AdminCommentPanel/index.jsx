@@ -8,7 +8,7 @@ import { nameFormation } from "./CommentRowParentMessage";
 const AdminCommentPanel = () => {
   const [commentGetAPIData, SetCommentGetAPIData] = useState([]);
   const [sortedCommentData, setSortedCommentData] = useState([]);
-  const { pkoId, skuId } = useParams();
+  const { pkoId, skuId, componentId } = useParams();
   const [pkoWholeDataList, setPKOWholeDataList] = useState();
   const [pkoDataList, setPkoDataList] = useState(undefined);
   const [skuDataList, setSkuDataList] = useState(undefined);
@@ -42,6 +42,8 @@ const AdminCommentPanel = () => {
   const [nameSortAsc, setNameSortAsc] = useState(true);
   const [skuSortAsc, setSkuSortAsc] = useState(true);
   const [dateSortAsc, setDateSortAsc] = useState(true);
+  const [parentComponentIdOpenedReply, setParentComponentIdOpenedReply] =
+    useState(null);
 
   useEffect(() => {
     setSortedCommentData(
@@ -63,27 +65,33 @@ const AdminCommentPanel = () => {
     );
 
     const handleOffcanvasOpen = async () => {
-      // Reset all inputs
       setTextComment("");
       setSelectedSkuID("Select SKU ID");
       setSelectedPkoID("Select PKO ID");
       setSelectedComponentID("Select Component ID");
       setFilterSupplierName("Select Supplier Name");
+      setComponentDataList(undefined);
+      setSkuDataList(undefined);
       apiGetPko();
-
+      setParentComponentIdOpenedReply(null);
       if (pkoId) {
         setFilterSelectedPkoID(pkoId);
+        setSelectedPkoID(pkoId);
         setCollapseFilterVal(false);
-        apiGetSKU(pkoId, "filterData");
+        apiGetSKU(pkoId, "bothData");
         if (skuId) {
           setFilterSelectedSkuID(skuId);
+          setSelectedSkuID(skuId);
           setCollapseFilterVal(false);
           await apiGetCallComment(pkoId, skuId);
+          await apiGetComponent(skuId, pkoId, componentId);
         } else {
+          setSelectedSkuID("Select SKU ID");
           setFilterSelectedSkuID("Select SKU ID");
           await apiGetCallComment(pkoId);
         }
       } else {
+        setSelectedPkoID("Select PKO ID");
         setFilterSelectedPkoID("Select PKO ID");
         await apiGetCallComment();
       }
@@ -211,6 +219,10 @@ const AdminCommentPanel = () => {
       );
       if (dataType === "filterData") {
         setSkuFilterDataList(response.data?.skus?.map((item) => item?.sku_id));
+      } else if (dataType === "bothData") {
+        setSelectedComponentID("Select Component ID");
+        setSkuFilterDataList(response.data?.skus?.map((item) => item?.sku_id));
+        setSkuDataList(response.data?.skus?.map((item) => item?.sku_id));
       } else {
         setSelectedSkuID("Select SKU ID");
         setSelectedComponentID("Select Component ID");
@@ -222,13 +234,17 @@ const AdminCommentPanel = () => {
     }
   };
 
-  const apiGetComponent = async (sku_id) => {
+  const apiGetComponent = async (sku_id, pko_id, componentIDIncoming) => {
     try {
       const response = await axiosInstance.get(
-        `/skus/${sku_id}/?pko_id=${selectedPkoID}`,
+        `/skus/${sku_id}/?pko_id=${pko_id}`,
       );
       setComponentDataList(response.data?.components);
-      setSelectedComponentID("Select Component ID");
+      if (componentIDIncoming) {
+        setSelectedComponentID(componentIDIncoming);
+      } else {
+        setSelectedComponentID("Select Component ID");
+      }
     } catch (err) {
       console.log(err, "error from comment block");
     }
@@ -241,7 +257,8 @@ const AdminCommentPanel = () => {
 
   const handleSkuDropdown = (e) => {
     setSelectedSkuID(e.target.value);
-    apiGetComponent(e.target.value);
+    console.log(e.target.value, "e.target.value");
+    apiGetComponent(e.target.value, selectedPkoID);
   };
 
   const handleComponentDropdown = (e) => {
@@ -253,6 +270,7 @@ const AdminCommentPanel = () => {
   };
 
   const handleFilterPkoDropdown = (e) => {
+    setParentComponentIdOpenedReply(null);
     setFilterSelectedPkoID(e.target.value);
     if (e.target.value === "Select PKO ID") {
       if (filterSupplierName !== "Select Supplier Name") {
@@ -271,6 +289,7 @@ const AdminCommentPanel = () => {
   };
 
   const handleFilterSkuDropdown = (e) => {
+    setParentComponentIdOpenedReply(null);
     setFilterSelectedSkuID(e.target.value);
     if (e.target.value === "Select SKU ID") {
       apiGetCallComment(filterSelectedPkoID);
@@ -280,6 +299,7 @@ const AdminCommentPanel = () => {
   };
 
   const handleFilterSupplierDropdown = (e) => {
+    setParentComponentIdOpenedReply(null);
     setFilterSupplierName(e.target.value);
     if (filterSelectedPkoID !== "Select PKO ID") {
       setPkoDataList(pkoWholeDataList?.map((item) => item?.pko_id));
@@ -340,7 +360,7 @@ const AdminCommentPanel = () => {
       filterSelectedSkuID !== "Select SKU ID"
     ) {
       apiGetCallComment(filterSelectedPkoID, filterSelectedSkuID);
-    } else if (filterSelectedPkoID !== "Select Component ID") {
+    } else if (filterSelectedPkoID !== "Select PKO ID") {
       apiGetCallComment(filterSelectedPkoID);
     } else if (filterSupplierName !== "Select Supplier Name") {
       apiGetSupplierCallComment(filterSupplierName);
@@ -487,7 +507,7 @@ const AdminCommentPanel = () => {
                   </option>
                   {skuDataList?.map((skuIDIncoming) => {
                     return (
-                      <option key={skuIDIncoming} value={componentDataList}>
+                      <option key={skuIDIncoming} value={skuIDIncoming}>
                         {skuIDIncoming}
                       </option>
                     );
@@ -621,7 +641,7 @@ const AdminCommentPanel = () => {
                   <option value={"Select SKU ID"}>Select SKU ID</option>
                   {skuFilterDataList?.map((skuIDIncoming) => {
                     return (
-                      <option key={skuIDIncoming} value={componentDataList}>
+                      <option key={skuIDIncoming} value={skuIDIncoming}>
                         {skuIDIncoming}
                       </option>
                     );
@@ -758,6 +778,12 @@ const AdminCommentPanel = () => {
                         parentMessage={item}
                         apiCallCommentAfterDeleteAndWritingComment={
                           apiCallCommentAfterDeleteAndWritingComment
+                        }
+                        parentComponentIdOpenedReply={
+                          parentComponentIdOpenedReply
+                        }
+                        setParentComponentIdOpenedReply={
+                          setParentComponentIdOpenedReply
                         }
                       />
                     );

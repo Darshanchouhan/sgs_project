@@ -23198,9 +23198,6 @@ input[type="radio"] {
 #offcanvasVendorCommentPanel {
   width: 42%;
 }
-#offcanvasVendorCommentPanel #sendCommentTextarea {
-  padding-right: 35% !important;
-}
 #offcanvasVendorCommentPanel .allComments-block {
   padding-bottom: 22% !important;
   max-height: 68vh;
@@ -23243,25 +23240,25 @@ input[type="radio"] {
 #offcanvasAdminCommentPanel #sendCommentTextareaAdmin {
   padding-bottom: 42px !important;
 }
-#offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder  {
+#offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder {
   min-height: 20vh !important;
   max-height: 52vh !important;
   overflow-y: auto !important;
 }
 
-#offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holdeFilterOpen  {
+#offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holdeFilterOpen {
   min-height: 20vh !important;
   max-height: 37.5vh !important;
   overflow-y: auto !important;
 }
 @media (min-width: 1650px) {
-  #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder  {
+  #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holder {
     max-height: 62vh !important;
   }
 }
 
 @media (min-width: 1650px) {
-  #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holdeFilterOpen  {
+  #offcanvasAdminCommentPanel .AdminCommentPanelMainTable-holdeFilterOpen {
     max-height: 56vh !important;
   }
 }

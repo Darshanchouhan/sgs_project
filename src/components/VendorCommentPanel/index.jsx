@@ -5,10 +5,16 @@ const VendorCommentPanel = ({
   dropdownData = {},
   initialSelectedPkoId = "",
   initialFilterPkoId = "",
-  initialSelectedSkuId = "", // For Add Comment section
-  initialFilterSkuId = "", // For Filter section
+  initialSelectedSkuId = "", // For “Add Comment” section
+  initialFilterSkuId = "", // For “Filter” section
   initialSelectedComponentName = "",
 }) => {
+  // Loader state, same style as AdminCommentPanel
+  const [loader, setLoader] = useState({
+    loadingCommentCall: false,
+    loadingSubmit: false,
+  });
+
   const [selectedPkoId, setSelectedPkoId] = useState(initialSelectedPkoId);
   const [hasUserChangedPko, setHasUserChangedPko] = useState(false);
   const [selectedSkuId, setSelectedSkuId] = useState(initialSelectedSkuId);
@@ -21,10 +27,6 @@ const VendorCommentPanel = ({
   const filteredSkusForFilter = skus.filter(
     (sku) => sku.pko_id === filterPkoId,
   );
-  //   const filteredSkusForFilter = skus.filter(
-  //   (sku) => sku.pko_id === filterPkoId || sku.pko_id === initialFilterPkoId
-  // );
-
   const [selectedComponent, setSelectedComponent] = useState(
     initialSelectedComponentName,
   );
@@ -32,19 +34,21 @@ const VendorCommentPanel = ({
   const [commentText, setCommentText] = useState("");
   const [openReplyFor, setOpenReplyFor] = useState(null);
   const [replyTextByComment, setReplyTextByComment] = useState({});
-  const [groupedComments, setGroupedComments] = useState([]);
+  const [collapsedReplies, setCollapsedReplies] = useState({});
 
+  // Reset everything when the offcanvas closes
   useEffect(() => {
     const offcanvasEl = document.getElementById("offcanvasVendorCommentPanel");
     if (!offcanvasEl) return;
 
     const onHidden = () => {
-      // reset everything back to props
       setSelectedPkoId(initialSelectedPkoId);
       setSelectedSkuId(initialSelectedSkuId);
       setFilterPkoId(initialFilterPkoId);
       setFilterSkuId(initialFilterSkuId);
       setSelectedComponent(initialSelectedComponentName);
+      //to collapse reply
+      setOpenReplyFor(null);
     };
 
     offcanvasEl.addEventListener("hidden.bs.offcanvas", onHidden);
@@ -59,18 +63,18 @@ const VendorCommentPanel = ({
     initialSelectedComponentName,
   ]);
 
+  // Sync from parent unless user manually changed
   useEffect(() => {
-    // Set from parent unless user manually changed
     if (!hasUserChangedPko) {
       setSelectedPkoId(initialSelectedPkoId);
-      setSelectedSkuId(initialSelectedSkuId); // sync only once
+      setSelectedSkuId(initialSelectedSkuId);
     }
   }, [initialSelectedPkoId, hasUserChangedPko]);
 
   useEffect(() => {
     if (!hasUserChangedFilterPko) {
       setFilterPkoId(initialFilterPkoId);
-      setFilterSkuId(initialFilterSkuId); // sync only once
+      setFilterSkuId(initialFilterSkuId);
     }
   }, [initialFilterPkoId, hasUserChangedFilterPko]);
 
@@ -80,14 +84,14 @@ const VendorCommentPanel = ({
     }
   }, [initialSelectedComponentName]);
 
-  // Reset when PKO changes
+  // Whenever PKO changes, clear SKU & component list
   useEffect(() => {
     setSelectedSkuId("");
     setSelectedComponent("");
     setComponentList([]);
   }, [selectedPkoId]);
 
-  // Fetch components on SKU selection
+  // Fetch components when SKU changes
   useEffect(() => {
     const fetchComponents = async () => {
       if (!selectedSkuId || !selectedPkoId) return;
@@ -99,14 +103,15 @@ const VendorCommentPanel = ({
       } catch (err) {
         console.error(
           `Failed to load components for SKU ${selectedSkuId} and PKO ${selectedPkoId}`,
+          err,
         );
         setComponentList([]);
       }
     };
-
     fetchComponents();
   }, [selectedSkuId, selectedPkoId]);
 
+  // Whenever filters or dropdown data change, re-fetch comments
   useEffect(() => {
     if (pkos.length && skus.length) {
       if (!filterPkoId && !filterSkuId) {
@@ -117,29 +122,27 @@ const VendorCommentPanel = ({
     }
   }, [filterPkoId, filterSkuId, pkos, skus]);
 
-  const markCommentsAsSeen = async (comments) => {
-    const unseenIds = comments
-      .filter((c) => !c.vendor_seen && c.sender_type === "admin") // adjust condition if needed
+  //mark “vendor_seen” on admin comments ──
+  const markCommentsAsSeen = async (allComments) => {
+    const unseenIds = allComments
+      .filter((c) => !c.vendor_seen && c.sender_type === "admin")
       .map((c) => c.id);
-
-    if (unseenIds.length === 0) return;
-
+    if (!unseenIds.length) return;
     try {
-      await axiosInstance.patch("/comments/", {
-        comment_ids: unseenIds,
-      });
+      await axiosInstance.patch("/comments/", { comment_ids: unseenIds });
       console.log("Marked as seen:", unseenIds);
     } catch (err) {
       console.error("Failed to mark comments as seen", err);
     }
   };
 
+  //fetchAllComments, wrapped in loader.loadingCommentCall
   const fetchAllComments = async () => {
+    setLoader((prev) => ({ ...prev, loadingCommentCall: true }));
     try {
       const pkoRequests = pkos.map((pko) =>
         axiosInstance.get(`/comments/?pko_id=${pko.pko_id}`),
       );
-
       const skuRequests = skus.map((sku) =>
         axiosInstance.get(
           `/comments/?pko_id=${sku.pko_id}&sku_id=${sku.sku_id}`,
@@ -152,7 +155,6 @@ const VendorCommentPanel = ({
             `/skus/${sku.sku_id}/?pko_id=${sku.pko_id}`,
           );
           const components = res.data?.components || [];
-
           return Promise.all(
             components.map((comp) =>
               axiosInstance.get(
@@ -173,13 +175,18 @@ const VendorCommentPanel = ({
       ];
 
       setComments(allComments);
+      await markCommentsAsSeen(allComments);
     } catch (err) {
       console.error("Failed to fetch ALL comments", err);
       setComments([]);
+    } finally {
+      setLoader((prev) => ({ ...prev, loadingCommentCall: false }));
     }
   };
 
+  //fetchFilteredComments, wrapped in loader.loadingCommentCall ──
   const fetchFilteredComments = async () => {
+    setLoader((prev) => ({ ...prev, loadingCommentCall: true }));
     try {
       let allComments = [];
 
@@ -190,7 +197,6 @@ const VendorCommentPanel = ({
         allComments.push(...(pkoLevelRes.data || []));
 
         const relatedSkus = skus.filter((sku) => sku.pko_id === filterPkoId);
-
         for (const sku of relatedSkus) {
           const skuLevelRes = await axiosInstance.get(
             `/comments/?pko_id=${filterPkoId}&sku_id=${sku.sku_id}`,
@@ -201,7 +207,6 @@ const VendorCommentPanel = ({
             `/skus/${sku.sku_id}/?pko_id=${filterPkoId}`,
           );
           const components = skuDetailRes.data?.components || [];
-
           const componentRequests = await Promise.all(
             components.map((comp) =>
               axiosInstance.get(
@@ -209,10 +214,7 @@ const VendorCommentPanel = ({
               ),
             ),
           );
-
-          allComments.push(
-            ...componentRequests.flatMap((res) => res.data || []),
-          );
+          allComments.push(...componentRequests.flatMap((r) => r.data || []));
         }
       }
 
@@ -226,7 +228,6 @@ const VendorCommentPanel = ({
           `/skus/${filterSkuId}/?pko_id=${filterPkoId}`,
         );
         const components = skuDetails.data?.components || [];
-
         const componentRequests = await Promise.all(
           components.map((comp) =>
             axiosInstance.get(
@@ -234,105 +235,129 @@ const VendorCommentPanel = ({
             ),
           ),
         );
-
         allComments.push(...componentRequests.flatMap((r) => r.data || []));
       }
 
-      // Deduplicate by comment ID
-      const deduplicatedComments = Array.from(
-        new Map(allComments.map((comment) => [comment.id, comment])).values(),
+      // Deduplicate by comment id, then sort by timestamp desc
+      const deduplicated = Array.from(
+        new Map(allComments.map((c) => [c.id, c])).values(),
       );
-      const sortedComments = deduplicatedComments.sort(
+      deduplicated.sort(
         (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
       );
-      setComments(deduplicatedComments);
-      setComments(sortedComments);
+
+      setComments(deduplicated);
       await markCommentsAsSeen(allComments);
     } catch (err) {
       console.error("Failed to fetch FILTERED comments", err);
       setComments([]);
+    } finally {
+      setLoader((prev) => ({ ...prev, loadingCommentCall: false }));
     }
   };
 
+  // which fetch to call after any post/delete/reply:
+  const refreshComments = async () => {
+    if (!filterPkoId && !filterSkuId) {
+      await fetchAllComments();
+    } else {
+      await fetchFilteredComments();
+    }
+  };
+
+  //  handlePostComment wrapped in loadingSubmit
   const handlePostComment = async () => {
     if (!selectedPkoId || !commentText.trim()) return;
+    setLoader((prev) => ({ ...prev, loadingSubmit: true }));
 
     const payload = {
       pko_id: selectedPkoId,
       message: commentText.trim(),
       sender_type: "vendor",
     };
-
     if (selectedSkuId) payload.sku_id = selectedSkuId;
-
     const matchedComponent = componentList.find(
       (comp) => comp.name === selectedComponent,
     );
     if (matchedComponent) payload.component_id = matchedComponent.id;
 
     try {
-      const res = await axiosInstance.post("/comments/", payload);
-      console.log("Comment posted successfully:", res?.data);
+      await axiosInstance.post("/comments/", payload);
       setCommentText("");
-    } catch (error) {
+      await refreshComments();
+    } catch (err) {
       console.error(
         "Failed to post comment:",
-        error?.response?.data || error.message,
+        err?.response?.data || err.message,
       );
+    } finally {
+      setLoader((prev) => ({ ...prev, loadingSubmit: false }));
     }
   };
 
+  // handlePostReply wrapped in loadingSubmit
   const handlePostReply = async (commentId) => {
-    const reply = replyTextByComment[commentId]?.trim();
+    const reply = (replyTextByComment[commentId] || "").trim();
     if (!reply) return;
+    setLoader((prev) => ({ ...prev, loadingSubmit: true }));
 
     const payload = {
       parent_id: commentId,
       message: reply,
-      sender_type: "admin", // or "vendor" dynamically if needed
+      sender_type: "vendor",
     };
-
     try {
-      const res = await axiosInstance.post("/comments/", payload);
-      console.log("Reply posted successfully:", res?.data);
-
-      // Clear and close
+      await axiosInstance.post("/comments/", payload);
       setReplyTextByComment((prev) => ({ ...prev, [commentId]: "" }));
-      setOpenReplyFor(null);
-
-      //  Refresh comments to see the reply
-      if (!filterPkoId && !filterSkuId) {
-        await fetchAllComments();
-      } else {
-        await fetchFilteredComments();
-      }
-    } catch (error) {
+      setOpenReplyFor(commentId); // Keep it open after refresh
+      await refreshComments();
+    } catch (err) {
       console.error(
         "Failed to post reply:",
-        error?.response?.data || error.message,
+        err?.response?.data || err.message,
       );
+    } finally {
+      setLoader((prev) => ({ ...prev, loadingSubmit: false }));
     }
   };
 
+  //  handleDeleteComment wrapped in loadingSubmit ──
   const handleDeleteComment = async (commentId) => {
+    setLoader((prev) => ({ ...prev, loadingSubmit: true }));
     try {
       await axiosInstance.delete("/comments/", {
         data: { comment_id: commentId },
       });
-      console.log("Comment deleted successfully:", commentId);
-
-      // Refresh comments after delete
-      if (!filterPkoId && !filterSkuId) {
-        await fetchAllComments();
-      } else {
-        await fetchFilteredComments();
-      }
-    } catch (error) {
+      await refreshComments();
+    } catch (err) {
       console.error(
         "Failed to delete comment:",
-        error?.response?.data || error.message,
+        err?.response?.data || err.message,
       );
+    } finally {
+      setLoader((prev) => ({ ...prev, loadingSubmit: false }));
     }
+  };
+
+  // Format “Administrator” vs. vendor’s display name
+  const getDisplayUserInfo = (user = "", senderType = "") => {
+    const currentUser = localStorage.getItem("user_name");
+    if (senderType === "admin") {
+      return {
+        name: "Administrator",
+        icon: "/assets/images/administrator-icon.svg",
+      };
+    }
+    const namePart = (user || "").split("@")[0];
+    const formattedName = namePart
+      .split(".")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+    const isCurrentUser = user === currentUser;
+    return {
+      name: isCurrentUser ? `${formattedName} (You)` : formattedName,
+      icon: "/assets/images/user-chart-profile-icon.svg",
+    };
   };
 
   return (
@@ -357,7 +382,7 @@ const VendorCommentPanel = ({
           >
             Enter a comment
           </label>
-          <div className="position-relative">
+          <div>
             <textarea
               className="form-control px-12 py-2"
               placeholder="Type your comment here.."
@@ -366,55 +391,39 @@ const VendorCommentPanel = ({
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
             ></textarea>
-            <button
-              type="button"
-              disabled={!selectedPkoId || commentText.trim() === ""}
-              onClick={handlePostComment}
-              className={`btn border px-4 py-1 fs-14 fw-600 w-mx-content position-absolute top-50 end-0 translate-middle-y me-12
-    ${
-      !selectedPkoId || commentText.trim() === ""
-        ? "bg-color-light-gray-shade text-color-typo-secondary border-color-typo-secondary opacity-50 cursor-not-allowed"
-        : "bg-secondary text-white border-secondary"
-    }
-  `}
-            >
-              Comment
-              <img
-                src="/assets/images/send-comment-icon.svg"
-                alt="send-comment-icon"
-                className="ms-12"
-              />
-            </button>
           </div>
         </div>
 
         <div className="d-flex align-items-center justify-content-between w-100 gap-2">
+          {/* “Add Comment labels” bar: PKO, SKU, Component (if fixed) */}
           <div>
             <label className="fs-12 fw-600 text-color-typo-primary">
               Add Comment labels{" "}
             </label>
           </div>
 
-          {/* PKO Dropdown */}
-          <div className="fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40">
+          {/* PKO Label */}
+          <div className="fs-12 fw-600 w-100 h-100 text-color-list-item bg-color-light-gray-shade border-0 p-6 rounded-2">
             <label className="fs-12 fw-600 text-color-typo-primary">
               PKO ID
             </label>
-            <span className="fs-14 fw-600 text-primary"> {selectedPkoId} </span>
+            <span className="fs-14 d-block fw-600 text-color-draft">
+              {selectedPkoId}
+            </span>
           </div>
-          {/* SKU Label or Dropdown */}
+
+          {/* SKU Label or dropdown */}
           {initialSelectedSkuId ? (
-            <div className="fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40">
+            <div className="fs-12 w-100 h-100 fw-600 text-color-list-item bg-color-light-gray-shade border-0 p-6 rounded-2">
               <label className="fs-12 fw-600 text-color-typo-primary">
-                SKU{" "}
+                SKU
               </label>
-              <span className="fs-14 fw-600 text-primary">
-                {" "}
-                {initialSelectedSkuId}{" "}
+              <span className="fs-14 fw-600 d-block text-color-draft">
+                {initialSelectedSkuId}
               </span>
             </div>
           ) : (
-            <div className="form-floating w-100">
+            <div className="form-floating w-100 h-100">
               <select
                 className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
                 id="floatingSkuSelect"
@@ -434,26 +443,25 @@ const VendorCommentPanel = ({
               </select>
               <label
                 htmlFor="floatingSkuSelect"
-                className="fs-10 fw-600 text-color-typo-primary"
+                className="fs-12 fw-600 text-color-typo-primary"
               >
                 SKU
               </label>
             </div>
           )}
 
-          {/* Component Dropdown */}
+          {/* Component Label or dropdown */}
           {initialSelectedComponentName ? (
-            <div className="fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40">
+            <div className="fs-12 w-100 h-100 fw-600 text-color-list-item bg-color-light-gray-shade border-0 p-6 rounded-2">
               <label className="fs-12 fw-600 text-color-typo-primary">
                 Component
               </label>
-              <span className="fs-14 fw-600 text-primary">
-                {" "}
+              <span className="fs-14 fw-600 text-color-draft">
                 {initialSelectedComponentName}
               </span>
             </div>
           ) : (
-            <div className="form-floating w-100">
+            <div className="form-floating w-100 h-100">
               <select
                 className="form-select fs-12 fw-600 text-color-list-item bg-color-light-gray-shade border-0 pe-40"
                 id="floatingComponentSelect"
@@ -470,12 +478,31 @@ const VendorCommentPanel = ({
               </select>
               <label
                 htmlFor="floatingComponentSelect"
-                className="fs-10 fw-600 text-color-typo-primary"
+                className="fs-12 fw-600 text-color-typo-primary"
               >
                 Component
               </label>
             </div>
           )}
+          <button
+            type="button"
+            disabled={!selectedPkoId || commentText.trim() === ""}
+            onClick={handlePostComment}
+            className={`btn border px-4 py-1 fs-14 fw-600 w-mx-content text-nowrap ms-4
+              ${
+                !selectedPkoId || commentText.trim() === ""
+                  ? "bg-color-light-gray-shade text-color-typo-secondary border-color-typo-secondary opacity-50 cursor-not-allowed"
+                  : "bg-secondary text-white border-secondary"
+              }
+            `}
+          >
+            Comment
+            <img
+              src="/assets/images/send-comment-icon.svg"
+              alt="send-comment-icon"
+              className="ms-12"
+            />
+          </button>
         </div>
       </div>
 
@@ -501,267 +528,311 @@ const VendorCommentPanel = ({
             </button>
           </div>
         </div>
-        <div class="collapse" id="collapseChooseFilters">
-          <div class="card card-body bg-color-light-gray-shade-new rounded-0 border-0 border-bottom border-color-black px-4 py-14">
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              <span className="fs-14 fw-400 text-color-typo-secondary">
-                Choose Filters
-              </span>
-              <button
-                type="button"
-                className="btn fs-14 fw-600 text-color-draft p-0 border-none bg-transparent"
-                onClick={() => {
-                  setFilterPkoId("");
-                  setFilterSkuId("");
-                }}
-              >
-                Clear all
-              </button>
-            </div>
-            <div className="d-flex align-items-center justify-content-between">
-              {/* PKO Filter Dropdown */}
-              <div className="d-flex align-items-center">
-                <label className="fs-14 fw-600 text-nowrap me-3 mb-0">
-                  PKO ID
-                </label>
-                <select
-                  className="form-select ..."
-                  value={filterPkoId}
-                  onChange={(e) => {
-                    setFilterPkoId(e.target.value);
 
-                    setFilterSkuId(""); // Clear SKU when PKO changes
-                    setHasUserChangedFilterPko(true); // mark as user-driven change
-                  }}
-                >
-                  <option value="">Select PKO</option>{" "}
-                  {/* This stays at the top */}
-                  {pkos.map((pko) => (
-                    <option key={pko.pko_id} value={pko.pko_id}>
-                      {pko.pko_id}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="d-flex align-items-center">
-                <label className="fs-14 fw-600 text-nowrap me-3 mb-0">
-                  SKU
-                </label>
-                <select
-                  className="form-select ..."
-                  value={filterSkuId}
-                  onChange={(e) => {
-                    setFilterSkuId(e.target.value);
-                    setHasUserChangedFilterPko(true); // Track manual change
-                  }}
-                >
-                  <option value="">Select SKU</option>{" "}
-                  {/*  Default placeholder */}
-                  {filteredSkusForFilter.map((sku) => (
-                    <option key={sku.sku_id} value={sku.sku_id}>
-                      {sku.sku_id}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {/* ── If any loader flag is true, show the overlay ── */}
+        {(loader.loadingCommentCall || loader.loadingSubmit) && (
+          <div className="loader">
+            <div className="loaderOverlay d-flex align-items-center justify-content-center bg-secondary rounded-4">
+              <img
+                src="/assets/images/loading_gif.gif"
+                alt="Loading..."
+                width="120px"
+                height="120px"
+              />
             </div>
           </div>
-        </div>
-        <div className="allComments-block p-4">
-          {comments.map((comment, idx) => {
-            const isUser = comment.user === localStorage.getItem("user_name");
-            return (
-              <div
-                key={idx}
-                className="card bg-white rounded-3 border-color-light-gray-shade mb-20"
-              >
-                <div className="card-header d-flex align-items-center justify-content-between border-0 bg-transparent px-3 pt-12 pb-0">
-                  <div className="d-flex align-items-center">
-                    <img
-                      src={
-                        isUser
-                          ? "/assets/images/user-chart-profile-icon.svg"
-                          : "/assets/images/administrator-icon.svg"
-                      }
-                      alt="user-icon"
-                    />
-                    <div className="ms-10">
-                      <h3 className="fs-14 fw-600 text-color-typo-primary mb-1">
-                        {isUser ? `${comment.user} (You)` : comment.user}
-                      </h3>
-                      <h4 className="fs-14 fw-400 text-color-typo-secondary mb-0">
-                        {new Date(comment.timestamp).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          },
-                        )}
-                      </h4>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center">
-                    <button
-                      type="button"
-                      className="btn border-0 p-0 me-3"
-                      onClick={() => handleDeleteComment(comment.id)}
-                    >
-                      <img
-                        src="/assets/images/delete-icon-blue.svg"
-                        alt="delete-icon-blue"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn border-0 p-0 d-flex align-items-center ms-3"
-                      onClick={() =>
-                        setOpenReplyFor(
-                          openReplyFor === comment.id ? null : comment.id,
-                        )
-                      }
-                    >
-                      <img
-                        src="/assets/images/reply-icon.svg"
-                        alt="reply-icon"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn border-0 p-0 d-flex align-items-center ms-3"
-                    >
-                      <img
-                        src="/assets/images/arrow-right-forward-blue-new.svg"
-                        alt="arrow-right-forward-blue-new"
-                      />
-                    </button>
-                  </div>
-                </div>
+        )}
 
-                <div className="card-body px-3 pt-2 pb-14">
-                  <p className="fs-14 fw-400 text-color-typo-primary mb-0">
-                    {comment.message}
-                  </p>
+        {/* ── Only show the comments block when not loading ── */}
+        {!(loader.loadingCommentCall || loader.loadingSubmit) && (
+          <>
+            <div className="collapse" id="collapseChooseFilters">
+              <div className="card card-body bg-color-light-gray-shade-new rounded-0 border-0 border-bottom border-color-black px-4 py-14">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                  <span className="fs-14 fw-400 text-color-typo-secondary">
+                    Choose Filters
+                  </span>
+                  <button
+                    type="button"
+                    className="btn fs-14 fw-600 text-color-draft p-0 border-none bg-transparent"
+                    onClick={() => {
+                      setFilterPkoId("");
+                      setFilterSkuId("");
+                    }}
+                  >
+                    Clear all
+                  </button>
                 </div>
-
-                <div className="card-footer px-3 py-6 border-color-desabled-lite bg-transparent">
-                  <div className="row">
-                    <div className="col-6">
-                      {[
-                        { label: "PKO ID", value: comment.pko_id },
-                        { label: "SKU", value: comment.sku_id || "-" },
-                      ].map(({ label, value }) => (
-                        <div className="row gx-2 mb-1" key={label}>
-                          <div className="col-4">
-                            <span className="fs-12 fw-400 text-color-typo-secondary">
-                              {label}
-                            </span>
-                          </div>
-                          <div className="col-8">
-                            <span className="fs-12 fw-600 text-color-typo-primary">
-                              {value}
-                            </span>
-                          </div>
-                        </div>
+                <div className="d-flex align-items-center justify-content-between">
+                  {/* PKO Filter Dropdown */}
+                  <div className="d-flex align-items-center">
+                    <label className="fs-14 fw-600 text-nowrap me-3 mb-0">
+                      PKO ID
+                    </label>
+                    <select
+                      className="form-select"
+                      value={filterPkoId}
+                      onChange={(e) => {
+                        setFilterPkoId(e.target.value);
+                        setFilterSkuId("");
+                        setHasUserChangedFilterPko(true);
+                      }}
+                    >
+                      <option value="">Select PKO</option>
+                      {pkos.map((pko) => (
+                        <option key={pko.pko_id} value={pko.pko_id}>
+                          {pko.pko_id}
+                        </option>
                       ))}
-                    </div>
-                    <div className="col-6">
-                      <div className="row gx-2">
-                        <div className="col-4">
-                          <span className="fs-12 fw-400 text-color-typo-secondary">
-                            Component
-                          </span>
-                        </div>
-                        <div className="col-8">
-                          <span className="fs-12 fw-600 text-color-typo-primary">
-                            {comment.component_name || "-"}
-                          </span>
+                    </select>
+                  </div>
+
+                  {/* SKU Filter Dropdown */}
+                  <div className="d-flex align-items-center">
+                    <label className="fs-14 fw-600 text-nowrap me-3 mb-0">
+                      SKU
+                    </label>
+                    <select
+                      className="form-select"
+                      value={filterSkuId}
+                      onChange={(e) => {
+                        setFilterSkuId(e.target.value);
+                        setHasUserChangedFilterPko(true);
+                      }}
+                    >
+                      <option value="">Select SKU</option>
+                      {filteredSkusForFilter.map((sku) => (
+                        <option key={sku.sku_id} value={sku.sku_id}>
+                          {sku.sku_id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="allComments-block p-4">
+              {comments.map((comment, idx) => {
+                const { name, icon } = getDisplayUserInfo(
+                  comment.user,
+                  comment.sender_type,
+                );
+                return (
+                  <div
+                    key={idx}
+                    className="card bg-white rounded-3 border-color-light-gray-shade mb-20"
+                  >
+                    <div className="card-header d-flex align-items-center justify-content-between border-0 bg-transparent px-3 pt-12 pb-0">
+                      <div className="d-flex align-items-center">
+                        <img src={icon} alt="user-icon" />
+                        <div className="ms-10">
+                          <h3 className="fs-14 fw-600 text-color-typo-primary mb-1">
+                            {name}
+                          </h3>
+                          <h4 className="fs-14 fw-400 text-color-typo-secondary mb-0">
+                            {new Date(comment.timestamp).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )}
+                          </h4>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Replies should be rendered here inside the comment block */}
-                {openReplyFor === comment.id && (
-                  <div className="repliesBlock ms-3 ps-3 border-start mt-3">
-                    {comment.replies &&
-                      comment.replies.length > 0 &&
-                      comment.replies.map((reply) => {
-                        const isReplyUser =
-                          reply.user === localStorage.getItem("user_name");
-                        return (
-                          <div key={reply.id} className="mb-3">
-                            <div className="d-flex align-items-center">
-                              <img
-                                src={
-                                  isReplyUser
-                                    ? "/assets/images/user-chart-profile-icon.svg"
-                                    : "/assets/images/administrator-icon.svg"
-                                }
-                                alt="user-icon"
-                              />
-                              <div className="ms-10">
-                                <h3 className="fs-14 fw-600">
-                                  {isReplyUser
-                                    ? `${reply.user} (You)`
-                                    : reply.user}
-                                </h3>
-                                <h4 className="fs-14 fw-400 text-color-typo-secondary mb-0">
-                                  {new Date(reply.timestamp).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                    },
-                                  )}
-                                </h4>
-                              </div>
-                            </div>
-                            <p className="fs-14 mt-2 mb-0 ms-5">
-                              {reply.message}
-                            </p>
-                          </div>
-                        );
-                      })}
-
-                    {/* Always show the reply input below */}
-                    <div className="border-top bg-white px-3 py-3">
-                      <textarea
-                        className="form-control fs-14 text-color-typo-primary"
-                        placeholder="Enter a reply.."
-                        style={{ height: "64px" }}
-                        value={replyTextByComment[comment.id] || ""}
-                        onChange={(e) =>
-                          setReplyTextByComment((prev) => ({
-                            ...prev,
-                            [comment.id]: e.target.value,
-                          }))
-                        }
-                      ></textarea>
-                      <div className="d-flex justify-content-end mt-2">
+                      <div className="d-flex align-items-center">
                         <button
-                          className="btn text-primary bg-transparent border-0 p-0 fs-14 fw-600 d-flex align-items-center"
-                          onClick={() => handlePostReply(comment.id)}
-                          disabled={!replyTextByComment[comment.id]?.trim()}
+                          type="button"
+                          className="btn border-0 p-0 "
+                          onClick={() => handleDeleteComment(comment.id)}
                         >
-                          Reply
                           <img
-                            src="/assets/images/send-reply-icon.svg"
-                            alt="send-reply-icon"
-                            className="ms-2"
+                            src="/assets/images/delete-icon-blue.svg"
+                            alt="delete-icon-blue"
+                          />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn border-0 p-0 d-flex align-items-center ms-3"
+                          onClick={() =>
+                            setOpenReplyFor(
+                              openReplyFor === comment.id ? null : comment.id,
+                            )
+                          }
+                        >
+                          <img
+                            src="/assets/images/reply-icon.svg"
+                            alt="reply-icon"
+                          />
+                        </button>
+                        {comment.replies?.length > 0 && (
+                          <button
+                            type="button"
+                            className="btn border-0 rounded-3 text-color-draft bg-color-light-border fs-14 fw-600 px-12 py-0 ms-1"
+                            onClick={() =>
+                              setOpenReplyFor(
+                                openReplyFor === comment.id ? null : comment.id,
+                              )
+                            }
+                          >
+                            {comment.replies.length}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="btn border-0 p-0 d-flex align-items-center ms-3"
+                          onClick={() =>
+                            setOpenReplyFor(
+                              openReplyFor === comment.id ? null : comment.id,
+                            )
+                          }
+                        >
+                          <img
+                            src="/assets/images/arrow-right-forward-blue-new.svg"
+                            alt="arrow-right-forward-blue-new"
                           />
                         </button>
                       </div>
                     </div>
+
+                    <div className="card-body px-3 pt-2 pb-14">
+                      <p className="fs-14 fw-400 text-color-typo-primary mb-0">
+                        {comment.message}
+                      </p>
+                    </div>
+
+                    <div className="card-footer px-3 py-6 border-color-desabled-lite bg-transparent">
+                      <div className="row">
+                        <div className="col-6">
+                          {[
+                            { label: "PKO ID", value: comment.pko_id },
+                            { label: "SKU", value: comment.sku_id || "-" },
+                          ].map(({ label, value }) => (
+                            <div className="row gx-2 mb-1" key={label}>
+                              <div className="col-4">
+                                <span className="fs-12 fw-400 text-color-typo-secondary">
+                                  {label}
+                                </span>
+                              </div>
+                              <div className="col-8">
+                                <span className="fs-12 fw-600 text-color-typo-primary">
+                                  {value}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="col-6">
+                          <div className="row gx-2">
+                            <div className="col-4">
+                              <span className="fs-12 fw-400 text-color-typo-secondary">
+                                Component
+                              </span>
+                            </div>
+                            <div className="col-8">
+                              <span className="fs-12 fw-600 text-color-typo-primary">
+                                {comment.component_name || "-"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Replies section */}
+                    {openReplyFor === comment.id && (
+                      <div className="repliesBlock ms-3 ps-3 border-start mt-3">
+                        {comment.replies?.length > 0 && (
+                          <button
+                            type="button"
+                            className="btn text-color-draft bg-transparent border-0 p-0 fs-12 fw-600 mb-2"
+                            onClick={() =>
+                              setCollapsedReplies((prev) => ({
+                                ...prev,
+                                [comment.id]: !prev[comment.id],
+                              }))
+                            }
+                          >
+                            {collapsedReplies[comment.id]
+                              ? `Show Replies (${comment.replies.length})`
+                              : `Hide Replies (${comment.replies.length})`}
+                          </button>
+                        )}
+
+                        {!collapsedReplies[comment.id] &&
+                          comment.replies?.map((reply) => {
+                            const { name, icon } = getDisplayUserInfo(
+                              reply.user,
+                              reply.sender_type,
+                            );
+                            return (
+                              <div
+                                key={reply.id}
+                                className="repliedBox ms-2 ps-20 pt-20"
+                              >
+                                <div className="d-flex align-items-center position-relative">
+                                  <img src={icon} alt="user-icon" />
+                                  <div className="ms-10">
+                                    <h3 className="fs-14 fw-600 text-color-typo-primary mb-1">
+                                      {name}
+                                    </h3>
+                                    <h4 className="fs-14 fw-400 text-color-typo-secondary mb-0">
+                                      {new Date(
+                                        reply.timestamp,
+                                      ).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      })}
+                                    </h4>
+                                  </div>
+                                </div>
+                                <p className="fs-14 fw-400 text-color-typo-primary mt-2 mb-0 ms-5">
+                                  {reply.message}
+                                </p>
+                              </div>
+                            );
+                          })}
+
+                        {/* Reply input */}
+                        <div className="border-top bg-white px-3 py-3">
+                          <textarea
+                            className="form-control fs-14 text-color-typo-primary"
+                            placeholder="Enter a reply.."
+                            style={{ height: "64px" }}
+                            value={replyTextByComment[comment.id] || ""}
+                            onChange={(e) =>
+                              setReplyTextByComment((prev) => ({
+                                ...prev,
+                                [comment.id]: e.target.value,
+                              }))
+                            }
+                          ></textarea>
+                          <div className="d-flex justify-content-end mt-2">
+                            <button
+                              className="btn text-primary bg-transparent border-0 p-0 fs-14 fw-600 d-flex align-items-center"
+                              onClick={() => handlePostReply(comment.id)}
+                              disabled={!replyTextByComment[comment.id]?.trim()}
+                            >
+                              Reply
+                              <img
+                                src="/assets/images/send-reply-icon.svg"
+                                alt="send-reply-icon"
+                                className="ms-2"
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
