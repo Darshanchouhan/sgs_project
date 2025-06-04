@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReplyBlockAdmin from "./ReplyBlockAdmin";
+import axiosInstance from "../../../services/axiosInstance";
 
 export const formatDate = (isoDate) => {
   const date = new Date(isoDate);
@@ -46,13 +47,26 @@ export const getLatestTimestampFromSameSender = (messageObj) => {
 };
 
 const CommentRowParentMessage = (props) => {
-  const { parentMessage, apiCallCommentAfterDeleteAndWritingComment } = props;
+  const {
+    parentMessage,
+    apiCallCommentAfterDeleteAndWritingComment,
+    parentComponentIdOpenedReply,
+    setParentComponentIdOpenedReply,
+  } = props;
   const [openReplies, setOpenReplies] = useState(false);
   const [replyBoxShow, setReplyBoxShow] = useState(false);
 
+  useEffect(() => {
+    if (parentComponentIdOpenedReply === parentMessage?.id) {
+      setOpenReplies(true);
+    } else {
+      setOpenReplies(false);
+    }
+  }, [parentComponentIdOpenedReply]);
+
   const seenRequestAPI = async (ids) => {
     try {
-      await axios.patch("/comments/", {
+      await axiosInstance.patch("/comments/", {
         comment_ids: ids,
       });
       apiCallCommentAfterDeleteAndWritingComment();
@@ -66,8 +80,10 @@ const CommentRowParentMessage = (props) => {
       if (parentMessage?.replies?.length === 0) {
         setReplyBoxShow(true);
       }
+      setParentComponentIdOpenedReply(parentMessage?.id);
     } else {
       setReplyBoxShow(false);
+      setParentComponentIdOpenedReply(null);
     }
     setOpenReplies(!openReplies);
 
